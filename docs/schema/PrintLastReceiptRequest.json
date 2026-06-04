@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PrintLastReceiptRequest",
+  "description": "Op 5 request: reprint a copy of the operator's most recent receipt.",
+  "type": "object"
+}

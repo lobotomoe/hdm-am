@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PrintReceiptRequest",
+  "description": "Op 4 request: print a fiscal receipt. Encrypted with the session key.",
+  "type": "object",
+  "properties": {
+    "mode": {
+      "description": "Mode (simple / products / prepayment).",
+      "type": "integer",
+      "format": "uint8",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "paidAmount": {
+      "description": "Cash portion of the payment.",
+      "type": "number",
+      "format": "double"
+    },
+    "paidAmountCard": {
+      "description": "Card (cashless) portion of the payment.",
+      "type": "number",
+      "format": "double"
+    },
+    "partialAmount": {
+      "description": "Partial-payment portion.",
+      "type": "number",
+      "format": "double"
+    },
+    "prePaymentAmount": {
+      "description": "Prepayment-used portion.",
+      "type": "number",
+      "format": "double"
+    },
+    "dep": {
+      "description": "Department for simple/prepayment receipts (when `items` is empty).",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint32",
+      "minimum": 0
+    },
+    "partnerTin": {
+      "description": "Partner TIN (8 digits) for B2B receipts. Sent as `null` if absent — the spec requires\nthis field to appear even when null.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "useExtPOS": {
+      "description": "If `true`, supply `rrn` + `terminal_id` from an external POS terminal. If `false`, the\nHDM uses its own configured payment system (set `payment_system`).",
+      "type": "boolean"
+    },
+    "PaymentSystem": {
+      "description": "Payment system code from spec §4.8 (1 = card, 10-18 = various Armenian wallets). Used\nonly when `use_ext_pos = false` and the HDM has multiple payment systems configured.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint32",
+      "minimum": 0
+    },
+    "rrn": {
+      "description": "Acquirer transaction RRN (12 chars). Used when `use_ext_pos = true`.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "terminalId": {
+      "description": "Payment terminal unique ID (8 chars). Used when `use_ext_pos = true`.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "eMarks": {
+      "description": "eMark traceability codes for marked goods (29-110 chars each, ASCII printable, escaping\nrules in spec §4.5.4). Used only in product-mode receipts.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "items": {
+      "description": "Items (required when `mode = Products`). Use an empty `Vec` for simple/prepayment modes.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ReceiptItem"
+      }
+    }
+  },
+  "required": [
+    "mode",
+    "paidAmount",
+    "paidAmountCard",
+    "partialAmount",
+    "prePaymentAmount",
+    "useExtPOS",
+    "eMarks",
+    "items"
+  ],
+  "$defs": {
+    "ReceiptItem": {
+      "description": "A single item in a printed receipt.",
+      "type": "object",
+      "properties": {
+        "dep": {
+          "description": "Department this item belongs to.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "qty": {
+          "description": "Quantity, max 3 decimal places.",
+          "type": "number",
+          "format": "double"
+        },
+        "price": {
+          "description": "Unit price, max 2 decimal places.",
+          "type": "number",
+          "format": "double"
+        },
+        "productCode": {
+          "description": "Vendor SKU (≤50 chars, must be non-empty).",
+          "type": "string"
+        },
+        "productName": {
+          "description": "Display name (≤50 chars, must be non-empty).",
+          "type": "string"
+        },
+        "adgCode": {
+          "description": "ATG/ADG tax classification code. Lookup at `taxservice.am`. Mandatory unless waived by\nitem-level discount logic per spec §4.5.4.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "unit": {
+          "description": "Unit of measure (≤50 chars, must be non-empty).",
+          "type": "string"
+        },
+        "discount": {
+          "description": "Primary discount amount (skip when no discount applies).",
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "discountType": {
+          "description": "Primary discount kind (skip when no discount applies).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        },
+        "additionalDiscount": {
+          "description": "Stacked secondary discount amount (skip when no discount applies).",
+          "type": [
+            "number",
+            "null"
+          ],
+          "format": "double"
+        },
+        "additionalDiscountType": {
+          "description": "Stacked secondary discount kind (skip when no discount applies).",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint32",
+          "minimum": 0
+        }
+      },
+      "required": [
+        "dep",
+        "qty",
+        "price",
+        "productCode",
+        "productName",
+        "unit"
+      ]
+    }
+  }
+}

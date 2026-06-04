@@ -1,0 +1,144 @@
+# hdm-am
+
+A Rust client for the Armenian fiscal cash register protocol — the spec published by the State Revenue Committee of Armenia (ՊԵԿ) for integrating external (commercial) software with fiscal cash registers (Հսկիչ Դրամարկղային Մեքենա — **HDM**, ՀԴՄ).
+
+The workspace contains two crates:
+
+- **`hdm-am`** — the library: wire framing, encryption, and one typed request/response per operation.
+- **`hdm-am-cli`** — a thin command-line tool (binary `hdm`) that maps subcommands onto the library.
+
+## Scope
+
+The crate speaks the HDM TCP protocol directly:
+
+- 12-byte fixed header with `D5 80 D4 B4 D5 84` magic ("ՀԴՄ" in UTF-8), 2-byte protocol version, 1-byte operation code, 2-byte big-endian payload length.
+- 3DES-ECB-PKCS7-encrypted JSON payloads.
+- Two-key model: a SHA-256-derived password key for operator login (and the operator/department listing), a session key returned by login for everything after.
+- All 16 operations from spec v0.7.3.
+
+It does **not** handle the surrounding business logic — selecting an HDM device, persisting fiscal receipts, deciding what to print. That belongs to the consumer.
+
+## Operation coverage
+
+All 16 operations are implemented and unit-tested. Hardware behaviour is recorded **per device and firmware** below — the protocol is the same across terminals, but what a given firmware actually does (logo rendering, returns, eMark validation) varies, so the status column is firmware-specific.
+
+### Tested devices
+
+| Device | OS / build | Firmware | HDM protocol / software |
+|---|---|---|---|
+| Newland N950 | NDroid 6 / Android 12 (`SKQ1.220119.001`) | `D_03_51_00_01010000` | `0.7` / `1.1.0` |
+
+The device reports protocol version `0.7` (matching spec v0.7.x) in its responses, yet accepts the `0.5`-framed requests this crate sends — so `hdm probe` keys identity on the protocol *major* version, not an exact match.
+
+### Per-operation status
+
+Each row is keyed by the protocol operation code (the byte sent on the wire, 1–16) and its function name.
+
+| Code | Function | Newland N950 (`D_03_51_00_01010000`) |
+|---:|---|---|
+| 1 | List operators & departments | OK |
+| 2 | Operator login | OK |
+| 3 | Operator logout | OK |
+| 4 | Print receipt | OK — registered a real fiscal sale |
+| 5 | Reprint last receipt | OK |
+| 6 | Get returnable receipt (lookup) | Blocked — returns `503` for any input [1] |
+| 7 | Header / footer config | OK |
+| 8 | Header logo | Accepted (`200`) but not rendered [2] |
+| 9 | Fiscal report (X / Z) | OK — both; a Z-report does not lock the device [3] |
+| 10 | Print return | Blocked — returns `174` for any input [1] |
+| 11 | Cash in / out | OK — both directions |
+| 12 | Date / time | OK |
+| 13 | Receipt sample | OK |
+| 14 | Time sync | OK |
+| 15 | Payment systems list | OK |
+| 16 | Single eMark | Error path only [4] |
+
+**Notes:**
+
+1. **Returns** (*get returnable receipt* and *print return*). Both are wire-correct but rejected server-side on this firmware. They key on a `Receipt_ID` that lives only in the receipt-print response's `qr` field — and this firmware omits `qr` entirely (confirmed on the raw decrypted payload, not just `null`). So the lookup returns vendor code `503` and the return returns `174` ("receipt to return does not exist") for every identifier tried (`rseq`, fiscal number, zero-padded). `crn` is correct (a wrong `crn` gives `175`). A real `Receipt_ID` must come out-of-band. The lookup response shape (`ReturnableReceiptResponse`) is therefore modelled from the spec alone and is **unverified** — see its doc comment.
+2. **Header logo.** The protocol accepts a Base64 BMP and returns success, but no custom logo prints (tried 1-bit BMP/PNG at 384×4 and 384×64). The firmware appears to ignore custom header logos.
+3. **Z-report.** Verified that a Z-report closes the fiscal shift without locking the device — the next receipt opens a new fiscal day.
+4. **Single eMark.** Only the error path is verified: malformed codes return `195`. The success path needs a real, registered GS1 Data Matrix code from a marked product.
+
+Behaviour on other models or firmware versions is unknown — additions to this table are welcome.
+
+## Library usage
+
+```rust
+use std::net::TcpStream;
+use std::time::Duration;
+use hdm_am::{Client, InMemorySeq, PrintReceiptRequest, PrintMode, Decimal};
+
+let tcp = TcpStream::connect("10.0.0.5:1025")?;
+tcp.set_read_timeout(Some(Duration::from_secs(50)))?;
+let mut client = Client::new(tcp, "<hdm-password>", InMemorySeq::default());
+
+client.login(3, "1234")?;                 // cashier id + PIN
+let receipt = client.print_receipt(PrintReceiptRequest {
+    mode: PrintMode::Simple,
+    paid_amount: Decimal::new(1000, 2),   // 10.00 cash
+    paid_amount_card: Decimal::ZERO,
+    partial_amount: Decimal::ZERO,
+    pre_payment_amount: Decimal::ZERO,
+    dep: Some(1),
+    partner_tin: None,
+    use_ext_pos: false,
+    payment_system: None,
+    rrn: None,
+    terminal_id: None,
+    e_marks: vec![],
+    items: vec![],
+})?;
+println!("fiscal #{} (seq {})", receipt.fiscal, receipt.rseq);
+client.logout()?;
+```
+
+All monetary and quantity fields use `rust_decimal::Decimal` (re-exported as `hdm_am::Decimal`); the wire encoding stays a JSON number.
+
+## CLI usage
+
+Connection parameters come from flags or the `HDM_*` environment variables:
+
+```sh
+export HDM_HOST=10.0.0.5 HDM_PORT=1025 HDM_PASSWORD=<hdm-password> HDM_CASHIER=3 HDM_PIN=1234
+
+hdm probe                                            # confirm the endpoint is an HDM (no login)
+hdm operators                                        # list operators & departments (no login)
+hdm receipt --mode simple --cash 10 --dep 1          # print a fiscal receipt (prompts first)
+hdm report --kind x                                  # interim X-report
+hdm lookup-receipt --receipt-id 123 --crn 51815332   # read-only receipt lookup
+hdm --json datetime                                  # machine-readable output to stdout
+```
+
+Irreversible operations (receipt, return, cash, Z-report) prompt for confirmation unless `--yes` is passed. `-v`/`-vv` raise log verbosity (logs go to stderr; `-vv` traces the raw decrypted payloads).
+
+## Source spec
+
+The State Revenue Committee of Armenia publishes the integration manual as a PDF on `src.am`. This crate targets **v0.7.3** (2025-04, 34 pages). The original and an unofficial English translation are checked in for offline reference:
+
+- [`docs/history/hdm-protocol-v0.7.3-2025.pdf`](docs/history/hdm-protocol-v0.7.3-2025.pdf) — original Armenian spec from src.am, **authoritative**. It is the newest entry in the version archive below.
+- [`docs/spec.md`](docs/spec.md) — English translation (unofficial; for developer convenience). Where the two disagree, trust the PDF — translator's notes in `spec.md` flag the corrections.
+- [`docs/history/`](docs/history/) — every published revision from v0.3 (2015) to v0.7.3, archived offline with a per-version index and a wire-protocol changelog. The transport envelope (framing, 3DES-ECB, SHA-256 keys) has been stable since v0.3; the header version byte has been `05` since v0.5.
+
+## Machine-readable schema
+
+JSON Schema for every request/response payload lives in [`docs/schema/`](docs/schema/) — one file
+per type, **generated from the Rust types** behind the `schema` feature so they can't drift from the
+code. They cover the decrypted JSON bodies (not the binary framing / 3DES envelope); money fields are
+JSON numbers and integer-coded enums are integers, matching the wire.
+
+```sh
+cargo run --example dump-schema --features schema             # (re)generate docs/schema/*.json
+cargo run --example dump-schema --features schema -- --check  # CI guard: fail if stale
+```
+
+## Design
+
+- `Client<T: Read + Write, S: SequenceProvider>` is generic over its transport and its sequence-number provider — pass a `TcpStream` + `InMemorySeq`/`FileSeq` in production, or any mock in tests.
+- Synchronous API. Consumers needing async should wrap calls in `tokio::task::spawn_blocking` or similar.
+- No global state. Each `Client` owns its session key and sequence counter.
+- Sequence-counter persistence is the consumer's choice (`InMemorySeq`, `FileSeq`, or a custom `SequenceProvider`).
+
+## License
+
+Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option.

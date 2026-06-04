@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EmptyResponse",
+  "description": "Marker response for operations that do not return a meaningful payload.\n\nThe wire-level response framing is still parsed (header + zero-byte or `{}` payload), but the\ncaller gets no fields to consume.",
+  "type": "object"
+}

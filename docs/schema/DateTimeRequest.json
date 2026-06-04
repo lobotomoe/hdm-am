@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DateTimeRequest",
+  "description": "Op 12 request: query the device's current date and time.",
+  "type": "object"
+}

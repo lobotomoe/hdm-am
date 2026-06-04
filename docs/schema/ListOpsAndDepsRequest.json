@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ListOpsAndDepsRequest",
+  "description": "Op 1 request. Encrypted with the password key.\n\n`Debug` is hand-written to redact `password` so it never leaks through `{:?}`.",
+  "type": "object",
+  "properties": {
+    "password": {
+      "description": "HDM access password.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "password"
+  ]
+}

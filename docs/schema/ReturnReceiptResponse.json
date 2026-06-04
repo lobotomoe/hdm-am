@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReturnReceiptResponse",
+  "description": "Op 10 response: full receipt details + return-specific timestamps.",
+  "type": "object",
+  "properties": {
+    "rseq": {
+      "description": "Receipt sequence number.",
+      "type": "integer",
+      "format": "int64"
+    },
+    "crn": {
+      "description": "HDM registration number.",
+      "type": "string",
+      "default": ""
+    },
+    "sn": {
+      "description": "HDM hardware serial number.",
+      "type": "string",
+      "default": ""
+    },
+    "tin": {
+      "description": "Taxpayer TIN.",
+      "type": "string",
+      "default": ""
+    },
+    "taxpayer": {
+      "description": "Taxpayer name.",
+      "type": "string",
+      "default": ""
+    },
+    "address": {
+      "description": "Taxpayer address.",
+      "type": "string",
+      "default": ""
+    },
+    "time": {
+      "description": "Original receipt timestamp (ms since epoch, Greenwich).",
+      "type": "integer",
+      "format": "int64",
+      "default": 0
+    },
+    "rtime": {
+      "description": "Return-receipt timestamp (ms since epoch, Greenwich).",
+      "type": "integer",
+      "format": "int64",
+      "default": 0
+    },
+    "fiscal": {
+      "description": "Fiscal number.",
+      "type": "string",
+      "default": ""
+    },
+    "lottery": {
+      "description": "Lottery number.",
+      "type": "string",
+      "default": ""
+    },
+    "prize": {
+      "description": "Prize indicator (currently always 0).",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0,
+      "default": 0
+    },
+    "total": {
+      "description": "Total amount.",
+      "type": "number",
+      "format": "double",
+      "default": 0.0
+    },
+    "change": {
+      "description": "Change.",
+      "type": "number",
+      "format": "double",
+      "default": 0.0
+    },
+    "emarksCount": {
+      "description": "Number of registered marks.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "verificationNumber": {
+      "description": "Short verification number printed on the receipt.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "rseq"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CashInOutRequest",
+  "description": "Op 11 request: record a cash-drawer adjustment.",
+  "type": "object",
+  "properties": {
+    "amount": {
+      "description": "Amount; must be greater than zero. Sent as a JSON number on the wire.",
+      "type": "number",
+      "format": "double"
+    },
+    "isCashIn": {
+      "description": "`true` for cash-in (deposit), `false` for cash-out (withdrawal).",
+      "type": "boolean"
+    },
+    "cashierId": {
+      "description": "Cashier number.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint32",
+      "minimum": 0
+    },
+    "description": {
+      "description": "Free-text comment.",
+      "type": "string",
+      "default": ""
+    }
+  },
+  "required": [
+    "amount",
+    "isCashIn"
+  ]
+}

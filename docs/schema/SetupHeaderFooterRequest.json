@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SetupHeaderFooterRequest",
+  "description": "Op 7 request: configure receipt header and footer lines.",
+  "type": "object",
+  "properties": {
+    "headers": {
+      "description": "Header lines, in print order (top to bottom).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TextLine"
+      }
+    },
+    "footers": {
+      "description": "Footer lines, in print order (top to bottom).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/TextLine"
+      }
+    }
+  },
+  "required": [
+    "headers",
+    "footers"
+  ],
+  "$defs": {
+    "TextLine": {
+      "description": "A single line of header or footer text.",
+      "type": "object",
+      "properties": {
+        "align": {
+          "description": "Alignment.",
+          "type": "integer",
+          "format": "uint8",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "bold": {
+          "description": "Bold flag, serialised as a JSON boolean (`true`/`false`) per the spec's field-type column\n(\"Boolean\"). The spec's §4.6.3 JSON example loosely writes it as the integer `1`, but a\nNewland N950 was verified to accept the boolean form (op 7 returned success).",
+          "type": "boolean"
+        },
+        "fsize": {
+          "description": "Font size (1 through 5).",
+          "type": "integer",
+          "format": "uint8",
+          "minimum": 0,
+          "maximum": 255
+        },
+        "text": {
+          "description": "Text content.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "align",
+        "bold",
+        "fsize",
+        "text"
+      ]
+    }
+  }
+}

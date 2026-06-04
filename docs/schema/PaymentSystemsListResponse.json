@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PaymentSystemsListResponse",
+  "description": "Op 15 response: list of payment systems configured on the device.",
+  "type": "object",
+  "properties": {
+    "PaymentSystems": {
+      "description": "One entry per configured payment system.",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PaymentSystemEntry"
+      },
+      "default": []
+    }
+  },
+  "$defs": {
+    "PaymentSystemEntry": {
+      "description": "A single payment-system entry from op 15. Codes are documented in spec §4.8 (1 = card,\n10-18 = various Armenian mobile wallets).",
+      "type": "object",
+      "properties": {
+        "code": {
+          "description": "Payment-system code (used in [`super::receipt::PrintReceiptRequest::payment_system`]).",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "name": {
+          "description": "Display name.",
+          "type": "string",
+          "default": ""
+        }
+      },
+      "required": [
+        "code"
+      ]
+    }
+  }
+}

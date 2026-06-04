@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OperatorLoginRequest",
+  "description": "Op 2 request. Encrypted with the password key. The response contains the session key for\nsubsequent operations.\n\n`Debug` is hand-written to redact `password` and `pin` so they never leak through `{:?}`.",
+  "type": "object",
+  "properties": {
+    "password": {
+      "description": "HDM access password.",
+      "type": "string"
+    },
+    "cashier": {
+      "description": "Operator (cashier) numeric ID — value from `OperatorInfo::id`.",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0
+    },
+    "pin": {
+      "description": "Operator's PIN code.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "password",
+    "cashier",
+    "pin"
+  ]
+}

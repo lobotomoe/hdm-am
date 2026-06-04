@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OperatorLoginResponse",
+  "description": "Op 2 response: the Base64-encoded session key.\n\nDeliberately does **not** derive `Serialize` (so it can't leak via `--json`), and its `Debug` is\nhand-written to redact `key`: the session secret must never be casually written to logs or\noutput. The client consumes it internally and never exposes it.",
+  "type": "object",
+  "properties": {
+    "key": {
+      "description": "24-byte session key, Base64-encoded.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "key"
+  ]
+}

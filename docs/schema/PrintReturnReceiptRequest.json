@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PrintReturnReceiptRequest",
+  "description": "Op 10 request: print a return/refund receipt — the operation that actually registers a return.\n\nWith no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or\n`return_item_list` for a partial return. The original spec §4.5.7 is\n\"ՀԴՄ վերադարձի կտրոնի տպում\" = *print return receipt* (the English spec.md mistitled it \"get\nreceipt info\"). The read-only lookup of the receipt being returned is op 6,\n[`GetReturnableReceiptRequest`].",
+  "type": "object",
+  "properties": {
+    "crn": {
+      "description": "HDM registration number of the device that printed the receipt.",
+      "type": "string"
+    },
+    "returnTicketId": {
+      "description": "Number of the receipt to be returned.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "cashAmountForReturn": {
+      "description": "Cash amount to return (only set if returning partial payments).",
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "cardAmountForReturn": {
+      "description": "Card amount to return (only set if returning partial payments).",
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "prePaymentAmountForReturn": {
+      "description": "Prepayment amount to return (only set if returning partial payments).",
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "rrn": {
+      "description": "Acquirer RRN (12 chars).",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "terminalId": {
+      "description": "Payment terminal ID (8 chars).",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "eMarks": {
+      "description": "eMark codes for marked goods.",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "returnItemList": {
+      "description": "Per-item return list (only set if returning specific items partially).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ReturnItem"
+      }
+    }
+  },
+  "required": [
+    "crn",
+    "returnTicketId",
+    "eMarks",
+    "returnItemList"
+  ],
+  "$defs": {
+    "ReturnItem": {
+      "description": "Per-item entry in a partial-return request.",
+      "type": "object",
+      "properties": {
+        "rpid": {
+          "description": "Row sequence number of the item being returned.",
+          "type": "integer",
+          "format": "int64"
+        },
+        "quantity": {
+          "description": "Quantity of this row's items to return.",
+          "type": "number",
+          "format": "double"
+        }
+      },
+      "required": [
+        "rpid",
+        "quantity"
+      ]
+    }
+  }
+}

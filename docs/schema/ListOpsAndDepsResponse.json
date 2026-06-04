@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ListOpsAndDepsResponse",
+  "description": "Op 1 response: operators and departments registered on the HDM device.\n\nThe wire keys are the cryptic `c` / `d` from the spec example; the Rust fields are named for\nwhat they hold.",
+  "type": "object",
+  "properties": {
+    "c": {
+      "description": "Operators registered on the device (wire key `c`).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/OperatorInfo"
+      },
+      "default": []
+    },
+    "d": {
+      "description": "Departments registered on the device (wire key `d`).",
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/DepartmentInfo"
+      },
+      "default": []
+    }
+  },
+  "$defs": {
+    "OperatorInfo": {
+      "description": "Single entry from the operator list.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Operator's unique numeric ID, used as the cashier code in [`super::session::OperatorLoginRequest`].",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "name": {
+          "description": "Display name.",
+          "type": "string",
+          "default": ""
+        },
+        "deps": {
+          "description": "Unique IDs of departments assigned to this operator.",
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          },
+          "default": []
+        }
+      },
+      "required": [
+        "id"
+      ]
+    },
+    "DepartmentInfo": {
+      "description": "Single entry from the department list.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "Department's unique numeric ID.",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0
+        },
+        "name": {
+          "description": "Display name.",
+          "type": "string",
+          "default": ""
+        },
+        "type": {
+          "description": "Taxation kind. Numeric on the wire; mapped to [`TaxationKind`].",
+          "type": "integer",
+          "format": "uint32",
+          "minimum": 0,
+          "default": 0
+        }
+      },
+      "required": [
+        "id"
+      ]
+    }
+  }
+}

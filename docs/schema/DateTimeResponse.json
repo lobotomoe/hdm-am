@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "DateTimeResponse",
+  "description": "Op 12 response.",
+  "type": "object",
+  "properties": {
+    "dt": {
+      "description": "Device date and time as a string. Spec does not pin the format; treat as opaque.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "dt"
+  ]
+}

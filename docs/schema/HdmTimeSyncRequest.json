@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "HdmTimeSyncRequest",
+  "description": "Op 14 request: synchronise the HDM with the tax authority.",
+  "type": "object"
+}

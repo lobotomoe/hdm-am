@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GetReturnableReceiptRequest",
+  "description": "Op 6 request: fetch the fiscal contents of a previously-issued receipt you intend to return.\n\nThis is a **read-only lookup**, not a refund. The original spec §4.5.6 is\n\"ՀԴՄ վերադարձվող կտրոնի ստացում\" = *get the returnable receipt* (the English spec.md mistitles\nit \"print return receipt\"). It returns the receipt's items, amounts, eMarks and sale type so a\ncaller can construct the actual return via [`PrintReturnReceiptRequest`] (op 10). It registers\nnothing.",
+  "type": "object",
+  "properties": {
+    "receiptId": {
+      "description": "Number of the receipt to look up.",
+      "type": "string"
+    },
+    "crn": {
+      "description": "HDM registration number of the device that printed the original receipt.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "receiptId",
+    "crn"
+  ]
+}

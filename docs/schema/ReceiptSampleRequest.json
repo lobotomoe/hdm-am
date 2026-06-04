@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReceiptSampleRequest",
+  "description": "Op 13 request: trigger a sample-receipt print.",
+  "type": "object"
+}

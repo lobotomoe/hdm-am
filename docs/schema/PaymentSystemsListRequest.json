@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PaymentSystemsListRequest",
+  "description": "Op 15 request: discover the payment-system codes installed on the HDM device.",
+  "type": "object"
+}

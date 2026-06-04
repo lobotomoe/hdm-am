@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FiscalReportRequest",
+  "description": "Op 9 request: print a fiscal report.",
+  "type": "object",
+  "properties": {
+    "reportType": {
+      "description": "X or Z report.",
+      "type": "integer",
+      "format": "uint8",
+      "minimum": 0,
+      "maximum": 255
+    },
+    "startDate": {
+      "description": "Start of the report time range (epoch-style integer, per spec example).",
+      "type": "integer",
+      "format": "int64"
+    },
+    "endDate": {
+      "description": "End of the report time range.",
+      "type": "integer",
+      "format": "int64"
+    }
+  },
+  "required": [
+    "reportType",
+    "startDate",
+    "endDate"
+  ],
+  "anyOf": [
+    {
+      "oneOf": [
+        {
+          "description": "Restrict to a single department (`deptId`).",
+          "type": "object",
+          "properties": {
+            "deptId": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "deptId"
+          ]
+        },
+        {
+          "description": "Restrict to a single cashier (`cashierId`).",
+          "type": "object",
+          "properties": {
+            "cashierId": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "cashierId"
+          ]
+        },
+        {
+          "description": "Restrict to a transaction type — cash vs cashless (`transactionTypeId`).",
+          "type": "object",
+          "properties": {
+            "transactionTypeId": {
+              "type": "integer",
+              "format": "uint32",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "transactionTypeId"
+          ]
+        }
+      ]
+    },
+    {}
+  ]
+}

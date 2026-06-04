@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SingleEmarkRequest",
+  "description": "Op 16 request: submit a single eMark traceability code.",
+  "type": "object",
+  "properties": {
+    "eMark": {
+      "description": "eMark code. Per spec §4.9: 29-110 chars, ASCII-printable only (33-126 plus 29 as\ndelimiter); `\"` escaped as `\\\"`, `\\` as `\\\\`, and ASCII 29 used as the group separator.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "eMark"
+  ]
+}

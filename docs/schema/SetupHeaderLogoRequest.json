@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SetupHeaderLogoRequest",
+  "description": "Op 8 request: upload a header logo image (Base64-encoded BMP, colour depth ≤4 bits).",
+  "type": "object",
+  "properties": {
+    "headerLogo": {
+      "description": "Logo image bytes encoded as a Base64 string. Per spec §4.6.4 the image must be in **BMP**\nformat with a colour depth of **no more than 4 bits** (≤16 colours; 1-bit monochrome is\nfine). Note: the English translation's \"must not exceed 4 pixels in height\" is a\nmistranslation of the original \"must not contain more than 4 bits of colour\".",
+      "type": "string"
+    }
+  },
+  "required": [
+    "headerLogo"
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ReceiptResponse",
+  "description": "Op 4 response: fiscal data for a successfully-printed receipt.\n\nThree fields (`qr`, `verification_number`, `emarks_count`) were added in spec revisions past\nv0.5; they are marked `Option` with `serde(default)` so older HDM firmware still deserialises\nwithout errors.",
+  "type": "object",
+  "properties": {
+    "rseq": {
+      "description": "HDM-assigned receipt sequence number.",
+      "type": "integer",
+      "format": "int64"
+    },
+    "crn": {
+      "description": "HDM registration number (unique per device).",
+      "type": "string",
+      "default": ""
+    },
+    "sn": {
+      "description": "HDM hardware serial number.",
+      "type": "string",
+      "default": ""
+    },
+    "tin": {
+      "description": "Taxpayer TIN.",
+      "type": "string",
+      "default": ""
+    },
+    "taxpayer": {
+      "description": "Taxpayer legal name.",
+      "type": "string",
+      "default": ""
+    },
+    "address": {
+      "description": "Taxpayer registered address.",
+      "type": "string",
+      "default": ""
+    },
+    "time": {
+      "description": "Receipt timestamp (milliseconds since Unix epoch, Greenwich time).",
+      "type": "integer",
+      "format": "int64",
+      "default": 0
+    },
+    "fiscal": {
+      "description": "Fiscal receipt number — the legally-binding identifier.",
+      "type": "string",
+      "default": ""
+    },
+    "lottery": {
+      "description": "Lottery ticket number associated with the receipt.",
+      "type": "string",
+      "default": ""
+    },
+    "prize": {
+      "description": "`0` = no prize, `1` = prize won. (Currently no longer used by the lottery system.)",
+      "type": "integer",
+      "format": "uint32",
+      "minimum": 0,
+      "default": 0
+    },
+    "total": {
+      "description": "Total amount on the receipt.",
+      "type": "number",
+      "format": "double",
+      "default": 0.0
+    },
+    "change": {
+      "description": "Change due to the customer.",
+      "type": "number",
+      "format": "double",
+      "default": 0.0
+    },
+    "qr": {
+      "description": "QR-code payload to render on the printed receipt. Added post-v0.5.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "emarksCount": {
+      "description": "Number of eMark codes processed. Added post-v0.5. Documented as `string` in spec.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    },
+    "verificationNumber": {
+      "description": "Short alphanumeric verification number (≤13 chars) printed on the receipt. Added post-v0.5.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "rseq"
+  ]
+}
