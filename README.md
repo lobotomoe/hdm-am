@@ -97,7 +97,8 @@ All monetary and quantity fields use `rust_decimal::Decimal` (re-exported as `hd
 
 ## CLI usage
 
-Connection parameters come from flags or the `HDM_*` environment variables:
+Connection parameters come from flags or the `HDM_*` environment variables. The CLI exposes all 16
+protocol operations; run `hdm --help` or `hdm <command> --help` for the full argument surface.
 
 ```sh
 export HDM_HOST=10.0.0.5 HDM_PORT=1025 HDM_PASSWORD=<hdm-password> HDM_CASHIER=3 HDM_PIN=1234
@@ -105,10 +106,17 @@ export HDM_HOST=10.0.0.5 HDM_PORT=1025 HDM_PASSWORD=<hdm-password> HDM_CASHIER=3
 hdm probe                                            # confirm the endpoint is an HDM (no login)
 hdm operators                                        # list operators & departments (no login)
 hdm receipt --mode simple --cash 10 --dep 1          # print a fiscal receipt (prompts first)
+hdm receipt --mode products --card 10 --items items.json --use-ext-pos --rrn 123456789012 --terminal-id 12345678 --emark <code>
 hdm report --kind x                                  # interim X-report
+hdm report --kind x --transaction-type 1             # X-report filtered by transaction type
 hdm lookup-receipt --receipt-id 123 --crn 51815332   # read-only receipt lookup
+hdm return --crn 51815332 --ticket 123 --return-items return-items.json --emark <code>
 hdm --json datetime                                  # machine-readable output to stdout
 ```
+
+`receipt --items` expects a JSON array of `ReceiptItem` objects. `return --return-items` expects a
+JSON array like `[{"rpid":100,"quantity":1}]`, using the item row IDs returned by
+`lookup-receipt`.
 
 Irreversible operations (receipt, return, cash, Z-report) prompt for confirmation unless `--yes` is passed. `-v`/`-vv` raise log verbosity (logs go to stderr; `-vv` traces the raw decrypted payloads).
 

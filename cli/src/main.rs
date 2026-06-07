@@ -160,6 +160,12 @@ pub struct ReturnArgs {
     /// Payment terminal ID (8 chars).
     #[arg(long)]
     pub terminal_id: Option<String>,
+    /// eMark code for marked goods being returned. May be passed more than once.
+    #[arg(long = "emark")]
+    pub e_marks: Vec<String>,
+    /// JSON file holding an array of per-item returns: `[{"rpid":123,"quantity":1}]`.
+    #[arg(long)]
+    pub return_items: Option<std::path::PathBuf>,
     /// Skip the confirmation prompt.
     #[arg(long)]
     pub yes: bool,
@@ -238,6 +244,18 @@ pub struct ReceiptArgs {
     /// Payment-system code (from `payment-systems`) when not using an external POS.
     #[arg(long)]
     pub payment_system: Option<u32>,
+    /// Use an external POS terminal; requires `--rrn` and `--terminal-id`.
+    #[arg(long)]
+    pub use_ext_pos: bool,
+    /// Acquirer RRN (12 chars) when `--use-ext-pos` is set.
+    #[arg(long)]
+    pub rrn: Option<String>,
+    /// Payment terminal ID (8 chars) when `--use-ext-pos` is set.
+    #[arg(long)]
+    pub terminal_id: Option<String>,
+    /// eMark traceability code for marked goods. May be passed more than once.
+    #[arg(long = "emark")]
+    pub e_marks: Vec<String>,
     /// Path to a JSON file holding an array of receipt items (required for `--mode products`).
     #[arg(long)]
     pub items: Option<std::path::PathBuf>,
@@ -258,6 +276,9 @@ pub struct ReportArgs {
     /// Cashier filter (at most one of --dept / --cashier-id may be set).
     #[arg(long)]
     pub cashier_id: Option<u32>,
+    /// Transaction-type filter (at most one report filter may be set).
+    #[arg(long)]
+    pub transaction_type: Option<u32>,
     /// Start of the report range (epoch-style integer per spec).
     #[arg(long, default_value_t = 0)]
     pub start: i64,
@@ -281,6 +302,9 @@ pub struct CashArgs {
     /// Free-text description.
     #[arg(long, default_value = "")]
     pub description: String,
+    /// Cashier number to send in the cash operation; defaults to global `--cashier`.
+    #[arg(long)]
+    pub cashier_id: Option<u32>,
     /// Skip the confirmation prompt.
     #[arg(long)]
     pub yes: bool,

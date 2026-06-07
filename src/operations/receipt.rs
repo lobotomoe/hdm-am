@@ -470,7 +470,7 @@ impl Operation for PrintReturnReceiptRequest {
 }
 
 /// Per-item entry in a partial-return request.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct ReturnItem {
     /// Row sequence number of the item being returned.

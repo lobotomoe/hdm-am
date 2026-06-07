@@ -7,8 +7,8 @@ use anyhow::{Context, Result, bail};
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use hdm_am::{
     CashInOutRequest, Error as HdmError, FiscalReportKind, FiscalReportRequest, PrintMode,
-    PrintReceiptRequest, PrintReturnReceiptRequest, ReceiptItem, ReportFilter, ServerErrorKind,
-    SetupHeaderFooterRequest, TextLine, identify,
+    PrintReceiptRequest, PrintReturnReceiptRequest, ReceiptItem, ReportFilter, ReturnItem,
+    ServerErrorKind, SetupHeaderFooterRequest, TextLine, identify,
 };
 use rust_decimal::Decimal;
 
@@ -192,22 +192,7 @@ fn sample(cli: &Cli) -> Result<()> {
 }
 
 fn receipt(cli: &Cli, args: &ReceiptArgs) -> Result<()> {
-    let mode = match args.mode {
-        ReceiptMode::Simple => PrintMode::Simple,
-        ReceiptMode::Products => PrintMode::Products,
-        ReceiptMode::Prepayment => PrintMode::Prepayment,
-    };
-
-    let items = match (&args.items, args.mode) {
-        (Some(path), ReceiptMode::Products) => read_items(path)?,
-        (Some(_), _) => bail!("--items is only valid with --mode products"),
-        (None, ReceiptMode::Products) => bail!("--mode products requires --items <FILE>"),
-        (None, _) => Vec::new(),
-    };
-
-    if matches!(args.mode, ReceiptMode::Simple | ReceiptMode::Prepayment) && args.dep.is_none() {
-        bail!("--dep is required for simple and prepayment receipts");
-    }
+    let request = build_receipt_request(args)?;
 
     let total = args.cash + args.card + args.partial + args.prepayment;
     let prompt = format!(
@@ -219,22 +204,6 @@ fn receipt(cli: &Cli, args: &ReceiptArgs) -> Result<()> {
     if !args.yes && !confirm(&prompt)? {
         bail!("aborted");
     }
-
-    let request = PrintReceiptRequest {
-        mode,
-        paid_amount: args.cash,
-        paid_amount_card: args.card,
-        partial_amount: args.partial,
-        pre_payment_amount: args.prepayment,
-        dep: args.dep,
-        partner_tin: args.partner_tin.clone(),
-        use_ext_pos: false,
-        payment_system: args.payment_system,
-        rrn: None,
-        terminal_id: None,
-        e_marks: Vec::new(),
-        items,
-    };
 
     let response = with_session(cli, |c| {
         c.print_receipt(request).context("printing receipt")
@@ -251,28 +220,13 @@ fn print_last(cli: &Cli) -> Result<()> {
 }
 
 fn report(cli: &Cli, args: &ReportArgs) -> Result<()> {
-    let kind = match args.kind {
-        ReportKind::X => FiscalReportKind::X,
-        ReportKind::Z => FiscalReportKind::Z,
-    };
     if matches!(args.kind, ReportKind::Z)
         && !args.yes
         && !confirm("Print a Z-report? This closes the fiscal day and zeros counters.")?
     {
         bail!("aborted");
     }
-    let filter = match (args.dept, args.cashier_id) {
-        (Some(_), Some(_)) => bail!("--dept and --cashier-id are mutually exclusive"),
-        (Some(dept), None) => Some(ReportFilter::Department(dept)),
-        (None, Some(cashier)) => Some(ReportFilter::Cashier(cashier)),
-        (None, None) => None,
-    };
-    let request = FiscalReportRequest {
-        kind,
-        filter,
-        start_date: args.start,
-        end_date: args.end,
-    };
+    let request = build_fiscal_report_request(args)?;
     with_session(cli, |c| {
         c.fiscal_report(request).context("printing fiscal report")
     })?;
@@ -299,7 +253,7 @@ fn cash(cli: &Cli, args: &CashArgs) -> Result<()> {
     let request = CashInOutRequest {
         amount: args.amount,
         is_cash_in,
-        cashier_id: cli.cashier,
+        cashier_id: args.cashier_id.or(cli.cashier),
         description: args.description.clone(),
     };
     with_session(cli, |c| {
@@ -337,6 +291,7 @@ fn lookup_receipt(cli: &Cli, args: &LookupReceiptArgs) -> Result<()> {
 }
 
 fn return_receipt(cli: &Cli, args: &ReturnArgs) -> Result<()> {
+    let request = build_return_receipt_request(args)?;
     if !args.yes
         && !confirm(&format!(
             "Print a return receipt for ticket {} (crn {})? This registers a refund.",
@@ -345,17 +300,6 @@ fn return_receipt(cli: &Cli, args: &ReturnArgs) -> Result<()> {
     {
         bail!("aborted");
     }
-    let request = PrintReturnReceiptRequest {
-        crn: args.crn.clone(),
-        return_ticket_id: args.ticket,
-        cash_amount_for_return: args.cash,
-        card_amount_for_return: args.card,
-        pre_payment_amount_for_return: args.prepayment,
-        rrn: args.rrn.clone(),
-        terminal_id: args.terminal_id.clone(),
-        e_marks: Vec::new(),
-        return_item_list: Vec::new(),
-    };
     let response = with_session(cli, |c| {
         c.print_return_receipt(request)
             .context("printing return receipt")
@@ -398,22 +342,277 @@ fn logo(cli: &Cli, args: &LogoArgs) -> Result<()> {
     emit(cli, &status, |_| println!("logo uploaded"))
 }
 
+fn build_receipt_request(args: &ReceiptArgs) -> Result<PrintReceiptRequest> {
+    let mode = match args.mode {
+        ReceiptMode::Simple => PrintMode::Simple,
+        ReceiptMode::Products => PrintMode::Products,
+        ReceiptMode::Prepayment => PrintMode::Prepayment,
+    };
+
+    let items = match (&args.items, args.mode) {
+        (Some(path), ReceiptMode::Products) => read_items(path)?,
+        (Some(_), _) => bail!("--items is only valid with --mode products"),
+        (None, ReceiptMode::Products) => bail!("--mode products requires --items <FILE>"),
+        (None, _) => Vec::new(),
+    };
+
+    if matches!(args.mode, ReceiptMode::Simple | ReceiptMode::Prepayment) && args.dep.is_none() {
+        bail!("--dep is required for simple and prepayment receipts");
+    }
+    if !matches!(args.mode, ReceiptMode::Products) && !args.e_marks.is_empty() {
+        bail!("--emark is only valid with --mode products");
+    }
+
+    let (rrn, terminal_id) = if args.use_ext_pos {
+        if args.payment_system.is_some() {
+            bail!("--payment-system cannot be used with --use-ext-pos");
+        }
+        let rrn = match &args.rrn {
+            Some(rrn) => rrn.clone(),
+            None => bail!("--use-ext-pos requires --rrn"),
+        };
+        let terminal_id = match &args.terminal_id {
+            Some(terminal_id) => terminal_id.clone(),
+            None => bail!("--use-ext-pos requires --terminal-id"),
+        };
+        (Some(rrn), Some(terminal_id))
+    } else {
+        if args.rrn.is_some() || args.terminal_id.is_some() {
+            bail!("--rrn and --terminal-id require --use-ext-pos");
+        }
+        (None, None)
+    };
+
+    Ok(PrintReceiptRequest {
+        mode,
+        paid_amount: args.cash,
+        paid_amount_card: args.card,
+        partial_amount: args.partial,
+        pre_payment_amount: args.prepayment,
+        dep: args.dep,
+        partner_tin: args.partner_tin.clone(),
+        use_ext_pos: args.use_ext_pos,
+        payment_system: args.payment_system,
+        rrn,
+        terminal_id,
+        e_marks: args.e_marks.clone(),
+        items,
+    })
+}
+
+fn build_fiscal_report_request(args: &ReportArgs) -> Result<FiscalReportRequest> {
+    let filters = [
+        args.dept.is_some(),
+        args.cashier_id.is_some(),
+        args.transaction_type.is_some(),
+    ]
+    .into_iter()
+    .filter(|selected| *selected)
+    .count();
+    if filters > 1 {
+        bail!("--dept, --cashier-id, and --transaction-type are mutually exclusive");
+    }
+
+    let kind = match args.kind {
+        ReportKind::X => FiscalReportKind::X,
+        ReportKind::Z => FiscalReportKind::Z,
+    };
+    let filter = match (args.dept, args.cashier_id, args.transaction_type) {
+        (Some(dept), None, None) => Some(ReportFilter::Department(dept)),
+        (None, Some(cashier), None) => Some(ReportFilter::Cashier(cashier)),
+        (None, None, Some(transaction_type)) => {
+            Some(ReportFilter::TransactionType(transaction_type))
+        }
+        (None, None, None) => None,
+        _ => unreachable!("multiple filters were rejected above"),
+    };
+
+    Ok(FiscalReportRequest {
+        kind,
+        filter,
+        start_date: args.start,
+        end_date: args.end,
+    })
+}
+
+fn build_return_receipt_request(args: &ReturnArgs) -> Result<PrintReturnReceiptRequest> {
+    let return_item_list = match &args.return_items {
+        Some(path) => read_return_items(path)?,
+        None => Vec::new(),
+    };
+
+    Ok(PrintReturnReceiptRequest {
+        crn: args.crn.clone(),
+        return_ticket_id: args.ticket,
+        cash_amount_for_return: args.cash,
+        card_amount_for_return: args.card,
+        pre_payment_amount_for_return: args.prepayment,
+        rrn: args.rrn.clone(),
+        terminal_id: args.terminal_id.clone(),
+        e_marks: args.e_marks.clone(),
+        return_item_list,
+    })
+}
+
 /// Load a JSON array of receipt items from a file (for `receipt --mode products`).
 fn read_items(path: &std::path::Path) -> Result<Vec<ReceiptItem>> {
+    read_json_array(path, "receipt items")
+}
+
+/// Load a JSON array of return items from a file (for `return --return-items`).
+fn read_return_items(path: &std::path::Path) -> Result<Vec<ReturnItem>> {
+    read_json_array(path, "return items")
+}
+
+fn read_json_array<T>(path: &std::path::Path, label: &str) -> Result<Vec<T>>
+where
+    T: for<'de> serde::Deserialize<'de>,
+{
     let raw = std::fs::read_to_string(path)
-        .with_context(|| format!("reading items file {}", path.display()))?;
-    serde_json::from_str(&raw)
-        .with_context(|| format!("parsing receipt items from {}", path.display()))
+        .with_context(|| format!("reading {label} file {}", path.display()))?;
+    serde_json::from_str(&raw).with_context(|| format!("parsing {label} from {}", path.display()))
 }
 
 #[cfg(test)]
 mod tests {
-    use super::probe_code_note;
+    use super::{
+        build_fiscal_report_request, build_receipt_request, build_return_receipt_request,
+        probe_code_note,
+    };
+    use crate::{ReceiptArgs, ReceiptMode, ReportArgs, ReportKind, ReturnArgs};
+    use hdm_am::{PrintMode, ReportFilter};
+    use rust_decimal::Decimal;
+    use std::path::PathBuf;
 
     #[test]
     fn probe_code_note_maps_known_codes() {
         assert!(probe_code_note(403).contains("whitelisted"));
         assert!(probe_code_note(101).contains("decrypt"));
         assert!(probe_code_note(999).contains("unusual"));
+    }
+
+    #[test]
+    fn receipt_request_supports_external_pos_and_emarks() {
+        let args = ReceiptArgs {
+            mode: ReceiptMode::Products,
+            cash: Decimal::ZERO,
+            card: Decimal::new(1000, 0),
+            partial: Decimal::ZERO,
+            prepayment: Decimal::ZERO,
+            dep: None,
+            partner_tin: None,
+            payment_system: None,
+            use_ext_pos: true,
+            rrn: Some("123456789012".to_owned()),
+            terminal_id: Some("12345678".to_owned()),
+            e_marks: vec!["emark-1".to_owned()],
+            items: Some(write_temp_file(
+                "receipt-items",
+                r#"[{"dep":1,"qty":1,"price":1000,"productCode":"A","productName":"Item","unit":"pcs"}]"#,
+            )),
+            yes: true,
+        };
+
+        let request = build_receipt_request(&args).unwrap();
+
+        assert_eq!(request.mode, PrintMode::Products);
+        assert!(request.use_ext_pos);
+        assert_eq!(request.rrn.as_deref(), Some("123456789012"));
+        assert_eq!(request.terminal_id.as_deref(), Some("12345678"));
+        assert_eq!(request.e_marks, ["emark-1"]);
+        assert_eq!(request.items.len(), 1);
+    }
+
+    #[test]
+    fn receipt_request_rejects_external_pos_without_terminal_pair() {
+        let args = ReceiptArgs {
+            mode: ReceiptMode::Simple,
+            cash: Decimal::new(1000, 0),
+            card: Decimal::ZERO,
+            partial: Decimal::ZERO,
+            prepayment: Decimal::ZERO,
+            dep: Some(1),
+            partner_tin: None,
+            payment_system: None,
+            use_ext_pos: true,
+            rrn: Some("123456789012".to_owned()),
+            terminal_id: None,
+            e_marks: Vec::new(),
+            items: None,
+            yes: true,
+        };
+
+        let err = build_receipt_request(&args).unwrap_err();
+
+        assert!(err.to_string().contains("--terminal-id"));
+    }
+
+    #[test]
+    fn fiscal_report_request_supports_transaction_filter() {
+        let args = ReportArgs {
+            kind: ReportKind::X,
+            dept: None,
+            cashier_id: None,
+            transaction_type: Some(1),
+            start: 10,
+            end: 20,
+            yes: true,
+        };
+
+        let request = build_fiscal_report_request(&args).unwrap();
+
+        assert_eq!(request.filter, Some(ReportFilter::TransactionType(1)));
+        assert_eq!(request.start_date, 10);
+        assert_eq!(request.end_date, 20);
+    }
+
+    #[test]
+    fn fiscal_report_request_rejects_multiple_filters() {
+        let args = ReportArgs {
+            kind: ReportKind::X,
+            dept: Some(1),
+            cashier_id: None,
+            transaction_type: Some(1),
+            start: 0,
+            end: 0,
+            yes: true,
+        };
+
+        let err = build_fiscal_report_request(&args).unwrap_err();
+
+        assert!(err.to_string().contains("mutually exclusive"));
+    }
+
+    #[test]
+    fn return_request_supports_items_and_emarks() {
+        let args = ReturnArgs {
+            crn: "51815332".to_owned(),
+            ticket: 42,
+            cash: Some(Decimal::new(500, 0)),
+            card: None,
+            prepayment: None,
+            rrn: Some("123456789012".to_owned()),
+            terminal_id: Some("12345678".to_owned()),
+            e_marks: vec!["emark-1".to_owned(), "emark-2".to_owned()],
+            return_items: Some(write_temp_file(
+                "return-items",
+                r#"[{"rpid":100,"quantity":1.5}]"#,
+            )),
+            yes: true,
+        };
+
+        let request = build_return_receipt_request(&args).unwrap();
+
+        assert_eq!(request.e_marks, ["emark-1", "emark-2"]);
+        assert_eq!(request.return_item_list.len(), 1);
+        assert_eq!(request.return_item_list[0].rpid, 100);
+        assert_eq!(request.return_item_list[0].quantity, Decimal::new(15, 1));
+    }
+
+    fn write_temp_file(name: &str, contents: &str) -> PathBuf {
+        let path =
+            std::env::temp_dir().join(format!("hdm-am-cli-{name}-{}.json", std::process::id()));
+        std::fs::write(&path, contents).unwrap();
+        path
     }
 }
