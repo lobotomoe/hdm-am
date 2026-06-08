@@ -1,3 +1,4 @@
 /target
 /playground
 .claude/
+app/ios/*.xcodeproj/
