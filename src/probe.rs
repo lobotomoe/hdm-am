@@ -17,6 +17,7 @@
 
 use crate::error::Error;
 use crate::wire::{OperationCode, PROTOCOL_VERSION, Request, ResponseHeader};
+use serde::Serialize;
 use std::io::{Read, Write};
 
 /// Bogus probe payload: a single 3DES block of zero bytes. Block-aligned so the device proceeds
@@ -25,7 +26,8 @@ use std::io::{Read, Write};
 const PROBE_PAYLOAD: [u8; 8] = [0u8; 8];
 
 /// Protocol identity reported by an endpoint that responded to [`identify`].
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct HdmIdentity {
     /// HDM protocol version reported in the response header (major, minor).
     pub protocol_version: (u8, u8),
