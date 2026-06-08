@@ -2,7 +2,7 @@
 //!
 //! Non-secret fields (host, port, operator id, …) are written to a small versioned JSON file in the
 //! app's data directory. Secrets (HDM password, cashier PIN) are never written here — they live in
-//! the Keychain (see [`crate::secrets`]), keyed by the profile id.
+//! the Keychain (see the `secrets` module), keyed by the profile id.
 //!
 //! Two kinds of records are kept: a single always-restored `draft` (the working set the user last
 //! had on screen) and a list of named `favorites` the user can switch between. The split means

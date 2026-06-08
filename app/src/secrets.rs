@@ -153,13 +153,18 @@ mod platform {
 
 #[cfg(not(target_vendor = "apple"))]
 mod platform {
+    // No secure credential store on these targets, so every call is a logged no-op (the logging
+    // also keeps these non-`const`, which is correct — a real store would not be const either).
     pub fn set(_profile_id: &str, _field: &str, _value: &str) {
         log::debug!("secret storage is unavailable on this platform; not persisting");
     }
 
     pub fn get(_profile_id: &str, _field: &str) -> Option<String> {
+        log::debug!("secret storage is unavailable on this platform; nothing to retrieve");
         None
     }
 
-    pub fn delete(_profile_id: &str, _field: &str) {}
+    pub fn delete(_profile_id: &str, _field: &str) {
+        log::debug!("secret storage is unavailable on this platform; nothing to delete");
+    }
 }
