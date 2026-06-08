@@ -1,7 +1,7 @@
 // Structural and display components: cards, rows, nav bar, buttons, result, and the per-operation
 // screen scaffold. Input controls live in inputs.slint.
 
-import { Switch, ScrollView } from "std-widgets.slint";
+import { Switch } from "std-widgets.slint";
 import { Theme, Choice } from "theme.slint";
 
 // Padded rounded container for free-form content.
@@ -365,10 +365,12 @@ export component PickerSheet inherits Rectangle {
                 }
             }
 
-            list := ScrollView {
+            list := Flickable {
                 vertical-stretch: 1;
-                VerticalLayout {
-                    width: list.visible-width;
+                viewport-width: list.width;
+                viewport-height: lcol.preferred-height;
+                lcol := VerticalLayout {
+                    width: list.width;
                     alignment: start;
 
                     if root.choices.length == 0: Rectangle {
@@ -494,10 +496,24 @@ export component OpDetail inherits VerticalLayout {
         }
     }
 
-    sv := ScrollView {
+    // Sink to drop keyboard focus when the form is scrolled (the local equivalent of the window's
+    // keyboard-sink, which this component can't reach).
+    kbd-sink := FocusScope {
+        width: 0px;
+        height: 0px;
+    }
+
+    // Flickable (not ScrollView) so the content pans on touch — Slint's ScrollView is desktop-only
+    // (its inner Flickable is interactive: false), which is why a finger-swipe did nothing.
+    sv := Flickable {
         vertical-stretch: 1;
-        VerticalLayout {
-            width: sv.visible-width;
+        viewport-width: sv.width;
+        viewport-height: col.preferred-height;
+        changed viewport-y => {
+            kbd-sink.focus();
+        }
+        col := VerticalLayout {
+            width: sv.width;
             alignment: start;
             padding: Theme.gap;
             spacing: Theme.gap;

@@ -1,4 +1,3 @@
-import { ScrollView } from "std-widgets.slint";
 import { Theme, Choice } from "theme.slint";
 import {
     Card, ListCard, SectionHeader, OpRow, ToggleRow, LabeledToggle,
@@ -202,10 +201,15 @@ export component MainWindow inherits Window {
                     }
                 }
 
-                home-sv := ScrollView {
+                home-sv := Flickable {
                     vertical-stretch: 1;
-                    VerticalLayout {
-                        width: home-sv.visible-width;
+                    viewport-width: home-sv.width;
+                    viewport-height: home-col.preferred-height;
+                    changed viewport-y => {
+                        keyboard-sink.focus();
+                    }
+                    home-col := VerticalLayout {
+                        width: home-sv.width;
                         alignment: start;
                         padding: Theme.gap;
                         padding-top: 4px;
@@ -392,10 +396,15 @@ export component MainWindow inherits Window {
                         root.nav = "";
                     }
                 }
-                set-sv := ScrollView {
+                set-sv := Flickable {
                     vertical-stretch: 1;
-                    VerticalLayout {
-                        width: set-sv.visible-width;
+                    viewport-width: set-sv.width;
+                    viewport-height: set-col.preferred-height;
+                    changed viewport-y => {
+                        keyboard-sink.focus();
+                    }
+                    set-col := VerticalLayout {
+                        width: set-sv.width;
                         alignment: start;
                         padding: Theme.gap;
                         spacing: Theme.gap;
@@ -527,10 +536,12 @@ export component MainWindow inherits Window {
                         root.nav = "";
                     }
                 }
-                priv-sv := ScrollView {
+                priv-sv := Flickable {
                     vertical-stretch: 1;
-                    VerticalLayout {
-                        width: priv-sv.visible-width;
+                    viewport-width: priv-sv.width;
+                    viewport-height: priv-col.preferred-height;
+                    priv-col := VerticalLayout {
+                        width: priv-sv.width;
                         alignment: start;
                         padding: Theme.gap;
                         spacing: Theme.gap;
