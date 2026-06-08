@@ -12,6 +12,11 @@ repository = "https://github.com/lobotomoe/hdm-am"
 # library first. Until then `publish = false` keeps `cargo publish` on the workspace from failing.
 publish = false
 
+[package.metadata.dist]
+# Ship this binary via `dist` even though `publish = false` (it depends on the lib by path and is
+# not destined for crates.io).
+dist = true
+
 [[bin]]
 name = "hdm"
 path = "src/main.rs"
