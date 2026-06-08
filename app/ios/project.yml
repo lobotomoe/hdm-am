@@ -26,6 +26,10 @@ targets:
         CFBundleDisplayName: HDM Tester
         CFBundleShortVersionString: "0.1.0"
         CFBundleVersion: "1"
+        # The app's only cryptography is the HDM protocol's standard 3DES, used to talk to the
+        # device. That qualifies for the export-compliance exemption, so declare it here to skip
+        # the per-upload TestFlight prompt. Revisit if the crypto usage ever changes.
+        ITSAppUsesNonExemptEncryption: false
         NSLocalNetworkUsageDescription: HDM Tester needs local network access to connect to Armenian fiscal cash registers over TCP.
         UILaunchScreen:
           UIColorName: ""
