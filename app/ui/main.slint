@@ -1,50 +1,413 @@
-import {
-    Button,
-    CheckBox,
-    LineEdit,
-    VerticalBox,
-    HorizontalBox,
-} from "std-widgets.slint";
+import { LineEdit, Switch, ScrollView } from "std-widgets.slint";
 
-component FieldLabel inherits Text {
-    color: #53616f;
-    font-size: 12px;
-    font-weight: 700;
+// ---------------------------------------------------------------------------
+// Theme
+// ---------------------------------------------------------------------------
+global Theme {
+    out property <color> bg: #f2f2f7;
+    out property <color> card: #ffffff;
+    out property <color> pressed: #e4e4ea;
+    out property <color> ink: #1c1c1e;
+    out property <color> sub: #8a8a8e;
+    out property <color> line: #d6d6db;
+    out property <color> accent: #007aff;
+    out property <color> ok: #34c759;
+    out property <color> warn: #ff9f0a;
+    out property <color> danger: #ff3b30;
+    out property <length> radius: 12px;
+    out property <length> gap: 16px;
 }
 
-component SectionLabel inherits Text {
-    color: #53616f;
-    font-size: 13px;
-    font-weight: 700;
-}
-
-component ActionButton inherits Button {
-    min-height: 34px;
-}
-
-component SmallField inherits VerticalBox {
+// ---------------------------------------------------------------------------
+// Primitives
+// ---------------------------------------------------------------------------
+component Field inherits VerticalLayout {
     in property <string> label;
     in-out property <string> value;
     in property <string> placeholder;
     in property <bool> enabled-state: true;
+    in property <bool> secret: false;
+    in property <bool> numeric: false;
+    in property <bool> decimal-kb: false;
 
-    spacing: 4px;
+    spacing: 6px;
 
-    FieldLabel { text: root.label; }
+    Text {
+        text: root.label;
+        color: Theme.sub;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
     LineEdit {
         text <=> root.value;
-        enabled: root.enabled-state;
         placeholder-text: root.placeholder;
+        enabled: root.enabled-state;
+        input-type: root.secret
+            ? InputType.password
+            : (root.decimal-kb
+                ? InputType.decimal
+                : (root.numeric ? InputType.number : InputType.text));
     }
 }
 
+component Card inherits Rectangle {
+    background: Theme.card;
+    border-radius: Theme.radius;
+
+    VerticalLayout {
+        padding: Theme.gap;
+        spacing: 14px;
+        @children
+    }
+}
+
+// Grouped-list container: rounded card, no inner padding, clipped corners.
+component ListCard inherits Rectangle {
+    background: Theme.card;
+    border-radius: Theme.radius;
+    clip: true;
+
+    VerticalLayout {
+        @children
+    }
+}
+
+component SectionHeader inherits Text {
+    color: Theme.sub;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+component OpRow inherits Rectangle {
+    in property <string> title;
+    in property <string> subtitle;
+    in property <bool> last: false;
+    callback clicked;
+
+    height: root.subtitle == "" ? 50px : 60px;
+    background: ta.pressed ? Theme.pressed : Theme.card;
+
+    ta := TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    HorizontalLayout {
+        padding-left: Theme.gap;
+        padding-right: Theme.gap;
+        spacing: 8px;
+
+        VerticalLayout {
+            horizontal-stretch: 1;
+            alignment: center;
+            spacing: 2px;
+            Text {
+                text: root.title;
+                color: Theme.ink;
+                font-size: 17px;
+            }
+            if root.subtitle != "": Text {
+                text: root.subtitle;
+                color: Theme.sub;
+                font-size: 13px;
+            }
+        }
+
+        Text {
+            text: "›";
+            color: Theme.sub;
+            font-size: 22px;
+            vertical-alignment: center;
+        }
+    }
+
+    if !root.last: Rectangle {
+        x: Theme.gap;
+        y: root.height - 1px;
+        width: root.width - Theme.gap;
+        height: 1px;
+        background: Theme.line;
+    }
+}
+
+component ToggleRow inherits Rectangle {
+    in property <string> title;
+    in-out property <bool> on;
+    in property <bool> enabled-state: true;
+    in property <bool> last: false;
+
+    height: 50px;
+    background: Theme.card;
+
+    HorizontalLayout {
+        padding-left: Theme.gap;
+        padding-right: Theme.gap;
+        spacing: 8px;
+        Text {
+            text: root.title;
+            color: Theme.ink;
+            font-size: 17px;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+        }
+        Switch {
+            checked <=> root.on;
+            enabled: root.enabled-state;
+        }
+    }
+
+    if !root.last: Rectangle {
+        x: Theme.gap;
+        y: root.height - 1px;
+        width: root.width - Theme.gap;
+        height: 1px;
+        background: Theme.line;
+    }
+}
+
+component LabeledToggle inherits HorizontalLayout {
+    in property <string> label;
+    in-out property <bool> on;
+    in property <bool> enabled-state: true;
+
+    spacing: 8px;
+    Text {
+        text: root.label;
+        color: Theme.ink;
+        font-size: 16px;
+        vertical-alignment: center;
+        horizontal-stretch: 1;
+        wrap: word-wrap;
+    }
+    Switch {
+        checked <=> root.on;
+        enabled: root.enabled-state;
+    }
+}
+
+component NavBar inherits Rectangle {
+    in property <string> title;
+    callback back;
+
+    height: 48px;
+    background: Theme.bg;
+
+    HorizontalLayout {
+        padding-left: 6px;
+        padding-right: 6px;
+
+        back-ta := TouchArea {
+            width: 90px;
+            clicked => {
+                root.back();
+            }
+            HorizontalLayout {
+                alignment: start;
+                spacing: 1px;
+                Text {
+                    text: "‹";
+                    color: Theme.accent;
+                    font-size: 30px;
+                    vertical-alignment: center;
+                }
+                Text {
+                    text: "Home";
+                    color: back-ta.pressed ? Theme.accent.darker(0.2) : Theme.accent;
+                    font-size: 17px;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Text {
+            text: root.title;
+            color: Theme.ink;
+            font-size: 17px;
+            font-weight: 600;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+        }
+
+        Rectangle {
+            width: 90px;
+        }
+    }
+}
+
+component PrimaryButton inherits Rectangle {
+    in property <string> text;
+    in property <bool> enabled-state: true;
+    in property <color> tint: Theme.accent;
+    callback clicked;
+
+    height: 50px;
+    border-radius: 12px;
+    background: !root.enabled-state
+        ? Theme.line
+        : (ta.pressed ? root.tint.darker(0.12) : root.tint);
+
+    ta := TouchArea {
+        enabled: root.enabled-state;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    Text {
+        text: root.text;
+        color: #ffffff;
+        font-size: 17px;
+        font-weight: 600;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+}
+
+component ResultCard inherits Rectangle {
+    in property <bool> busy;
+    in property <string> status;
+    in property <string> detail;
+    in property <string> result;
+
+    background: Theme.card;
+    border-radius: Theme.radius;
+
+    VerticalLayout {
+        padding: Theme.gap;
+        spacing: 10px;
+
+        HorizontalLayout {
+            spacing: 8px;
+            Rectangle {
+                width: 10px;
+                height: 10px;
+                y: 5px;
+                border-radius: 5px;
+                background: root.busy
+                    ? Theme.warn
+                    : (root.status == "Error" ? Theme.danger : Theme.ok);
+            }
+            Text {
+                text: root.status;
+                color: Theme.ink;
+                font-size: 17px;
+                font-weight: 600;
+                horizontal-stretch: 1;
+                vertical-alignment: center;
+            }
+        }
+
+        Text {
+            text: root.detail;
+            color: Theme.sub;
+            font-size: 14px;
+            wrap: word-wrap;
+        }
+
+        if root.result != "": Text {
+            text: root.result;
+            color: Theme.ink;
+            font-size: 14px;
+            wrap: word-wrap;
+        }
+    }
+}
+
+// Reusable per-operation screen: nav bar, description, the operation's own fields
+// (passed as @children), an optional confirmation gate, the Run button, and the result.
+component OpDetail inherits VerticalLayout {
+    in property <string> title;
+    in property <string> description;
+    in property <string> run-label: "Run";
+    in property <bool> side-effect: false;
+    in-out property <bool> confirm;
+    in property <bool> demo;
+    in property <bool> busy;
+    in property <string> status;
+    in property <string> detail;
+    in property <string> result;
+    callback back;
+    callback run;
+
+    NavBar {
+        title: root.title;
+        back => {
+            root.back();
+        }
+    }
+
+    sv := ScrollView {
+        VerticalLayout {
+            width: sv.visible-width;
+            padding: Theme.gap;
+            spacing: Theme.gap;
+
+            if root.description != "": Card {
+                Text {
+                    text: root.description;
+                    color: Theme.sub;
+                    font-size: 14px;
+                    wrap: word-wrap;
+                }
+            }
+
+            @children
+
+            if root.side-effect: Card {
+                LabeledToggle {
+                    label: "I confirm this prints or registers on the device";
+                    on <=> root.confirm;
+                    enabled-state: !root.busy;
+                }
+            }
+
+            PrimaryButton {
+                text: root.busy ? "Running…" : root.run-label;
+                enabled-state: !root.busy && (!root.side-effect || root.confirm || root.demo);
+                clicked => {
+                    root.run();
+                }
+            }
+
+            ResultCard {
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.result;
+            }
+
+            // tail spacer so the result clears the keyboard / bottom inset
+            Rectangle {
+                height: 24px;
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Window
+// ---------------------------------------------------------------------------
 export component MainWindow inherits Window {
     title: "HDM";
-    min-width: 1120px;
-    min-height: 760px;
-    preferred-width: 1220px;
-    preferred-height: 840px;
+    background: Theme.bg;
+    min-width: 320px;
+    min-height: 480px;
+    preferred-width: 420px;
+    preferred-height: 880px;
 
+    // Safe-area insets. Slint does not auto-inset on iOS, so reserve generous opaque
+    // space for the status bar / Dynamic Island (top) and home indicator (bottom).
+    // Exposed so a future native layer can set exact per-device values.
+    in-out property <length> safe-top: 59px;
+    in-out property <length> safe-bottom: 34px;
+
+    // Navigation: "" = home, "settings", "privacy", or an operation key.
+    in-out property <string> nav: "";
+
+    // ---- connection ----
     in-out property <string> host: "10.0.0.5";
     in-out property <string> port: "1025";
     in-out property <string> timeout-seconds: "50";
@@ -53,6 +416,7 @@ export component MainWindow inherits Window {
     in-out property <string> pin: "";
     in-out property <bool> demo-mode: false;
 
+    // ---- operation inputs ----
     in-out property <string> receipt-mode: "simple";
     in-out property <string> amount: "";
     in-out property <string> card-amount: "";
@@ -79,11 +443,13 @@ export component MainWindow inherits Window {
     in-out property <string> report-end: "0";
     in-out property <bool> confirm-operation: false;
 
+    // ---- status ----
     in-out property <bool> busy: false;
     in-out property <string> status: "Ready";
-    in-out property <string> detail: "Enter connection settings and run a device operation.";
+    in-out property <string> detail: "Choose an operation.";
     in-out property <string> last-result: "";
 
+    // ---- callbacks (consumed by the Rust bridge) ----
     callback probe-requested();
     callback operators-requested();
     callback login-requested();
@@ -102,253 +468,845 @@ export component MainWindow inherits Window {
     callback emark-requested();
     callback privacy-requested();
 
-    background: #f6f7f8;
+    // Clears focus when the user taps empty space -> dismisses the soft keyboard.
+    bg-tap := TouchArea {
+        clicked => {
+            keyboard-sink.focus();
+        }
+    }
 
-    HorizontalLayout {
-        spacing: 0px;
+    keyboard-sink := FocusScope {
+        width: 0px;
+        height: 0px;
+    }
 
+    VerticalLayout {
+        // ---- top safe area ----
         Rectangle {
-            width: 430px;
-            background: #ffffff;
-            border-color: #d7dce2;
-            border-width: 1px;
+            height: root.safe-top;
+            background: Theme.bg;
+        }
 
-            VerticalBox {
-                padding: 18px;
-                spacing: 12px;
+        // ---- screen area ----
+        Rectangle {
+            vertical-stretch: 1;
+            background: Theme.bg;
 
-                Text {
-                    text: "HDM";
-                    color: #1e252e;
-                    font-size: 28px;
-                    font-weight: 700;
-                }
-
-                SectionLabel { text: "Connection"; }
-
-                SmallField {
-                    label: "Host";
-                    value <=> root.host;
-                    placeholder: "10.0.0.5";
-                    enabled-state: !root.busy && !root.demo-mode;
-                }
-
-                HorizontalBox {
-                    spacing: 10px;
-                    SmallField {
-                        label: "Port";
-                        value <=> root.port;
-                        placeholder: "1025";
-                        enabled-state: !root.busy && !root.demo-mode;
+            // ===================== HOME =====================
+            if root.nav == "": VerticalLayout {
+                HorizontalLayout {
+                    padding-left: Theme.gap;
+                    padding-right: 8px;
+                    height: 56px;
+                    Text {
+                        text: "HDM";
+                        color: Theme.ink;
+                        font-size: 34px;
+                        font-weight: 800;
+                        horizontal-stretch: 1;
+                        vertical-alignment: center;
                     }
-                    SmallField {
-                        label: "Timeout";
-                        value <=> root.timeout-seconds;
-                        placeholder: "50";
-                        enabled-state: !root.busy && !root.demo-mode;
-                    }
-                }
-
-                FieldLabel { text: "Password"; }
-                LineEdit {
-                    text <=> root.password;
-                    enabled: !root.busy && !root.demo-mode;
-                    input-type: InputType.password;
-                    placeholder-text: "HDM password";
-                }
-
-                HorizontalBox {
-                    spacing: 10px;
-                    SmallField {
-                        label: "Cashier";
-                        value <=> root.cashier;
-                        placeholder: "3";
-                        enabled-state: !root.busy && !root.demo-mode;
-                    }
-
-                    VerticalBox {
-                        spacing: 4px;
-                        FieldLabel { text: "PIN"; }
-                        LineEdit {
-                            text <=> root.pin;
-                            enabled: !root.busy && !root.demo-mode;
-                            input-type: InputType.password;
-                            placeholder-text: "1234";
+                    gear := TouchArea {
+                        width: 48px;
+                        clicked => {
+                            root.nav = "settings";
+                        }
+                        Text {
+                            text: "⚙";
+                            font-size: 26px;
+                            color: gear.pressed ? Theme.accent.darker(0.2) : Theme.accent;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
                         }
                     }
                 }
 
-                CheckBox {
-                    text: "Demo mode";
-                    checked <=> root.demo-mode;
-                    enabled: !root.busy;
-                }
+                home-sv := ScrollView {
+                    VerticalLayout {
+                        width: home-sv.visible-width;
+                        padding: Theme.gap;
+                        padding-top: 4px;
+                        spacing: 22px;
 
-                Rectangle { height: 1px; background: #e2e6ea; }
+                        // Connection
+                        VerticalLayout {
+                            spacing: 7px;
+                            SectionHeader {
+                                text: "CONNECTION";
+                            }
+                            ListCard {
+                                OpRow {
+                                    title: "Connection settings";
+                                    subtitle: root.host + ":" + root.port;
+                                    clicked => {
+                                        root.nav = "settings";
+                                    }
+                                }
+                                ToggleRow {
+                                    title: "Demo mode";
+                                    on <=> root.demo-mode;
+                                    enabled-state: !root.busy;
+                                    last: true;
+                                }
+                            }
+                        }
 
-                SectionLabel { text: "Operations"; }
+                        // Diagnostics
+                        VerticalLayout {
+                            spacing: 7px;
+                            SectionHeader {
+                                text: "DIAGNOSTICS";
+                            }
+                            ListCard {
+                                OpRow {
+                                    title: "Probe";
+                                    clicked => {
+                                        root.nav = "probe";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Operators & departments";
+                                    clicked => {
+                                        root.nav = "operators";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Verify login";
+                                    clicked => {
+                                        root.nav = "login";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Date & time";
+                                    clicked => {
+                                        root.nav = "datetime";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Payment systems";
+                                    last: true;
+                                    clicked => {
+                                        root.nav = "payments";
+                                    }
+                                }
+                            }
+                        }
 
-                HorizontalBox {
-                    spacing: 10px;
+                        // Receipts & returns
+                        VerticalLayout {
+                            spacing: 7px;
+                            SectionHeader {
+                                text: "RECEIPTS & RETURNS";
+                            }
+                            ListCard {
+                                OpRow {
+                                    title: "Print receipt";
+                                    clicked => {
+                                        root.nav = "receipt";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Reprint last receipt";
+                                    clicked => {
+                                        root.nav = "print-last";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Look up receipt";
+                                    clicked => {
+                                        root.nav = "lookup";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Return / refund";
+                                    last: true;
+                                    clicked => {
+                                        root.nav = "return";
+                                    }
+                                }
+                            }
+                        }
 
-                    VerticalBox {
-                        spacing: 7px;
+                        // Reports & cash
+                        VerticalLayout {
+                            spacing: 7px;
+                            SectionHeader {
+                                text: "REPORTS & CASH";
+                            }
+                            ListCard {
+                                OpRow {
+                                    title: "Fiscal report (X / Z)";
+                                    clicked => {
+                                        root.nav = "report";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Cash in / out";
+                                    last: true;
+                                    clicked => {
+                                        root.nav = "cash";
+                                    }
+                                }
+                            }
+                        }
 
-                        ActionButton { text: root.busy ? "Running..." : "Probe"; enabled: !root.busy; clicked => { root.probe-requested(); } }
-                        ActionButton { text: "Operators"; enabled: !root.busy; clicked => { root.operators-requested(); } }
-                        ActionButton { text: "Verify login"; enabled: !root.busy; clicked => { root.login-requested(); } }
-                        ActionButton { text: "Receipt"; enabled: !root.busy; clicked => { root.receipt-requested(); } }
-                        ActionButton { text: "Print last"; enabled: !root.busy; clicked => { root.print-last-requested(); } }
-                        ActionButton { text: "Lookup"; enabled: !root.busy; clicked => { root.lookup-requested(); } }
-                        ActionButton { text: "Header/footer"; enabled: !root.busy; clicked => { root.header-footer-requested(); } }
-                        ActionButton { text: "Logo"; enabled: !root.busy; clicked => { root.logo-requested(); } }
+                        // Device
+                        VerticalLayout {
+                            spacing: 7px;
+                            SectionHeader {
+                                text: "DEVICE";
+                            }
+                            ListCard {
+                                OpRow {
+                                    title: "Header / footer";
+                                    clicked => {
+                                        root.nav = "header-footer";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Header logo";
+                                    clicked => {
+                                        root.nav = "logo";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Sample receipt";
+                                    clicked => {
+                                        root.nav = "sample";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Sync with tax authority";
+                                    clicked => {
+                                        root.nav = "time-sync";
+                                    }
+                                }
+                                OpRow {
+                                    title: "Submit eMark";
+                                    last: true;
+                                    clicked => {
+                                        root.nav = "emark";
+                                    }
+                                }
+                            }
+                        }
+
+                        OpRow {
+                            title: "Privacy";
+                            clicked => {
+                                root.privacy-requested();
+                                root.nav = "privacy";
+                            }
+                        }
+
+                        Rectangle {
+                            height: 16px;
+                        }
                     }
+                }
+            }
 
-                    VerticalBox {
-                        spacing: 7px;
-
-                        ActionButton { text: "Report"; enabled: !root.busy; clicked => { root.report-requested(); } }
-                        ActionButton { text: "Return"; enabled: !root.busy; clicked => { root.return-requested(); } }
-                        ActionButton { text: "Cash"; enabled: !root.busy; clicked => { root.cash-requested(); } }
-                        ActionButton { text: "Datetime"; enabled: !root.busy; clicked => { root.datetime-requested(); } }
-                        ActionButton { text: "Sample"; enabled: !root.busy; clicked => { root.sample-requested(); } }
-                        ActionButton { text: "Time sync"; enabled: !root.busy; clicked => { root.time-sync-requested(); } }
-                        ActionButton { text: "Payments"; enabled: !root.busy; clicked => { root.payment-systems-requested(); } }
-                        ActionButton { text: "eMark"; enabled: !root.busy; clicked => { root.emark-requested(); } }
+            // ===================== SETTINGS =====================
+            if root.nav == "settings": VerticalLayout {
+                NavBar {
+                    title: "Connection";
+                    back => {
+                        root.nav = "";
                     }
                 }
+                set-sv := ScrollView {
+                    VerticalLayout {
+                        width: set-sv.visible-width;
+                        padding: Theme.gap;
+                        spacing: Theme.gap;
+                        Card {
+                            Field {
+                                label: "Host";
+                                value <=> root.host;
+                                placeholder: "10.0.0.5";
+                                enabled-state: !root.busy && !root.demo-mode;
+                            }
+                            HorizontalLayout {
+                                spacing: 10px;
+                                Field {
+                                    label: "Port";
+                                    value <=> root.port;
+                                    placeholder: "1025";
+                                    numeric: true;
+                                    enabled-state: !root.busy && !root.demo-mode;
+                                }
+                                Field {
+                                    label: "Timeout (s)";
+                                    value <=> root.timeout-seconds;
+                                    placeholder: "50";
+                                    numeric: true;
+                                    enabled-state: !root.busy && !root.demo-mode;
+                                }
+                            }
+                            Field {
+                                label: "Password";
+                                value <=> root.password;
+                                placeholder: "HDM password";
+                                secret: true;
+                                enabled-state: !root.busy && !root.demo-mode;
+                            }
+                            HorizontalLayout {
+                                spacing: 10px;
+                                Field {
+                                    label: "Cashier";
+                                    value <=> root.cashier;
+                                    placeholder: "3";
+                                    numeric: true;
+                                    enabled-state: !root.busy && !root.demo-mode;
+                                }
+                                Field {
+                                    label: "PIN";
+                                    value <=> root.pin;
+                                    placeholder: "1234";
+                                    secret: true;
+                                    numeric: true;
+                                    enabled-state: !root.busy && !root.demo-mode;
+                                }
+                            }
+                        }
+                        Card {
+                            LabeledToggle {
+                                label: "Demo mode (no network, synthetic responses)";
+                                on <=> root.demo-mode;
+                                enabled-state: !root.busy;
+                            }
+                        }
+                        Rectangle {
+                            height: 24px;
+                        }
+                    }
+                }
+            }
 
-                ActionButton {
-                    text: "Privacy";
-                    enabled: !root.busy;
-                    clicked => { root.privacy-requested(); }
+            // ===================== PRIVACY =====================
+            if root.nav == "privacy": VerticalLayout {
+                NavBar {
+                    title: "Privacy";
+                    back => {
+                        root.nav = "";
+                    }
+                }
+                priv-sv := ScrollView {
+                    VerticalLayout {
+                        width: priv-sv.visible-width;
+                        padding: Theme.gap;
+                        spacing: Theme.gap;
+                        Card {
+                            Text {
+                                text: root.last-result;
+                                color: Theme.ink;
+                                font-size: 14px;
+                                wrap: word-wrap;
+                            }
+                        }
+                        Rectangle {
+                            height: 24px;
+                        }
+                    }
+                }
+            }
+
+            // ===================== OPERATIONS =====================
+            if root.nav == "probe": OpDetail {
+                title: "Probe";
+                description: "Check whether the endpoint speaks the HDM protocol, without logging in.";
+                run-label: "Run probe";
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.probe-requested(); }
+            }
+
+            if root.nav == "operators": OpDetail {
+                title: "Operators";
+                description: "List the operators and departments registered on the device.";
+                run-label: "List operators";
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.operators-requested(); }
+            }
+
+            if root.nav == "login": OpDetail {
+                title: "Verify login";
+                description: "Log in with the cashier credentials and immediately log out.";
+                run-label: "Verify login";
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.login-requested(); }
+            }
+
+            if root.nav == "datetime": OpDetail {
+                title: "Date & time";
+                description: "Read the device's current date and time.";
+                run-label: "Read date & time";
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.datetime-requested(); }
+            }
+
+            if root.nav == "payments": OpDetail {
+                title: "Payment systems";
+                description: "List the payment systems configured on the device.";
+                run-label: "List payment systems";
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.payment-systems-requested(); }
+            }
+
+            if root.nav == "receipt": OpDetail {
+                title: "Print receipt";
+                description: "Print a fiscal receipt. For products mode, set the items JSON path.";
+                run-label: "Print receipt";
+                side-effect: true;
+                confirm <=> root.confirm-operation;
+                demo: root.demo-mode;
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.receipt-requested(); }
+                Card {
+                    Field {
+                        label: "Mode";
+                        value <=> root.receipt-mode;
+                        placeholder: "simple / products / prepayment";
+                        enabled-state: !root.busy;
+                    }
+                    HorizontalLayout {
+                        spacing: 10px;
+                        Field {
+                            label: "Cash";
+                            value <=> root.amount;
+                            placeholder: "0.00";
+                            decimal-kb: true;
+                            enabled-state: !root.busy;
+                        }
+                        Field {
+                            label: "Card";
+                            value <=> root.card-amount;
+                            placeholder: "0.00";
+                            decimal-kb: true;
+                            enabled-state: !root.busy;
+                        }
+                    }
+                    HorizontalLayout {
+                        spacing: 10px;
+                        Field {
+                            label: "Partial";
+                            value <=> root.partial-amount;
+                            placeholder: "0.00";
+                            decimal-kb: true;
+                            enabled-state: !root.busy;
+                        }
+                        Field {
+                            label: "Prepayment";
+                            value <=> root.prepayment-amount;
+                            placeholder: "0.00";
+                            decimal-kb: true;
+                            enabled-state: !root.busy;
+                        }
+                    }
+                    HorizontalLayout {
+                        spacing: 10px;
+                        Field {
+                            label: "Department";
+                            value <=> root.department;
+                            placeholder: "1";
+                            numeric: true;
+                            enabled-state: !root.busy;
+                        }
+                        Field {
+                            label: "Partner TIN";
+                            value <=> root.partner-tin;
+                            placeholder: "optional";
+                            numeric: true;
+                            enabled-state: !root.busy;
+                        }
+                    }
+                    Field {
+                        label: "Payment system code";
+                        value <=> root.payment-system;
+                        placeholder: "optional";
+                        numeric: true;
+                        enabled-state: !root.busy;
+                    }
+                    LabeledToggle {
+                        label: "External POS";
+                        on <=> root.use-ext-pos;
+                        enabled-state: !root.busy;
+                    }
+                    HorizontalLayout {
+                        spacing: 10px;
+                        Field {
+                            label: "RRN";
+                            value <=> root.rrn;
+                            placeholder: "12 chars";
+                            enabled-state: !root.busy;
+                        }
+                        Field {
+                            label: "Terminal ID";
+                            value <=> root.terminal-id;
+                            placeholder: "8 chars";
+                            enabled-state: !root.busy;
+                        }
+                    }
+                    Field {
+                        label: "eMarks (comma-separated)";
+                        value <=> root.emarks;
+                        placeholder: "optional";
+                        enabled-state: !root.busy;
+                    }
+                    Field {
+                        label: "Items JSON path (products mode)";
+                        value <=> root.json-path;
+                        placeholder: "items.json";
+                        enabled-state: !root.busy;
+                    }
+                }
+            }
+
+            if root.nav == "print-last": OpDetail {
+                title: "Reprint last";
+                description: "Reprint a copy of the operator's most recent receipt.";
+                run-label: "Reprint last receipt";
+                side-effect: true;
+                confirm <=> root.confirm-operation;
+                demo: root.demo-mode;
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.print-last-requested(); }
+            }
+
+            if root.nav == "lookup": OpDetail {
+                title: "Look up receipt";
+                description: "Look up a previous receipt's contents by number. Registers nothing.";
+                run-label: "Look up";
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.lookup-requested(); }
+                Card {
+                    Field {
+                        label: "CRN";
+                        value <=> root.crn;
+                        placeholder: "51815332";
+                        numeric: true;
+                        enabled-state: !root.busy;
+                    }
+                    Field {
+                        label: "Receipt ID";
+                        value <=> root.receipt-id;
+                        placeholder: "receipt number";
+                        enabled-state: !root.busy;
+                    }
+                }
+            }
+
+            if root.nav == "return": OpDetail {
+                title: "Return / refund";
+                description: "Register a return for a prior receipt: full, by-amount, or per-item.";
+                run-label: "Register return";
+                side-effect: true;
+                confirm <=> root.confirm-operation;
+                demo: root.demo-mode;
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.return-requested(); }
+                Card {
+                    HorizontalLayout {
+                        spacing: 10px;
+                        Field {
+                            label: "CRN";
+                            value <=> root.crn;
+                            placeholder: "51815332";
+                            numeric: true;
+                            enabled-state: !root.busy;
+                        }
+                        Field {
+                            label: "Ticket #";
+                            value <=> root.ticket;
+                            placeholder: "receipt to return";
+                            numeric: true;
+                            enabled-state: !root.busy;
+                        }
+                    }
+                    HorizontalLayout {
+                        spacing: 10px;
+                        Field {
+                            label: "Cash";
+                            value <=> root.amount;
+                            placeholder: "optional";
+                            decimal-kb: true;
+                            enabled-state: !root.busy;
+                        }
+                        Field {
+                            label: "Card";
+                            value <=> root.card-amount;
+                            placeholder: "optional";
+                            decimal-kb: true;
+                            enabled-state: !root.busy;
+                        }
+                    }
+                    Field {
+                        label: "Prepayment";
+                        value <=> root.prepayment-amount;
+                        placeholder: "optional";
+                        decimal-kb: true;
+                        enabled-state: !root.busy;
+                    }
+                    HorizontalLayout {
+                        spacing: 10px;
+                        Field {
+                            label: "RRN";
+                            value <=> root.rrn;
+                            placeholder: "optional";
+                            enabled-state: !root.busy;
+                        }
+                        Field {
+                            label: "Terminal ID";
+                            value <=> root.terminal-id;
+                            placeholder: "optional";
+                            enabled-state: !root.busy;
+                        }
+                    }
+                    Field {
+                        label: "eMarks (comma-separated)";
+                        value <=> root.emarks;
+                        placeholder: "optional";
+                        enabled-state: !root.busy;
+                    }
+                    Field {
+                        label: "Per-item JSON path";
+                        value <=> root.json-path;
+                        placeholder: "optional";
+                        enabled-state: !root.busy;
+                    }
+                }
+            }
+
+            if root.nav == "report": OpDetail {
+                title: "Fiscal report";
+                description: "Print an X (interim) or Z (end-of-day) report. Z closes the fiscal day.";
+                run-label: root.report-kind == "z" ? "Print Z report" : "Print X report";
+                side-effect: root.report-kind == "z";
+                confirm <=> root.confirm-operation;
+                demo: root.demo-mode;
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.report-requested(); }
+                Card {
+                    Field {
+                        label: "Kind (x / z)";
+                        value <=> root.report-kind;
+                        placeholder: "x";
+                        enabled-state: !root.busy;
+                    }
+                    HorizontalLayout {
+                        spacing: 10px;
+                        Field {
+                            label: "Filter kind";
+                            value <=> root.report-filter-kind;
+                            placeholder: "dept / cashier / transaction";
+                            enabled-state: !root.busy;
+                        }
+                        Field {
+                            label: "Filter value";
+                            value <=> root.report-filter-value;
+                            placeholder: "optional";
+                            numeric: true;
+                            enabled-state: !root.busy;
+                        }
+                    }
+                    HorizontalLayout {
+                        spacing: 10px;
+                        Field {
+                            label: "Start";
+                            value <=> root.report-start;
+                            placeholder: "0";
+                            numeric: true;
+                            enabled-state: !root.busy;
+                        }
+                        Field {
+                            label: "End";
+                            value <=> root.report-end;
+                            placeholder: "0";
+                            numeric: true;
+                            enabled-state: !root.busy;
+                        }
+                    }
+                }
+            }
+
+            if root.nav == "cash": OpDetail {
+                title: "Cash in / out";
+                description: "Record a cash-drawer adjustment.";
+                run-label: "Record cash op";
+                side-effect: true;
+                confirm <=> root.confirm-operation;
+                demo: root.demo-mode;
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.cash-requested(); }
+                Card {
+                    LabeledToggle {
+                        label: "Cash in (off = cash out)";
+                        on <=> root.cash-in;
+                        enabled-state: !root.busy;
+                    }
+                    Field {
+                        label: "Amount";
+                        value <=> root.amount;
+                        placeholder: "0.00";
+                        decimal-kb: true;
+                        enabled-state: !root.busy;
+                    }
+                    Field {
+                        label: "Description";
+                        value <=> root.description;
+                        placeholder: "optional note";
+                        enabled-state: !root.busy;
+                    }
+                }
+            }
+
+            if root.nav == "header-footer": OpDetail {
+                title: "Header / footer";
+                description: "Configure the receipt header and footer lines from a JSON file.";
+                run-label: "Apply header/footer";
+                side-effect: true;
+                confirm <=> root.confirm-operation;
+                demo: root.demo-mode;
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.header-footer-requested(); }
+                Card {
+                    Field {
+                        label: "JSON path";
+                        value <=> root.json-path;
+                        placeholder: "header-footer.json";
+                        enabled-state: !root.busy;
+                    }
+                }
+            }
+
+            if root.nav == "logo": OpDetail {
+                title: "Header logo";
+                description: "Upload a header logo bitmap (BMP, colour depth ≤ 4 bits).";
+                run-label: "Upload logo";
+                side-effect: true;
+                confirm <=> root.confirm-operation;
+                demo: root.demo-mode;
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.logo-requested(); }
+                Card {
+                    Field {
+                        label: "Logo path";
+                        value <=> root.logo-path;
+                        placeholder: "logo.bmp";
+                        enabled-state: !root.busy;
+                    }
+                }
+            }
+
+            if root.nav == "sample": OpDetail {
+                title: "Sample receipt";
+                description: "Print a non-fiscal sample receipt for layout verification. Consumes paper.";
+                run-label: "Print sample";
+                side-effect: true;
+                confirm <=> root.confirm-operation;
+                demo: root.demo-mode;
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.sample-requested(); }
+            }
+
+            if root.nav == "time-sync": OpDetail {
+                title: "Time sync";
+                description: "Synchronise the device with the tax authority's clock / state.";
+                run-label: "Sync now";
+                side-effect: true;
+                confirm <=> root.confirm-operation;
+                demo: root.demo-mode;
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.time-sync-requested(); }
+            }
+
+            if root.nav == "emark": OpDetail {
+                title: "Submit eMark";
+                description: "Submit a single eMark traceability code (29–110 ASCII chars).";
+                run-label: "Submit eMark";
+                side-effect: true;
+                confirm <=> root.confirm-operation;
+                demo: root.demo-mode;
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.last-result;
+                back => { root.nav = ""; }
+                run => { root.emark-requested(); }
+                Card {
+                    Field {
+                        label: "eMark code";
+                        value <=> root.emarks;
+                        placeholder: "29–110 characters";
+                        enabled-state: !root.busy;
+                    }
                 }
             }
         }
 
+        // ---- bottom safe area ----
         Rectangle {
-            background: #f6f7f8;
-
-            VerticalBox {
-                padding: 18px;
-                spacing: 14px;
-
-                HorizontalBox {
-                    spacing: 14px;
-
-                    Rectangle {
-                        width: 11px;
-                        height: 11px;
-                        border-radius: 6px;
-                        background: root.busy ? #d88725 : (root.status == "Error" ? #c73a3a : #26724d);
-                    }
-
-                    Text {
-                        text: root.status;
-                        color: #17202a;
-                        font-size: 22px;
-                        font-weight: 700;
-                        vertical-alignment: center;
-                    }
-                }
-
-                Text {
-                    text: root.detail;
-                    color: #5d6875;
-                    font-size: 14px;
-                }
-
-                Rectangle {
-                    background: #ffffff;
-                    border-radius: 6px;
-                    border-color: #d9dee5;
-                    border-width: 1px;
-
-                    VerticalBox {
-                        padding: 14px;
-                        spacing: 10px;
-
-                        SectionLabel { text: "Operation inputs"; }
-
-                        HorizontalBox {
-                            spacing: 10px;
-                            SmallField { label: "Receipt mode"; value <=> root.receipt-mode; placeholder: "simple/products/prepayment"; enabled-state: !root.busy; }
-                            SmallField { label: "Amount"; value <=> root.amount; placeholder: "cash / cash op"; enabled-state: !root.busy; }
-                            SmallField { label: "Card"; value <=> root.card-amount; placeholder: "card amount"; enabled-state: !root.busy; }
-                            SmallField { label: "Partial"; value <=> root.partial-amount; placeholder: "partial"; enabled-state: !root.busy; }
-                        }
-
-                        HorizontalBox {
-                            spacing: 10px;
-                            SmallField { label: "Prepayment"; value <=> root.prepayment-amount; placeholder: "prepayment"; enabled-state: !root.busy; }
-                            SmallField { label: "Department"; value <=> root.department; placeholder: "1"; enabled-state: !root.busy; }
-                            SmallField { label: "Partner TIN"; value <=> root.partner-tin; placeholder: "optional"; enabled-state: !root.busy; }
-                            SmallField { label: "Payment system"; value <=> root.payment-system; placeholder: "optional"; enabled-state: !root.busy; }
-                        }
-
-                        HorizontalBox {
-                            spacing: 10px;
-                            CheckBox { text: "External POS"; checked <=> root.use-ext-pos; enabled: !root.busy; }
-                            SmallField { label: "RRN"; value <=> root.rrn; placeholder: "123456789012"; enabled-state: !root.busy; }
-                            SmallField { label: "Terminal ID"; value <=> root.terminal-id; placeholder: "12345678"; enabled-state: !root.busy; }
-                        }
-
-                        HorizontalBox {
-                            spacing: 10px;
-                            SmallField { label: "CRN"; value <=> root.crn; placeholder: "51815332"; enabled-state: !root.busy; }
-                            SmallField { label: "Receipt ID"; value <=> root.receipt-id; placeholder: "lookup id"; enabled-state: !root.busy; }
-                            SmallField { label: "Ticket"; value <=> root.ticket; placeholder: "return ticket"; enabled-state: !root.busy; }
-                        }
-
-                        HorizontalBox {
-                            spacing: 10px;
-                            SmallField { label: "eMarks"; value <=> root.emarks; placeholder: "comma-separated"; enabled-state: !root.busy; }
-                            SmallField { label: "JSON path"; value <=> root.json-path; placeholder: "items/header/return json"; enabled-state: !root.busy; }
-                            SmallField { label: "Logo path"; value <=> root.logo-path; placeholder: "logo.bmp"; enabled-state: !root.busy; }
-                        }
-
-                        HorizontalBox {
-                            spacing: 10px;
-                            SmallField { label: "Report kind"; value <=> root.report-kind; placeholder: "x/z"; enabled-state: !root.busy; }
-                            SmallField { label: "Filter kind"; value <=> root.report-filter-kind; placeholder: "dept/cashier/transaction"; enabled-state: !root.busy; }
-                            SmallField { label: "Filter value"; value <=> root.report-filter-value; placeholder: "optional"; enabled-state: !root.busy; }
-                            SmallField { label: "Start"; value <=> root.report-start; placeholder: "0"; enabled-state: !root.busy; }
-                            SmallField { label: "End"; value <=> root.report-end; placeholder: "0"; enabled-state: !root.busy; }
-                        }
-
-                        HorizontalBox {
-                            spacing: 10px;
-                            CheckBox { text: "Cash in"; checked <=> root.cash-in; enabled: !root.busy; }
-                            SmallField { label: "Description"; value <=> root.description; placeholder: "cash/header note"; enabled-state: !root.busy; }
-                            CheckBox { text: "Confirm side effect"; checked <=> root.confirm-operation; enabled: !root.busy; }
-                        }
-                    }
-                }
-
-                Rectangle {
-                    min-height: 205px;
-                    background: #ffffff;
-                    border-radius: 6px;
-                    border-color: #d9dee5;
-                    border-width: 1px;
-
-                    VerticalBox {
-                        padding: 16px;
-                        spacing: 10px;
-
-                        SectionLabel { text: "Result"; }
-
-                        Text {
-                            text: root.last-result == "" ? "No operation has been run yet." : root.last-result;
-                            color: root.last-result == "" ? #7c8794 : #202933;
-                            font-size: 14px;
-                            wrap: word-wrap;
-                        }
-                    }
-                }
-
-                Rectangle { background: transparent; }
-            }
+            height: root.safe-bottom;
+            background: Theme.bg;
         }
     }
 }
