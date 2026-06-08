@@ -1,0 +1,572 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: hdm-am-app\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: en\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "NavBar"
+msgid "common.home"
+msgstr "Home"
+
+msgctxt "PickerSheet"
+msgid "common.cancel"
+msgstr "Cancel"
+
+msgctxt "PickerSheet"
+msgid "sheet.empty_loadable"
+msgstr "No items yet. Tap “Refresh from device”."
+
+msgctxt "PickerSheet"
+msgid "sheet.empty"
+msgstr "No items available."
+
+msgctxt "PickerSheet"
+msgid "common.loading"
+msgstr "Loading…"
+
+msgctxt "PickerSheet"
+msgid "common.refresh"
+msgstr "Refresh from device"
+
+msgctxt "OpDetail"
+msgid "common.confirm"
+msgstr "I confirm this prints or registers on the device"
+
+msgctxt "OpDetail"
+msgid "common.running"
+msgstr "Running…"
+
+msgctxt "PickerRow"
+msgid "common.select"
+msgstr "Select"
+
+msgctxt "MainWindow"
+msgid "choice.mode.simple"
+msgstr "Simple"
+
+msgctxt "MainWindow"
+msgid "choice.mode.products"
+msgstr "Products"
+
+msgctxt "MainWindow"
+msgid "choice.mode.prepay"
+msgstr "Prepay"
+
+msgctxt "MainWindow"
+msgid "choice.report.x"
+msgstr "X · interim"
+
+msgctxt "MainWindow"
+msgid "choice.report.z"
+msgstr "Z · close day"
+
+msgctxt "MainWindow"
+msgid "choice.filter.none"
+msgstr "None"
+
+msgctxt "MainWindow"
+msgid "choice.filter.dept"
+msgstr "Dept"
+
+msgctxt "MainWindow"
+msgid "choice.filter.operator"
+msgstr "Operator"
+
+msgctxt "MainWindow"
+msgid "choice.filter.txn"
+msgstr "Txn"
+
+msgctxt "MainWindow"
+msgid "sheet.select_operator"
+msgstr "Select operator"
+
+msgctxt "MainWindow"
+msgid "sheet.select_department"
+msgstr "Select department"
+
+msgctxt "MainWindow"
+msgid "sheet.select_payment"
+msgstr "Select payment system"
+
+msgctxt "MainWindow"
+msgid "sheet.filter_operator"
+msgstr "Filter by operator"
+
+msgctxt "MainWindow"
+msgid "sheet.filter_department"
+msgstr "Filter by department"
+
+msgctxt "MainWindow"
+msgid "section.connection"
+msgstr "CONNECTION"
+
+msgctxt "MainWindow"
+msgid "home.connection_settings"
+msgstr "Connection settings"
+
+msgctxt "MainWindow"
+msgid "home.demo"
+msgstr "Demo mode"
+
+msgctxt "MainWindow"
+msgid "section.diagnostics"
+msgstr "DIAGNOSTICS"
+
+msgctxt "MainWindow"
+msgid "op.probe.title"
+msgstr "Probe"
+
+msgctxt "MainWindow"
+msgid "home.operators"
+msgstr "Operators & departments"
+
+msgctxt "MainWindow"
+msgid "op.login.title"
+msgstr "Verify login"
+
+msgctxt "MainWindow"
+msgid "op.datetime.title"
+msgstr "Date & time"
+
+msgctxt "MainWindow"
+msgid "op.payments.title"
+msgstr "Payment systems"
+
+msgctxt "MainWindow"
+msgid "section.receipts"
+msgstr "RECEIPTS & RETURNS"
+
+msgctxt "MainWindow"
+msgid "op.receipt.title"
+msgstr "Print receipt"
+
+msgctxt "MainWindow"
+msgid "home.print_last"
+msgstr "Reprint last receipt"
+
+msgctxt "MainWindow"
+msgid "op.lookup.title"
+msgstr "Look up receipt"
+
+msgctxt "MainWindow"
+msgid "op.return.title"
+msgstr "Return / refund"
+
+msgctxt "MainWindow"
+msgid "section.reports"
+msgstr "REPORTS & CASH"
+
+msgctxt "MainWindow"
+msgid "home.report"
+msgstr "Fiscal report (X / Z)"
+
+msgctxt "MainWindow"
+msgid "op.cash.title"
+msgstr "Cash in / out"
+
+msgctxt "MainWindow"
+msgid "section.device"
+msgstr "DEVICE"
+
+msgctxt "MainWindow"
+msgid "op.header_footer.title"
+msgstr "Header / footer"
+
+msgctxt "MainWindow"
+msgid "op.logo.title"
+msgstr "Header logo"
+
+msgctxt "MainWindow"
+msgid "op.sample.title"
+msgstr "Sample receipt"
+
+msgctxt "MainWindow"
+msgid "home.time_sync"
+msgstr "Sync with tax authority"
+
+msgctxt "MainWindow"
+msgid "op.emark.title"
+msgstr "Submit eMark"
+
+msgctxt "MainWindow"
+msgid "op.privacy.title"
+msgstr "Privacy"
+
+msgctxt "MainWindow"
+msgid "settings.title"
+msgstr "Connection"
+
+msgctxt "MainWindow"
+msgid "field.host"
+msgstr "Host"
+
+msgctxt "MainWindow"
+msgid "field.port"
+msgstr "Port"
+
+msgctxt "MainWindow"
+msgid "field.timeout"
+msgstr "Timeout (seconds)"
+
+msgctxt "MainWindow"
+msgid "field.password"
+msgstr "Password"
+
+msgctxt "MainWindow"
+msgid "ph.hdm_password"
+msgstr "HDM password"
+
+msgctxt "MainWindow"
+msgid "section.operator"
+msgstr "OPERATOR"
+
+msgctxt "MainWindow"
+msgid "field.operator"
+msgstr "Operator"
+
+msgctxt "MainWindow"
+msgid "ph.choose_operator"
+msgstr "Choose operator"
+
+msgctxt "MainWindow"
+msgid "field.cashier_id"
+msgstr "Cashier ID"
+
+msgctxt "MainWindow"
+msgid "field.pin"
+msgstr "PIN"
+
+msgctxt "MainWindow"
+msgid "common.loading"
+msgstr "Loading…"
+
+msgctxt "MainWindow"
+msgid "settings.load_directory"
+msgstr "Load operators & departments"
+
+msgctxt "MainWindow"
+msgid "settings.advanced"
+msgstr "Advanced fields (manual IDs, all options)"
+
+msgctxt "MainWindow"
+msgid "settings.demo"
+msgstr "Demo mode (no network, synthetic responses)"
+
+msgctxt "MainWindow"
+msgid "section.language"
+msgstr "LANGUAGE"
+
+msgctxt "MainWindow"
+msgid "op.probe.desc"
+msgstr "Check whether the endpoint speaks the HDM protocol, without logging in."
+
+msgctxt "MainWindow"
+msgid "op.probe.run"
+msgstr "Run probe"
+
+msgctxt "MainWindow"
+msgid "op.operators.title"
+msgstr "Operators"
+
+msgctxt "MainWindow"
+msgid "op.operators.desc"
+msgstr "List the operators and departments registered on the device."
+
+msgctxt "MainWindow"
+msgid "op.operators.run"
+msgstr "List operators"
+
+msgctxt "MainWindow"
+msgid "op.login.desc"
+msgstr "Log in with the operator credentials and immediately log out."
+
+msgctxt "MainWindow"
+msgid "op.datetime.desc"
+msgstr "Read the device's current date and time."
+
+msgctxt "MainWindow"
+msgid "op.datetime.run"
+msgstr "Read date & time"
+
+msgctxt "MainWindow"
+msgid "op.payments.desc"
+msgstr "List the payment systems configured on the device."
+
+msgctxt "MainWindow"
+msgid "op.payments.run"
+msgstr "List payment systems"
+
+msgctxt "MainWindow"
+msgid "op.receipt.desc"
+msgstr "Print a fiscal receipt. Pick the mode, enter the payment, and choose the department."
+
+msgctxt "MainWindow"
+msgid "field.mode"
+msgstr "Mode"
+
+msgctxt "MainWindow"
+msgid "field.cash"
+msgstr "Cash"
+
+msgctxt "MainWindow"
+msgid "field.card"
+msgstr "Card"
+
+msgctxt "MainWindow"
+msgid "field.partial"
+msgstr "Partial"
+
+msgctxt "MainWindow"
+msgid "field.prepayment"
+msgstr "Prepayment"
+
+msgctxt "MainWindow"
+msgid "field.department"
+msgstr "Department"
+
+msgctxt "MainWindow"
+msgid "ph.choose_department"
+msgstr "Choose department"
+
+msgctxt "MainWindow"
+msgid "field.department_id"
+msgstr "Department ID"
+
+msgctxt "MainWindow"
+msgid "field.items_json"
+msgstr "Items JSON path"
+
+msgctxt "MainWindow"
+msgid "field.partner_tin"
+msgstr "Partner TIN"
+
+msgctxt "MainWindow"
+msgid "ph.partner_tin"
+msgstr "8 digits, optional"
+
+msgctxt "MainWindow"
+msgid "section.payment"
+msgstr "PAYMENT"
+
+msgctxt "MainWindow"
+msgid "field.payment_system"
+msgstr "Payment system"
+
+msgctxt "MainWindow"
+msgid "ph.device_default"
+msgstr "Device default"
+
+msgctxt "MainWindow"
+msgid "field.ext_pos"
+msgstr "External POS terminal"
+
+msgctxt "MainWindow"
+msgid "field.rrn"
+msgstr "RRN"
+
+msgctxt "MainWindow"
+msgid "ph.rrn12"
+msgstr "12 chars"
+
+msgctxt "MainWindow"
+msgid "field.terminal_id"
+msgstr "Terminal ID"
+
+msgctxt "MainWindow"
+msgid "ph.term8"
+msgstr "8 chars"
+
+msgctxt "MainWindow"
+msgid "field.emarks"
+msgstr "eMarks (comma-separated)"
+
+msgctxt "MainWindow"
+msgid "ph.optional"
+msgstr "optional"
+
+msgctxt "MainWindow"
+msgid "op.print_last.title"
+msgstr "Reprint last"
+
+msgctxt "MainWindow"
+msgid "op.print_last.desc"
+msgstr "Reprint a copy of the operator's most recent receipt."
+
+msgctxt "MainWindow"
+msgid "op.lookup.desc"
+msgstr "Look up a previous receipt's contents by number. Registers nothing."
+
+msgctxt "MainWindow"
+msgid "op.lookup.run"
+msgstr "Look up"
+
+msgctxt "MainWindow"
+msgid "field.crn"
+msgstr "CRN"
+
+msgctxt "MainWindow"
+msgid "field.receipt_id"
+msgstr "Receipt ID"
+
+msgctxt "MainWindow"
+msgid "ph.receipt_number"
+msgstr "receipt number"
+
+msgctxt "MainWindow"
+msgid "op.return.desc"
+msgstr "Register a return for a prior receipt: full, by-amount, or per-item."
+
+msgctxt "MainWindow"
+msgid "op.return.run"
+msgstr "Register return"
+
+msgctxt "MainWindow"
+msgid "field.ticket"
+msgstr "Ticket # (receipt to return)"
+
+msgctxt "MainWindow"
+msgid "field.cash_return"
+msgstr "Cash to return"
+
+msgctxt "MainWindow"
+msgid "ph.optional_full"
+msgstr "optional, blank = full"
+
+msgctxt "MainWindow"
+msgid "field.card_return"
+msgstr "Card to return"
+
+msgctxt "MainWindow"
+msgid "field.prepayment_return"
+msgstr "Prepayment to return"
+
+msgctxt "MainWindow"
+msgid "field.peritem_json"
+msgstr "Per-item JSON path"
+
+msgctxt "MainWindow"
+msgid "op.report.title"
+msgstr "Fiscal report"
+
+msgctxt "MainWindow"
+msgid "op.report.desc"
+msgstr "Print an X (interim) or Z (end-of-day) report. Z closes the fiscal day."
+
+msgctxt "MainWindow"
+msgid "op.report.run_z"
+msgstr "Print Z report"
+
+msgctxt "MainWindow"
+msgid "op.report.run_x"
+msgstr "Print X report"
+
+msgctxt "MainWindow"
+msgid "field.report_kind"
+msgstr "Report kind"
+
+msgctxt "MainWindow"
+msgid "field.filter"
+msgstr "Filter"
+
+msgctxt "MainWindow"
+msgid "field.transaction_type"
+msgstr "Transaction type"
+
+msgctxt "MainWindow"
+msgid "ph.type_code"
+msgstr "type code"
+
+msgctxt "MainWindow"
+msgid "field.start"
+msgstr "Start (epoch ms, 0 = all)"
+
+msgctxt "MainWindow"
+msgid "field.end"
+msgstr "End (epoch ms, 0 = all)"
+
+msgctxt "MainWindow"
+msgid "op.cash.desc"
+msgstr "Record a cash-drawer adjustment."
+
+msgctxt "MainWindow"
+msgid "op.cash.run"
+msgstr "Record cash op"
+
+msgctxt "MainWindow"
+msgid "field.cash_in"
+msgstr "Cash in (off = cash out)"
+
+msgctxt "MainWindow"
+msgid "field.amount"
+msgstr "Amount"
+
+msgctxt "MainWindow"
+msgid "field.description"
+msgstr "Description"
+
+msgctxt "MainWindow"
+msgid "ph.optional_note"
+msgstr "optional note"
+
+msgctxt "MainWindow"
+msgid "op.header_footer.desc"
+msgstr "Configure the receipt header and footer lines from a JSON file."
+
+msgctxt "MainWindow"
+msgid "op.header_footer.run"
+msgstr "Apply header/footer"
+
+msgctxt "MainWindow"
+msgid "field.json_path"
+msgstr "JSON path"
+
+msgctxt "MainWindow"
+msgid "op.logo.desc"
+msgstr "Upload a header logo bitmap (BMP, colour depth ≤ 4 bits)."
+
+msgctxt "MainWindow"
+msgid "op.logo.run"
+msgstr "Upload logo"
+
+msgctxt "MainWindow"
+msgid "field.logo_path"
+msgstr "Logo path"
+
+msgctxt "MainWindow"
+msgid "op.sample.desc"
+msgstr "Print a non-fiscal sample receipt for layout verification. Consumes paper."
+
+msgctxt "MainWindow"
+msgid "op.sample.run"
+msgstr "Print sample"
+
+msgctxt "MainWindow"
+msgid "op.time_sync.title"
+msgstr "Time sync"
+
+msgctxt "MainWindow"
+msgid "op.time_sync.desc"
+msgstr "Synchronise the device with the tax authority's clock / state."
+
+msgctxt "MainWindow"
+msgid "op.time_sync.run"
+msgstr "Sync now"
+
+msgctxt "MainWindow"
+msgid "op.emark.desc"
+msgstr "Submit a single eMark traceability code (29–110 ASCII chars)."
+
+msgctxt "MainWindow"
+msgid "field.emark_code"
+msgstr "eMark code"
+
+msgctxt "MainWindow"
+msgid "ph.emark_len"
+msgstr "29–110 characters"

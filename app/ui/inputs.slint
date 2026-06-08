@@ -1,0 +1,167 @@
+// Input controls: free-text field, segmented control for small static enums, and a picker row
+// that opens the modal selection sheet for device-backed lists.
+
+import { LineEdit } from "std-widgets.slint";
+import { Theme, Choice } from "theme.slint";
+
+// Label above a single-line text input. `min-width: 0` lets it shrink on narrow screens instead
+// of forcing the surrounding ScrollView to scroll sideways.
+export component Field inherits VerticalLayout {
+    in property <string> label;
+    in-out property <string> value;
+    in property <string> placeholder;
+    in property <bool> enabled-state: true;
+    in property <bool> secret: false;
+    in property <bool> numeric: false;
+    in property <bool> decimal-kb: false;
+
+    spacing: 6px;
+
+    if root.label != "": Text {
+        text: root.label;
+        color: Theme.sub;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    LineEdit {
+        min-width: 0;
+        text <=> root.value;
+        placeholder-text: root.placeholder;
+        enabled: root.enabled-state;
+        input-type: root.secret
+            ? InputType.password
+            : (root.decimal-kb
+                ? InputType.decimal
+                : (root.numeric ? InputType.number : InputType.text));
+    }
+}
+
+// iOS-style segmented control with a label above it. The segment whose `key` equals `value` gets
+// the raised white pill. Used for small fixed enums (receipt mode, report kind, report filter).
+export component SegmentedField inherits VerticalLayout {
+    in property <string> label;
+    in property <[Choice]> options;
+    in-out property <string> value;
+    in property <bool> enabled-state: true;
+
+    spacing: 6px;
+
+    if root.label != "": Text {
+        text: root.label;
+        color: Theme.sub;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    Rectangle {
+        height: 34px;
+        border-radius: 9px;
+        background: Theme.track;
+
+        HorizontalLayout {
+            padding: 2px;
+            spacing: 2px;
+            for opt in root.options: Rectangle {
+                horizontal-stretch: 1;
+                min-width: 0;
+                border-radius: 7px;
+                background: opt.key == root.value ? Theme.card : transparent;
+
+                seg-ta := TouchArea {
+                    enabled: root.enabled-state;
+                    clicked => {
+                        root.value = opt.key;
+                    }
+                }
+
+                Text {
+                    text: opt.label;
+                    color: Theme.ink;
+                    font-size: 13px;
+                    font-weight: opt.key == root.value ? 600 : 400;
+                    horizontal-alignment: center;
+                    vertical-alignment: center;
+                    overflow: elide;
+                }
+            }
+        }
+    }
+}
+
+// Grouped-list row that shows the current selection and opens the modal sheet on tap. The row
+// resolves its display text from `choices`; selection is committed by the sheet, not here.
+export component PickerRow inherits Rectangle {
+    in property <string> label;
+    in property <string> placeholder: @tr("common.select");
+    in property <[Choice]> choices;
+    in property <string> value;
+    in property <bool> enabled-state: true;
+    in property <bool> last: false;
+    callback open();
+
+    height: Theme.row;
+    background: ta.pressed && root.enabled-state ? Theme.pressed : Theme.card;
+
+    ta := TouchArea {
+        enabled: root.enabled-state;
+        clicked => {
+            root.open();
+        }
+    }
+
+    HorizontalLayout {
+        padding-left: Theme.gap;
+        padding-right: Theme.gap;
+        spacing: 8px;
+
+        Text {
+            text: root.label;
+            color: root.enabled-state ? Theme.ink : Theme.sub;
+            font-size: 17px;
+            vertical-alignment: center;
+        }
+
+        HorizontalLayout {
+            horizontal-stretch: 1;
+            alignment: end;
+            spacing: 0px;
+
+            if root.value == "": Text {
+                text: root.placeholder;
+                color: Theme.sub;
+                font-size: 17px;
+                vertical-alignment: center;
+                overflow: elide;
+            }
+            // Resolve the selected key to its label. Non-matching rows render an empty 0-width
+            // layout (Slint has no array lookup in expressions, so this is the idiomatic form).
+            for c in root.choices: HorizontalLayout {
+                if c.key == root.value: Text {
+                    text: c.label;
+                    color: Theme.sub;
+                    font-size: 17px;
+                    vertical-alignment: center;
+                    overflow: elide;
+                }
+            }
+            Rectangle {
+                width: 6px;
+            }
+            Text {
+                text: "›";
+                color: Theme.line;
+                font-size: 20px;
+                vertical-alignment: center;
+            }
+        }
+    }
+
+    if !root.last: Rectangle {
+        x: Theme.gap;
+        y: root.height - 1px;
+        width: root.width - Theme.gap;
+        height: 1px;
+        background: Theme.line;
+    }
+}

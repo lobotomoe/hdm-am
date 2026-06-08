@@ -1,0 +1,572 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: hdm-am-app\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: hy\n"
+"Language: hy\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "NavBar"
+msgid "common.home"
+msgstr "Գլխավոր"
+
+msgctxt "PickerSheet"
+msgid "common.cancel"
+msgstr "Չեղարկել"
+
+msgctxt "PickerSheet"
+msgid "sheet.empty_loadable"
+msgstr "Ցուցակը դատարկ է։ Սեղմեք «Թարմացնել սարքից»։"
+
+msgctxt "PickerSheet"
+msgid "sheet.empty"
+msgstr "Հասանելի տարրեր չկան։"
+
+msgctxt "PickerSheet"
+msgid "common.loading"
+msgstr "Բեռնում…"
+
+msgctxt "PickerSheet"
+msgid "common.refresh"
+msgstr "Թարմացնել սարքից"
+
+msgctxt "OpDetail"
+msgid "common.confirm"
+msgstr "Հաստատում եմ՝ սա տպում կամ գրանցում է սարքում"
+
+msgctxt "OpDetail"
+msgid "common.running"
+msgstr "Կատարվում է…"
+
+msgctxt "PickerRow"
+msgid "common.select"
+msgstr "Ընտրել"
+
+msgctxt "MainWindow"
+msgid "choice.mode.simple"
+msgstr "Պարզ"
+
+msgctxt "MainWindow"
+msgid "choice.mode.products"
+msgstr "Ապրանքներ"
+
+msgctxt "MainWindow"
+msgid "choice.mode.prepay"
+msgstr "Կանխավճ."
+
+msgctxt "MainWindow"
+msgid "choice.report.x"
+msgstr "X · միջանկյալ"
+
+msgctxt "MainWindow"
+msgid "choice.report.z"
+msgstr "Z · փակում"
+
+msgctxt "MainWindow"
+msgid "choice.filter.none"
+msgstr "Չկա"
+
+msgctxt "MainWindow"
+msgid "choice.filter.dept"
+msgstr "Բաժին"
+
+msgctxt "MainWindow"
+msgid "choice.filter.operator"
+msgstr "Օպեր."
+
+msgctxt "MainWindow"
+msgid "choice.filter.txn"
+msgstr "Գործ."
+
+msgctxt "MainWindow"
+msgid "sheet.select_operator"
+msgstr "Ընտրեք օպերատորին"
+
+msgctxt "MainWindow"
+msgid "sheet.select_department"
+msgstr "Ընտրեք բաժինը"
+
+msgctxt "MainWindow"
+msgid "sheet.select_payment"
+msgstr "Ընտրեք վճարային համակարգը"
+
+msgctxt "MainWindow"
+msgid "sheet.filter_operator"
+msgstr "Զտել ըստ օպերատորի"
+
+msgctxt "MainWindow"
+msgid "sheet.filter_department"
+msgstr "Զտել ըստ բաժնի"
+
+msgctxt "MainWindow"
+msgid "section.connection"
+msgstr "ՄԻԱՑՈՒՄ"
+
+msgctxt "MainWindow"
+msgid "home.connection_settings"
+msgstr "Միացման կարգավորումներ"
+
+msgctxt "MainWindow"
+msgid "home.demo"
+msgstr "Դեմո ռեժիմ"
+
+msgctxt "MainWindow"
+msgid "section.diagnostics"
+msgstr "ԱԽՏՈՐՈՇՈՒՄ"
+
+msgctxt "MainWindow"
+msgid "op.probe.title"
+msgstr "Ստուգում"
+
+msgctxt "MainWindow"
+msgid "home.operators"
+msgstr "Օպերատորներ և բաժիններ"
+
+msgctxt "MainWindow"
+msgid "op.login.title"
+msgstr "Մուտքի ստուգում"
+
+msgctxt "MainWindow"
+msgid "op.datetime.title"
+msgstr "Ամսաթիվ և ժամ"
+
+msgctxt "MainWindow"
+msgid "op.payments.title"
+msgstr "Վճարային համակարգեր"
+
+msgctxt "MainWindow"
+msgid "section.receipts"
+msgstr "ԿՏՐՈՆՆԵՐ ԵՎ ՎԵՐԱԴԱՐՁ"
+
+msgctxt "MainWindow"
+msgid "op.receipt.title"
+msgstr "Տպել կտրոն"
+
+msgctxt "MainWindow"
+msgid "home.print_last"
+msgstr "Վերատպել վերջին կտրոնը"
+
+msgctxt "MainWindow"
+msgid "op.lookup.title"
+msgstr "Գտնել կտրոնը"
+
+msgctxt "MainWindow"
+msgid "op.return.title"
+msgstr "Վերադարձ"
+
+msgctxt "MainWindow"
+msgid "section.reports"
+msgstr "ՀԱՇՎԵՏՎՈՒԹՅՈՒՆ ԵՎ ԿԱՆԽԻԿ"
+
+msgctxt "MainWindow"
+msgid "home.report"
+msgstr "Ֆիսկալ հաշվետվություն (X / Z)"
+
+msgctxt "MainWindow"
+msgid "op.cash.title"
+msgstr "Կանխիկի մուտք / ելք"
+
+msgctxt "MainWindow"
+msgid "section.device"
+msgstr "ՍԱՐՔ"
+
+msgctxt "MainWindow"
+msgid "op.header_footer.title"
+msgstr "Վերնագիր / ստորագիր"
+
+msgctxt "MainWindow"
+msgid "op.logo.title"
+msgstr "Վերնագրի լոգո"
+
+msgctxt "MainWindow"
+msgid "op.sample.title"
+msgstr "Կտրոնի նմուշ"
+
+msgctxt "MainWindow"
+msgid "home.time_sync"
+msgstr "Համաժամեցում հարկային մարմնի հետ"
+
+msgctxt "MainWindow"
+msgid "op.emark.title"
+msgstr "Ուղարկել eMark"
+
+msgctxt "MainWindow"
+msgid "op.privacy.title"
+msgstr "Գաղտնիություն"
+
+msgctxt "MainWindow"
+msgid "settings.title"
+msgstr "Միացում"
+
+msgctxt "MainWindow"
+msgid "field.host"
+msgstr "Հոսթ"
+
+msgctxt "MainWindow"
+msgid "field.port"
+msgstr "Պորտ"
+
+msgctxt "MainWindow"
+msgid "field.timeout"
+msgstr "Սպասման ժամանակ (վայրկյան)"
+
+msgctxt "MainWindow"
+msgid "field.password"
+msgstr "Գաղտնաբառ"
+
+msgctxt "MainWindow"
+msgid "ph.hdm_password"
+msgstr "ՀԴՄ գաղտնաբառ"
+
+msgctxt "MainWindow"
+msgid "section.operator"
+msgstr "ՕՊԵՐԱՏՈՐ"
+
+msgctxt "MainWindow"
+msgid "field.operator"
+msgstr "Օպերատոր"
+
+msgctxt "MainWindow"
+msgid "ph.choose_operator"
+msgstr "Ընտրեք օպերատորին"
+
+msgctxt "MainWindow"
+msgid "field.cashier_id"
+msgstr "Գանձապահի ID"
+
+msgctxt "MainWindow"
+msgid "field.pin"
+msgstr "PIN"
+
+msgctxt "MainWindow"
+msgid "common.loading"
+msgstr "Բեռնում…"
+
+msgctxt "MainWindow"
+msgid "settings.load_directory"
+msgstr "Բեռնել օպերատորներն ու բաժինները"
+
+msgctxt "MainWindow"
+msgid "settings.advanced"
+msgstr "Ընդլայնված դաշտեր (ձեռքով ID, բոլոր ընտրանքները)"
+
+msgctxt "MainWindow"
+msgid "settings.demo"
+msgstr "Դեմո ռեժիմ (առանց ցանցի, սինթետիկ պատասխաններ)"
+
+msgctxt "MainWindow"
+msgid "section.language"
+msgstr "ԼԵԶՈՒ"
+
+msgctxt "MainWindow"
+msgid "op.probe.desc"
+msgstr "Ստուգել՝ արդյոք հասցեն խոսում է ՀԴՄ արձանագրությամբ՝ առանց մուտքի։"
+
+msgctxt "MainWindow"
+msgid "op.probe.run"
+msgstr "Գործարկել ստուգումը"
+
+msgctxt "MainWindow"
+msgid "op.operators.title"
+msgstr "Օպերատորներ"
+
+msgctxt "MainWindow"
+msgid "op.operators.desc"
+msgstr "Ցուցադրել սարքում գրանցված օպերատորներն ու բաժինները։"
+
+msgctxt "MainWindow"
+msgid "op.operators.run"
+msgstr "Ցուցադրել օպերատորներին"
+
+msgctxt "MainWindow"
+msgid "op.login.desc"
+msgstr "Մուտք գործել օպերատորի տվյալներով և անմիջապես դուրս գալ։"
+
+msgctxt "MainWindow"
+msgid "op.datetime.desc"
+msgstr "Կարդալ սարքի ընթացիկ ամսաթիվն ու ժամը։"
+
+msgctxt "MainWindow"
+msgid "op.datetime.run"
+msgstr "Կարդալ ամսաթիվն ու ժամը"
+
+msgctxt "MainWindow"
+msgid "op.payments.desc"
+msgstr "Ցուցադրել սարքում կարգավորված վճարային համակարգերը։"
+
+msgctxt "MainWindow"
+msgid "op.payments.run"
+msgstr "Ցուցադրել վճարային համակարգերը"
+
+msgctxt "MainWindow"
+msgid "op.receipt.desc"
+msgstr "Տպել ֆիսկալ կտրոն։ Ընտրեք ռեժիմը, մուտքագրեք վճարումը և ընտրեք բաժինը։"
+
+msgctxt "MainWindow"
+msgid "field.mode"
+msgstr "Ռեժիմ"
+
+msgctxt "MainWindow"
+msgid "field.cash"
+msgstr "Կանխիկ"
+
+msgctxt "MainWindow"
+msgid "field.card"
+msgstr "Քարտ"
+
+msgctxt "MainWindow"
+msgid "field.partial"
+msgstr "Մասնակի"
+
+msgctxt "MainWindow"
+msgid "field.prepayment"
+msgstr "Կանխավճար"
+
+msgctxt "MainWindow"
+msgid "field.department"
+msgstr "Բաժին"
+
+msgctxt "MainWindow"
+msgid "ph.choose_department"
+msgstr "Ընտրեք բաժինը"
+
+msgctxt "MainWindow"
+msgid "field.department_id"
+msgstr "Բաժնի ID"
+
+msgctxt "MainWindow"
+msgid "field.items_json"
+msgstr "Ապրանքների JSON ուղին"
+
+msgctxt "MainWindow"
+msgid "field.partner_tin"
+msgstr "Գործընկերոջ ՀՎՀՀ"
+
+msgctxt "MainWindow"
+msgid "ph.partner_tin"
+msgstr "8 նիշ, ըստ ցանկության"
+
+msgctxt "MainWindow"
+msgid "section.payment"
+msgstr "ՎՃԱՐՈՒՄ"
+
+msgctxt "MainWindow"
+msgid "field.payment_system"
+msgstr "Վճարային համակարգ"
+
+msgctxt "MainWindow"
+msgid "ph.device_default"
+msgstr "Սարքի կանխադրված"
+
+msgctxt "MainWindow"
+msgid "field.ext_pos"
+msgstr "Արտաքին POS տերմինալ"
+
+msgctxt "MainWindow"
+msgid "field.rrn"
+msgstr "RRN"
+
+msgctxt "MainWindow"
+msgid "ph.rrn12"
+msgstr "12 նիշ"
+
+msgctxt "MainWindow"
+msgid "field.terminal_id"
+msgstr "Տերմինալի ID"
+
+msgctxt "MainWindow"
+msgid "ph.term8"
+msgstr "8 նիշ"
+
+msgctxt "MainWindow"
+msgid "field.emarks"
+msgstr "eMark կոդեր (ստորակետով)"
+
+msgctxt "MainWindow"
+msgid "ph.optional"
+msgstr "ըստ ցանկության"
+
+msgctxt "MainWindow"
+msgid "op.print_last.title"
+msgstr "Վերատպել"
+
+msgctxt "MainWindow"
+msgid "op.print_last.desc"
+msgstr "Վերատպել օպերատորի վերջին կտրոնի պատճենը։"
+
+msgctxt "MainWindow"
+msgid "op.lookup.desc"
+msgstr "Գտնել նախկին կտրոնի բովանդակությունը ըստ համարի։ Ոչինչ չի գրանցում։"
+
+msgctxt "MainWindow"
+msgid "op.lookup.run"
+msgstr "Գտնել"
+
+msgctxt "MainWindow"
+msgid "field.crn"
+msgstr "CRN"
+
+msgctxt "MainWindow"
+msgid "field.receipt_id"
+msgstr "Կտրոնի ID"
+
+msgctxt "MainWindow"
+msgid "ph.receipt_number"
+msgstr "կտրոնի համար"
+
+msgctxt "MainWindow"
+msgid "op.return.desc"
+msgstr "Գրանցել վերադարձ նախկին կտրոնի համար՝ ամբողջական, ըստ գումարի կամ ըստ ապրանքների։"
+
+msgctxt "MainWindow"
+msgid "op.return.run"
+msgstr "Գրանցել վերադարձը"
+
+msgctxt "MainWindow"
+msgid "field.ticket"
+msgstr "Կտրոնի № (վերադարձի համար)"
+
+msgctxt "MainWindow"
+msgid "field.cash_return"
+msgstr "Կանխիկի վերադարձ"
+
+msgctxt "MainWindow"
+msgid "ph.optional_full"
+msgstr "ըստ ցանկության, դատարկ = ամբողջը"
+
+msgctxt "MainWindow"
+msgid "field.card_return"
+msgstr "Քարտի վերադարձ"
+
+msgctxt "MainWindow"
+msgid "field.prepayment_return"
+msgstr "Կանխավճարի վերադարձ"
+
+msgctxt "MainWindow"
+msgid "field.peritem_json"
+msgstr "Ըստ ապրանքների JSON ուղին"
+
+msgctxt "MainWindow"
+msgid "op.report.title"
+msgstr "Ֆիսկալ հաշվետվություն"
+
+msgctxt "MainWindow"
+msgid "op.report.desc"
+msgstr "Տպել X (միջանկյալ) կամ Z (օրվա փակում) հաշվետվություն։ Z-ը փակում է ֆիսկալ օրը։"
+
+msgctxt "MainWindow"
+msgid "op.report.run_z"
+msgstr "Տպել Z հաշվետվություն"
+
+msgctxt "MainWindow"
+msgid "op.report.run_x"
+msgstr "Տպել X հաշվետվություն"
+
+msgctxt "MainWindow"
+msgid "field.report_kind"
+msgstr "Հաշվետվության տեսակ"
+
+msgctxt "MainWindow"
+msgid "field.filter"
+msgstr "Զտիչ"
+
+msgctxt "MainWindow"
+msgid "field.transaction_type"
+msgstr "Գործարքի տեսակ"
+
+msgctxt "MainWindow"
+msgid "ph.type_code"
+msgstr "տեսակի կոդ"
+
+msgctxt "MainWindow"
+msgid "field.start"
+msgstr "Սկիզբ (epoch մվ, 0 = բոլորը)"
+
+msgctxt "MainWindow"
+msgid "field.end"
+msgstr "Վերջ (epoch մվ, 0 = բոլորը)"
+
+msgctxt "MainWindow"
+msgid "op.cash.desc"
+msgstr "Գրանցել կանխիկի շարժը դրամարկղում։"
+
+msgctxt "MainWindow"
+msgid "op.cash.run"
+msgstr "Գրանցել"
+
+msgctxt "MainWindow"
+msgid "field.cash_in"
+msgstr "Մուտք (անջատ = ելք)"
+
+msgctxt "MainWindow"
+msgid "field.amount"
+msgstr "Գումար"
+
+msgctxt "MainWindow"
+msgid "field.description"
+msgstr "Նկարագրություն"
+
+msgctxt "MainWindow"
+msgid "ph.optional_note"
+msgstr "ըստ ցանկության նշում"
+
+msgctxt "MainWindow"
+msgid "op.header_footer.desc"
+msgstr "Կարգավորել կտրոնի վերնագրի և ստորագրի տողերը JSON ֆայլից։"
+
+msgctxt "MainWindow"
+msgid "op.header_footer.run"
+msgstr "Կիրառել"
+
+msgctxt "MainWindow"
+msgid "field.json_path"
+msgstr "JSON ուղի"
+
+msgctxt "MainWindow"
+msgid "op.logo.desc"
+msgstr "Վերբեռնել վերնագրի լոգոն (BMP, գույնի խորություն ≤ 4 բիթ)։"
+
+msgctxt "MainWindow"
+msgid "op.logo.run"
+msgstr "Վերբեռնել լոգոն"
+
+msgctxt "MainWindow"
+msgid "field.logo_path"
+msgstr "Լոգոյի ուղի"
+
+msgctxt "MainWindow"
+msgid "op.sample.desc"
+msgstr "Տպել ոչ ֆիսկալ նմուշ կտրոն՝ դասավորությունը ստուգելու համար։ Ծախսում է թուղթ։"
+
+msgctxt "MainWindow"
+msgid "op.sample.run"
+msgstr "Տպել նմուշը"
+
+msgctxt "MainWindow"
+msgid "op.time_sync.title"
+msgstr "Համաժամեցում"
+
+msgctxt "MainWindow"
+msgid "op.time_sync.desc"
+msgstr "Համաժամեցնել սարքը հարկային մարմնի ժամի և վիճակի հետ։"
+
+msgctxt "MainWindow"
+msgid "op.time_sync.run"
+msgstr "Համաժամեցնել"
+
+msgctxt "MainWindow"
+msgid "op.emark.desc"
+msgstr "Ուղարկել մեկ eMark հետագծելիության կոդ (29–110 ASCII նիշ)։"
+
+msgctxt "MainWindow"
+msgid "field.emark_code"
+msgstr "eMark կոդ"
+
+msgctxt "MainWindow"
+msgid "ph.emark_len"
+msgstr "29–110 նիշ"

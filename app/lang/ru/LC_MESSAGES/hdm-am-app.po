@@ -1,0 +1,572 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: hdm-am-app\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: ru\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "NavBar"
+msgid "common.home"
+msgstr "Главная"
+
+msgctxt "PickerSheet"
+msgid "common.cancel"
+msgstr "Отмена"
+
+msgctxt "PickerSheet"
+msgid "sheet.empty_loadable"
+msgstr "Список пуст. Нажмите «Загрузить с устройства»."
+
+msgctxt "PickerSheet"
+msgid "sheet.empty"
+msgstr "Нет доступных значений."
+
+msgctxt "PickerSheet"
+msgid "common.loading"
+msgstr "Загрузка…"
+
+msgctxt "PickerSheet"
+msgid "common.refresh"
+msgstr "Загрузить с устройства"
+
+msgctxt "OpDetail"
+msgid "common.confirm"
+msgstr "Подтверждаю: операция печатает или регистрируется на устройстве"
+
+msgctxt "OpDetail"
+msgid "common.running"
+msgstr "Выполняется…"
+
+msgctxt "PickerRow"
+msgid "common.select"
+msgstr "Выбрать"
+
+msgctxt "MainWindow"
+msgid "choice.mode.simple"
+msgstr "Простой"
+
+msgctxt "MainWindow"
+msgid "choice.mode.products"
+msgstr "Товары"
+
+msgctxt "MainWindow"
+msgid "choice.mode.prepay"
+msgstr "Предопл."
+
+msgctxt "MainWindow"
+msgid "choice.report.x"
+msgstr "X · промежут."
+
+msgctxt "MainWindow"
+msgid "choice.report.z"
+msgstr "Z · закрытие"
+
+msgctxt "MainWindow"
+msgid "choice.filter.none"
+msgstr "Нет"
+
+msgctxt "MainWindow"
+msgid "choice.filter.dept"
+msgstr "Отдел"
+
+msgctxt "MainWindow"
+msgid "choice.filter.operator"
+msgstr "Оператор"
+
+msgctxt "MainWindow"
+msgid "choice.filter.txn"
+msgstr "Тип"
+
+msgctxt "MainWindow"
+msgid "sheet.select_operator"
+msgstr "Выберите оператора"
+
+msgctxt "MainWindow"
+msgid "sheet.select_department"
+msgstr "Выберите отдел"
+
+msgctxt "MainWindow"
+msgid "sheet.select_payment"
+msgstr "Выберите платёжную систему"
+
+msgctxt "MainWindow"
+msgid "sheet.filter_operator"
+msgstr "Фильтр по оператору"
+
+msgctxt "MainWindow"
+msgid "sheet.filter_department"
+msgstr "Фильтр по отделу"
+
+msgctxt "MainWindow"
+msgid "section.connection"
+msgstr "ПОДКЛЮЧЕНИЕ"
+
+msgctxt "MainWindow"
+msgid "home.connection_settings"
+msgstr "Настройки подключения"
+
+msgctxt "MainWindow"
+msgid "home.demo"
+msgstr "Демо-режим"
+
+msgctxt "MainWindow"
+msgid "section.diagnostics"
+msgstr "ДИАГНОСТИКА"
+
+msgctxt "MainWindow"
+msgid "op.probe.title"
+msgstr "Проверка"
+
+msgctxt "MainWindow"
+msgid "home.operators"
+msgstr "Операторы и отделы"
+
+msgctxt "MainWindow"
+msgid "op.login.title"
+msgstr "Проверка входа"
+
+msgctxt "MainWindow"
+msgid "op.datetime.title"
+msgstr "Дата и время"
+
+msgctxt "MainWindow"
+msgid "op.payments.title"
+msgstr "Платёжные системы"
+
+msgctxt "MainWindow"
+msgid "section.receipts"
+msgstr "ЧЕКИ И ВОЗВРАТЫ"
+
+msgctxt "MainWindow"
+msgid "op.receipt.title"
+msgstr "Печать чека"
+
+msgctxt "MainWindow"
+msgid "home.print_last"
+msgstr "Повторить печать чека"
+
+msgctxt "MainWindow"
+msgid "op.lookup.title"
+msgstr "Найти чек"
+
+msgctxt "MainWindow"
+msgid "op.return.title"
+msgstr "Возврат"
+
+msgctxt "MainWindow"
+msgid "section.reports"
+msgstr "ОТЧЁТЫ И КАССА"
+
+msgctxt "MainWindow"
+msgid "home.report"
+msgstr "Фискальный отчёт (X / Z)"
+
+msgctxt "MainWindow"
+msgid "op.cash.title"
+msgstr "Внесение / выемка"
+
+msgctxt "MainWindow"
+msgid "section.device"
+msgstr "УСТРОЙСТВО"
+
+msgctxt "MainWindow"
+msgid "op.header_footer.title"
+msgstr "Шапка / подвал"
+
+msgctxt "MainWindow"
+msgid "op.logo.title"
+msgstr "Логотип шапки"
+
+msgctxt "MainWindow"
+msgid "op.sample.title"
+msgstr "Образец чека"
+
+msgctxt "MainWindow"
+msgid "home.time_sync"
+msgstr "Синхронизация с налоговой"
+
+msgctxt "MainWindow"
+msgid "op.emark.title"
+msgstr "Отправить eMark"
+
+msgctxt "MainWindow"
+msgid "op.privacy.title"
+msgstr "Конфиденциальность"
+
+msgctxt "MainWindow"
+msgid "settings.title"
+msgstr "Подключение"
+
+msgctxt "MainWindow"
+msgid "field.host"
+msgstr "Хост"
+
+msgctxt "MainWindow"
+msgid "field.port"
+msgstr "Порт"
+
+msgctxt "MainWindow"
+msgid "field.timeout"
+msgstr "Тайм-аут (секунды)"
+
+msgctxt "MainWindow"
+msgid "field.password"
+msgstr "Пароль"
+
+msgctxt "MainWindow"
+msgid "ph.hdm_password"
+msgstr "Пароль ХДМ"
+
+msgctxt "MainWindow"
+msgid "section.operator"
+msgstr "ОПЕРАТОР"
+
+msgctxt "MainWindow"
+msgid "field.operator"
+msgstr "Оператор"
+
+msgctxt "MainWindow"
+msgid "ph.choose_operator"
+msgstr "Выберите оператора"
+
+msgctxt "MainWindow"
+msgid "field.cashier_id"
+msgstr "ID кассира"
+
+msgctxt "MainWindow"
+msgid "field.pin"
+msgstr "PIN"
+
+msgctxt "MainWindow"
+msgid "common.loading"
+msgstr "Загрузка…"
+
+msgctxt "MainWindow"
+msgid "settings.load_directory"
+msgstr "Загрузить операторов и отделы"
+
+msgctxt "MainWindow"
+msgid "settings.advanced"
+msgstr "Расширенные поля (ручной ввод ID, все опции)"
+
+msgctxt "MainWindow"
+msgid "settings.demo"
+msgstr "Демо-режим (без сети, синтетические ответы)"
+
+msgctxt "MainWindow"
+msgid "section.language"
+msgstr "ЯЗЫК"
+
+msgctxt "MainWindow"
+msgid "op.probe.desc"
+msgstr "Проверить, отвечает ли адрес по протоколу ХДМ, без входа в систему."
+
+msgctxt "MainWindow"
+msgid "op.probe.run"
+msgstr "Запустить проверку"
+
+msgctxt "MainWindow"
+msgid "op.operators.title"
+msgstr "Операторы"
+
+msgctxt "MainWindow"
+msgid "op.operators.desc"
+msgstr "Показать операторов и отделы, зарегистрированные на устройстве."
+
+msgctxt "MainWindow"
+msgid "op.operators.run"
+msgstr "Показать операторов"
+
+msgctxt "MainWindow"
+msgid "op.login.desc"
+msgstr "Войти с учётными данными оператора и сразу выйти."
+
+msgctxt "MainWindow"
+msgid "op.datetime.desc"
+msgstr "Прочитать текущие дату и время устройства."
+
+msgctxt "MainWindow"
+msgid "op.datetime.run"
+msgstr "Прочитать дату и время"
+
+msgctxt "MainWindow"
+msgid "op.payments.desc"
+msgstr "Показать платёжные системы, настроенные на устройстве."
+
+msgctxt "MainWindow"
+msgid "op.payments.run"
+msgstr "Показать платёжные системы"
+
+msgctxt "MainWindow"
+msgid "op.receipt.desc"
+msgstr "Напечатать фискальный чек. Выберите режим, введите оплату и выберите отдел."
+
+msgctxt "MainWindow"
+msgid "field.mode"
+msgstr "Режим"
+
+msgctxt "MainWindow"
+msgid "field.cash"
+msgstr "Наличные"
+
+msgctxt "MainWindow"
+msgid "field.card"
+msgstr "Карта"
+
+msgctxt "MainWindow"
+msgid "field.partial"
+msgstr "Частичная"
+
+msgctxt "MainWindow"
+msgid "field.prepayment"
+msgstr "Предоплата"
+
+msgctxt "MainWindow"
+msgid "field.department"
+msgstr "Отдел"
+
+msgctxt "MainWindow"
+msgid "ph.choose_department"
+msgstr "Выберите отдел"
+
+msgctxt "MainWindow"
+msgid "field.department_id"
+msgstr "ID отдела"
+
+msgctxt "MainWindow"
+msgid "field.items_json"
+msgstr "Путь к JSON позиций"
+
+msgctxt "MainWindow"
+msgid "field.partner_tin"
+msgstr "ИНН партнёра"
+
+msgctxt "MainWindow"
+msgid "ph.partner_tin"
+msgstr "8 цифр, необязательно"
+
+msgctxt "MainWindow"
+msgid "section.payment"
+msgstr "ОПЛАТА"
+
+msgctxt "MainWindow"
+msgid "field.payment_system"
+msgstr "Платёжная система"
+
+msgctxt "MainWindow"
+msgid "ph.device_default"
+msgstr "По умолчанию"
+
+msgctxt "MainWindow"
+msgid "field.ext_pos"
+msgstr "Внешний POS-терминал"
+
+msgctxt "MainWindow"
+msgid "field.rrn"
+msgstr "RRN"
+
+msgctxt "MainWindow"
+msgid "ph.rrn12"
+msgstr "12 символов"
+
+msgctxt "MainWindow"
+msgid "field.terminal_id"
+msgstr "ID терминала"
+
+msgctxt "MainWindow"
+msgid "ph.term8"
+msgstr "8 символов"
+
+msgctxt "MainWindow"
+msgid "field.emarks"
+msgstr "eMark-коды (через запятую)"
+
+msgctxt "MainWindow"
+msgid "ph.optional"
+msgstr "необязательно"
+
+msgctxt "MainWindow"
+msgid "op.print_last.title"
+msgstr "Повтор чека"
+
+msgctxt "MainWindow"
+msgid "op.print_last.desc"
+msgstr "Повторно напечатать копию последнего чека оператора."
+
+msgctxt "MainWindow"
+msgid "op.lookup.desc"
+msgstr "Найти содержимое прежнего чека по номеру. Ничего не регистрирует."
+
+msgctxt "MainWindow"
+msgid "op.lookup.run"
+msgstr "Найти"
+
+msgctxt "MainWindow"
+msgid "field.crn"
+msgstr "CRN"
+
+msgctxt "MainWindow"
+msgid "field.receipt_id"
+msgstr "ID чека"
+
+msgctxt "MainWindow"
+msgid "ph.receipt_number"
+msgstr "номер чека"
+
+msgctxt "MainWindow"
+msgid "op.return.desc"
+msgstr "Оформить возврат по прежнему чеку: полный, по сумме или по позициям."
+
+msgctxt "MainWindow"
+msgid "op.return.run"
+msgstr "Оформить возврат"
+
+msgctxt "MainWindow"
+msgid "field.ticket"
+msgstr "№ чека (для возврата)"
+
+msgctxt "MainWindow"
+msgid "field.cash_return"
+msgstr "Возврат наличными"
+
+msgctxt "MainWindow"
+msgid "ph.optional_full"
+msgstr "необязательно, пусто = полностью"
+
+msgctxt "MainWindow"
+msgid "field.card_return"
+msgstr "Возврат на карту"
+
+msgctxt "MainWindow"
+msgid "field.prepayment_return"
+msgstr "Возврат предоплаты"
+
+msgctxt "MainWindow"
+msgid "field.peritem_json"
+msgstr "Путь к JSON по позициям"
+
+msgctxt "MainWindow"
+msgid "op.report.title"
+msgstr "Фискальный отчёт"
+
+msgctxt "MainWindow"
+msgid "op.report.desc"
+msgstr "Напечатать отчёт X (промежуточный) или Z (закрытие дня). Z закрывает смену."
+
+msgctxt "MainWindow"
+msgid "op.report.run_z"
+msgstr "Напечатать Z-отчёт"
+
+msgctxt "MainWindow"
+msgid "op.report.run_x"
+msgstr "Напечатать X-отчёт"
+
+msgctxt "MainWindow"
+msgid "field.report_kind"
+msgstr "Тип отчёта"
+
+msgctxt "MainWindow"
+msgid "field.filter"
+msgstr "Фильтр"
+
+msgctxt "MainWindow"
+msgid "field.transaction_type"
+msgstr "Тип операции"
+
+msgctxt "MainWindow"
+msgid "ph.type_code"
+msgstr "код типа"
+
+msgctxt "MainWindow"
+msgid "field.start"
+msgstr "Начало (epoch мс, 0 = всё)"
+
+msgctxt "MainWindow"
+msgid "field.end"
+msgstr "Конец (epoch мс, 0 = всё)"
+
+msgctxt "MainWindow"
+msgid "op.cash.desc"
+msgstr "Зарегистрировать движение наличных в кассе."
+
+msgctxt "MainWindow"
+msgid "op.cash.run"
+msgstr "Зарегистрировать"
+
+msgctxt "MainWindow"
+msgid "field.cash_in"
+msgstr "Внесение (выкл = выемка)"
+
+msgctxt "MainWindow"
+msgid "field.amount"
+msgstr "Сумма"
+
+msgctxt "MainWindow"
+msgid "field.description"
+msgstr "Описание"
+
+msgctxt "MainWindow"
+msgid "ph.optional_note"
+msgstr "необязательная заметка"
+
+msgctxt "MainWindow"
+msgid "op.header_footer.desc"
+msgstr "Настроить строки шапки и подвала чека из файла JSON."
+
+msgctxt "MainWindow"
+msgid "op.header_footer.run"
+msgstr "Применить"
+
+msgctxt "MainWindow"
+msgid "field.json_path"
+msgstr "Путь к JSON"
+
+msgctxt "MainWindow"
+msgid "op.logo.desc"
+msgstr "Загрузить логотип шапки (BMP, глубина цвета ≤ 4 бит)."
+
+msgctxt "MainWindow"
+msgid "op.logo.run"
+msgstr "Загрузить логотип"
+
+msgctxt "MainWindow"
+msgid "field.logo_path"
+msgstr "Путь к логотипу"
+
+msgctxt "MainWindow"
+msgid "op.sample.desc"
+msgstr "Напечатать нефискальный образец чека для проверки печати. Расходует бумагу."
+
+msgctxt "MainWindow"
+msgid "op.sample.run"
+msgstr "Напечатать образец"
+
+msgctxt "MainWindow"
+msgid "op.time_sync.title"
+msgstr "Синхронизация"
+
+msgctxt "MainWindow"
+msgid "op.time_sync.desc"
+msgstr "Синхронизировать устройство с часами и состоянием налоговой."
+
+msgctxt "MainWindow"
+msgid "op.time_sync.run"
+msgstr "Синхронизировать"
+
+msgctxt "MainWindow"
+msgid "op.emark.desc"
+msgstr "Отправить один код прослеживаемости eMark (29–110 символов ASCII)."
+
+msgctxt "MainWindow"
+msgid "field.emark_code"
+msgstr "Код eMark"
+
+msgctxt "MainWindow"
+msgid "ph.emark_len"
+msgstr "29–110 символов"

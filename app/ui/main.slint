@@ -1,395 +1,11 @@
-import { LineEdit, Switch, ScrollView } from "std-widgets.slint";
+import { ScrollView } from "std-widgets.slint";
+import { Theme, Choice } from "theme.slint";
+import {
+    Card, ListCard, SectionHeader, OpRow, ToggleRow, LabeledToggle,
+    NavBar, PrimaryButton, ResultCard, OpDetail, PickerSheet,
+} from "components.slint";
+import { Field, SegmentedField, PickerRow } from "inputs.slint";
 
-// ---------------------------------------------------------------------------
-// Theme
-// ---------------------------------------------------------------------------
-global Theme {
-    out property <color> bg: #f2f2f7;
-    out property <color> card: #ffffff;
-    out property <color> pressed: #e4e4ea;
-    out property <color> ink: #1c1c1e;
-    out property <color> sub: #8a8a8e;
-    out property <color> line: #d6d6db;
-    out property <color> accent: #007aff;
-    out property <color> ok: #34c759;
-    out property <color> warn: #ff9f0a;
-    out property <color> danger: #ff3b30;
-    out property <length> radius: 12px;
-    out property <length> gap: 16px;
-}
-
-// ---------------------------------------------------------------------------
-// Primitives
-// ---------------------------------------------------------------------------
-component Field inherits VerticalLayout {
-    in property <string> label;
-    in-out property <string> value;
-    in property <string> placeholder;
-    in property <bool> enabled-state: true;
-    in property <bool> secret: false;
-    in property <bool> numeric: false;
-    in property <bool> decimal-kb: false;
-
-    spacing: 6px;
-
-    Text {
-        text: root.label;
-        color: Theme.sub;
-        font-size: 13px;
-        font-weight: 600;
-    }
-
-    LineEdit {
-        text <=> root.value;
-        placeholder-text: root.placeholder;
-        enabled: root.enabled-state;
-        input-type: root.secret
-            ? InputType.password
-            : (root.decimal-kb
-                ? InputType.decimal
-                : (root.numeric ? InputType.number : InputType.text));
-    }
-}
-
-component Card inherits Rectangle {
-    background: Theme.card;
-    border-radius: Theme.radius;
-
-    VerticalLayout {
-        padding: Theme.gap;
-        spacing: 14px;
-        @children
-    }
-}
-
-// Grouped-list container: rounded card, no inner padding, clipped corners.
-component ListCard inherits Rectangle {
-    background: Theme.card;
-    border-radius: Theme.radius;
-    clip: true;
-
-    VerticalLayout {
-        @children
-    }
-}
-
-component SectionHeader inherits Text {
-    color: Theme.sub;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-component OpRow inherits Rectangle {
-    in property <string> title;
-    in property <string> subtitle;
-    in property <bool> last: false;
-    callback clicked;
-
-    height: root.subtitle == "" ? 50px : 60px;
-    background: ta.pressed ? Theme.pressed : Theme.card;
-
-    ta := TouchArea {
-        clicked => {
-            root.clicked();
-        }
-    }
-
-    HorizontalLayout {
-        padding-left: Theme.gap;
-        padding-right: Theme.gap;
-        spacing: 8px;
-
-        VerticalLayout {
-            horizontal-stretch: 1;
-            alignment: center;
-            spacing: 2px;
-            Text {
-                text: root.title;
-                color: Theme.ink;
-                font-size: 17px;
-            }
-            if root.subtitle != "": Text {
-                text: root.subtitle;
-                color: Theme.sub;
-                font-size: 13px;
-            }
-        }
-
-        Text {
-            text: "›";
-            color: Theme.sub;
-            font-size: 22px;
-            vertical-alignment: center;
-        }
-    }
-
-    if !root.last: Rectangle {
-        x: Theme.gap;
-        y: root.height - 1px;
-        width: root.width - Theme.gap;
-        height: 1px;
-        background: Theme.line;
-    }
-}
-
-component ToggleRow inherits Rectangle {
-    in property <string> title;
-    in-out property <bool> on;
-    in property <bool> enabled-state: true;
-    in property <bool> last: false;
-
-    height: 50px;
-    background: Theme.card;
-
-    HorizontalLayout {
-        padding-left: Theme.gap;
-        padding-right: Theme.gap;
-        spacing: 8px;
-        Text {
-            text: root.title;
-            color: Theme.ink;
-            font-size: 17px;
-            vertical-alignment: center;
-            horizontal-stretch: 1;
-        }
-        Switch {
-            checked <=> root.on;
-            enabled: root.enabled-state;
-        }
-    }
-
-    if !root.last: Rectangle {
-        x: Theme.gap;
-        y: root.height - 1px;
-        width: root.width - Theme.gap;
-        height: 1px;
-        background: Theme.line;
-    }
-}
-
-component LabeledToggle inherits HorizontalLayout {
-    in property <string> label;
-    in-out property <bool> on;
-    in property <bool> enabled-state: true;
-
-    spacing: 8px;
-    Text {
-        text: root.label;
-        color: Theme.ink;
-        font-size: 16px;
-        vertical-alignment: center;
-        horizontal-stretch: 1;
-        wrap: word-wrap;
-    }
-    Switch {
-        checked <=> root.on;
-        enabled: root.enabled-state;
-    }
-}
-
-component NavBar inherits Rectangle {
-    in property <string> title;
-    callback back;
-
-    height: 48px;
-    background: Theme.bg;
-
-    HorizontalLayout {
-        padding-left: 6px;
-        padding-right: 6px;
-
-        back-ta := TouchArea {
-            width: 90px;
-            clicked => {
-                root.back();
-            }
-            HorizontalLayout {
-                alignment: start;
-                spacing: 1px;
-                Text {
-                    text: "‹";
-                    color: Theme.accent;
-                    font-size: 30px;
-                    vertical-alignment: center;
-                }
-                Text {
-                    text: "Home";
-                    color: back-ta.pressed ? Theme.accent.darker(0.2) : Theme.accent;
-                    font-size: 17px;
-                    vertical-alignment: center;
-                }
-            }
-        }
-
-        Text {
-            text: root.title;
-            color: Theme.ink;
-            font-size: 17px;
-            font-weight: 600;
-            horizontal-alignment: center;
-            vertical-alignment: center;
-            horizontal-stretch: 1;
-        }
-
-        Rectangle {
-            width: 90px;
-        }
-    }
-}
-
-component PrimaryButton inherits Rectangle {
-    in property <string> text;
-    in property <bool> enabled-state: true;
-    in property <color> tint: Theme.accent;
-    callback clicked;
-
-    height: 50px;
-    border-radius: 12px;
-    background: !root.enabled-state
-        ? Theme.line
-        : (ta.pressed ? root.tint.darker(0.12) : root.tint);
-
-    ta := TouchArea {
-        enabled: root.enabled-state;
-        clicked => {
-            root.clicked();
-        }
-    }
-
-    Text {
-        text: root.text;
-        color: #ffffff;
-        font-size: 17px;
-        font-weight: 600;
-        horizontal-alignment: center;
-        vertical-alignment: center;
-    }
-}
-
-component ResultCard inherits Rectangle {
-    in property <bool> busy;
-    in property <string> status;
-    in property <string> detail;
-    in property <string> result;
-
-    background: Theme.card;
-    border-radius: Theme.radius;
-
-    VerticalLayout {
-        padding: Theme.gap;
-        spacing: 10px;
-
-        HorizontalLayout {
-            spacing: 8px;
-            Rectangle {
-                width: 10px;
-                height: 10px;
-                y: 5px;
-                border-radius: 5px;
-                background: root.busy
-                    ? Theme.warn
-                    : (root.status == "Error" ? Theme.danger : Theme.ok);
-            }
-            Text {
-                text: root.status;
-                color: Theme.ink;
-                font-size: 17px;
-                font-weight: 600;
-                horizontal-stretch: 1;
-                vertical-alignment: center;
-            }
-        }
-
-        Text {
-            text: root.detail;
-            color: Theme.sub;
-            font-size: 14px;
-            wrap: word-wrap;
-        }
-
-        if root.result != "": Text {
-            text: root.result;
-            color: Theme.ink;
-            font-size: 14px;
-            wrap: word-wrap;
-        }
-    }
-}
-
-// Reusable per-operation screen: nav bar, description, the operation's own fields
-// (passed as @children), an optional confirmation gate, the Run button, and the result.
-component OpDetail inherits VerticalLayout {
-    in property <string> title;
-    in property <string> description;
-    in property <string> run-label: "Run";
-    in property <bool> side-effect: false;
-    in-out property <bool> confirm;
-    in property <bool> demo;
-    in property <bool> busy;
-    in property <string> status;
-    in property <string> detail;
-    in property <string> result;
-    callback back;
-    callback run;
-
-    NavBar {
-        title: root.title;
-        back => {
-            root.back();
-        }
-    }
-
-    sv := ScrollView {
-        VerticalLayout {
-            width: sv.visible-width;
-            padding: Theme.gap;
-            spacing: Theme.gap;
-
-            if root.description != "": Card {
-                Text {
-                    text: root.description;
-                    color: Theme.sub;
-                    font-size: 14px;
-                    wrap: word-wrap;
-                }
-            }
-
-            @children
-
-            if root.side-effect: Card {
-                LabeledToggle {
-                    label: "I confirm this prints or registers on the device";
-                    on <=> root.confirm;
-                    enabled-state: !root.busy;
-                }
-            }
-
-            PrimaryButton {
-                text: root.busy ? "Running…" : root.run-label;
-                enabled-state: !root.busy && (!root.side-effect || root.confirm || root.demo);
-                clicked => {
-                    root.run();
-                }
-            }
-
-            ResultCard {
-                busy: root.busy;
-                status: root.status;
-                detail: root.detail;
-                result: root.result;
-            }
-
-            // tail spacer so the result clears the keyboard / bottom inset
-            Rectangle {
-                height: 24px;
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Window
-// ---------------------------------------------------------------------------
 export component MainWindow inherits Window {
     title: "HDM";
     background: Theme.bg;
@@ -398,17 +14,24 @@ export component MainWindow inherits Window {
     preferred-width: 420px;
     preferred-height: 880px;
 
-    // Safe-area insets. Slint does not auto-inset on iOS, so reserve generous opaque
-    // space for the status bar / Dynamic Island (top) and home indicator (bottom).
-    // Exposed so a future native layer can set exact per-device values.
+    // Safe-area insets. Slint does not auto-inset on iOS, so reserve generous opaque space for the
+    // status bar / Dynamic Island (top) and home indicator (bottom). Exposed so a future native
+    // layer can set exact per-device values.
     in-out property <length> safe-top: 59px;
     in-out property <length> safe-bottom: 34px;
 
     // Navigation: "" = home, "settings", "privacy", or an operation key.
     in-out property <string> nav: "";
 
+    // ---- language (active translation code: "en" / "ru" / "hy") ----
+    in-out property <string> language: "en";
+    callback language-changed(string);
+    changed language => {
+        root.language-changed(self.language);
+    }
+
     // ---- connection ----
-    in-out property <string> host: "10.0.0.5";
+    in-out property <string> host: "192.168.1.5";
     in-out property <string> port: "1025";
     in-out property <string> timeout-seconds: "50";
     in-out property <string> password: "";
@@ -443,6 +66,60 @@ export component MainWindow inherits Window {
     in-out property <string> report-end: "0";
     in-out property <bool> confirm-operation: false;
 
+    // ---- power-user toggle: reveal raw fields / manual entry ----
+    in-out property <bool> advanced: false;
+
+    // ---- device-backed choice models (populated by the Rust bridge) ----
+    in property <[Choice]> operator-choices: [];
+    in property <[Choice]> department-choices: [];
+    in property <[Choice]> payment-choices: [];
+
+    // ---- static enum choices ----
+    property <[Choice]> mode-choices: [
+        { key: "simple", label: @tr("choice.mode.simple") },
+        { key: "products", label: @tr("choice.mode.products") },
+        { key: "prepayment", label: @tr("choice.mode.prepay") },
+    ];
+    property <[Choice]> report-kind-choices: [
+        { key: "x", label: @tr("choice.report.x") },
+        { key: "z", label: @tr("choice.report.z") },
+    ];
+    property <[Choice]> filter-kind-choices: [
+        { key: "", label: @tr("choice.filter.none") },
+        { key: "dept", label: @tr("choice.filter.dept") },
+        { key: "cashier", label: @tr("choice.filter.operator") },
+        { key: "transaction", label: @tr("choice.filter.txn") },
+    ];
+    property <[Choice]> language-choices: [
+        { key: "en", label: "English" },
+        { key: "ru", label: "Русский" },
+        { key: "hy", label: "Հայերեն" },
+    ];
+
+    // ---- modal picker state ----
+    // "" closed, else "cashier" / "department" / "payment" / "filter-dept" / "filter-cashier".
+    in-out property <string> picker-kind: "";
+    in-out property <bool> picker-busy: false;
+    in-out property <string> picker-note: "";
+
+    property <[Choice]> sheet-choices:
+        (root.picker-kind == "cashier" || root.picker-kind == "filter-cashier")
+            ? root.operator-choices
+            : ((root.picker-kind == "department" || root.picker-kind == "filter-dept")
+                ? root.department-choices
+                : root.payment-choices);
+    property <string> sheet-current:
+        root.picker-kind == "cashier" ? root.cashier
+        : root.picker-kind == "department" ? root.department
+        : root.picker-kind == "payment" ? root.payment-system
+        : root.report-filter-value;
+    property <string> sheet-title:
+        root.picker-kind == "cashier" ? @tr("sheet.select_operator")
+        : root.picker-kind == "department" ? @tr("sheet.select_department")
+        : root.picker-kind == "payment" ? @tr("sheet.select_payment")
+        : root.picker-kind == "filter-cashier" ? @tr("sheet.filter_operator")
+        : @tr("sheet.filter_department");
+
     // ---- status ----
     in-out property <bool> busy: false;
     in-out property <string> status: "Ready";
@@ -467,6 +144,10 @@ export component MainWindow inherits Window {
     callback payment-systems-requested();
     callback emark-requested();
     callback privacy-requested();
+    // populate operator-choices + department-choices (password op)
+    callback load-directory-requested();
+    // populate payment-choices (session op)
+    callback load-payments-requested();
 
     // Clears focus when the user taps empty space -> dismisses the soft keyboard.
     bg-tap := TouchArea {
@@ -522,28 +203,29 @@ export component MainWindow inherits Window {
                 }
 
                 home-sv := ScrollView {
+                    vertical-stretch: 1;
                     VerticalLayout {
                         width: home-sv.visible-width;
+                        alignment: start;
                         padding: Theme.gap;
                         padding-top: 4px;
                         spacing: 22px;
 
-                        // Connection
                         VerticalLayout {
                             spacing: 7px;
                             SectionHeader {
-                                text: "CONNECTION";
+                                text: @tr("section.connection");
                             }
                             ListCard {
                                 OpRow {
-                                    title: "Connection settings";
+                                    title: @tr("home.connection_settings");
                                     subtitle: root.host + ":" + root.port;
                                     clicked => {
                                         root.nav = "settings";
                                     }
                                 }
                                 ToggleRow {
-                                    title: "Demo mode";
+                                    title: @tr("home.demo");
                                     on <=> root.demo-mode;
                                     enabled-state: !root.busy;
                                     last: true;
@@ -551,39 +233,38 @@ export component MainWindow inherits Window {
                             }
                         }
 
-                        // Diagnostics
                         VerticalLayout {
                             spacing: 7px;
                             SectionHeader {
-                                text: "DIAGNOSTICS";
+                                text: @tr("section.diagnostics");
                             }
                             ListCard {
                                 OpRow {
-                                    title: "Probe";
+                                    title: @tr("op.probe.title");
                                     clicked => {
                                         root.nav = "probe";
                                     }
                                 }
                                 OpRow {
-                                    title: "Operators & departments";
+                                    title: @tr("home.operators");
                                     clicked => {
                                         root.nav = "operators";
                                     }
                                 }
                                 OpRow {
-                                    title: "Verify login";
+                                    title: @tr("op.login.title");
                                     clicked => {
                                         root.nav = "login";
                                     }
                                 }
                                 OpRow {
-                                    title: "Date & time";
+                                    title: @tr("op.datetime.title");
                                     clicked => {
                                         root.nav = "datetime";
                                     }
                                 }
                                 OpRow {
-                                    title: "Payment systems";
+                                    title: @tr("op.payments.title");
                                     last: true;
                                     clicked => {
                                         root.nav = "payments";
@@ -592,33 +273,32 @@ export component MainWindow inherits Window {
                             }
                         }
 
-                        // Receipts & returns
                         VerticalLayout {
                             spacing: 7px;
                             SectionHeader {
-                                text: "RECEIPTS & RETURNS";
+                                text: @tr("section.receipts");
                             }
                             ListCard {
                                 OpRow {
-                                    title: "Print receipt";
+                                    title: @tr("op.receipt.title");
                                     clicked => {
                                         root.nav = "receipt";
                                     }
                                 }
                                 OpRow {
-                                    title: "Reprint last receipt";
+                                    title: @tr("home.print_last");
                                     clicked => {
                                         root.nav = "print-last";
                                     }
                                 }
                                 OpRow {
-                                    title: "Look up receipt";
+                                    title: @tr("op.lookup.title");
                                     clicked => {
                                         root.nav = "lookup";
                                     }
                                 }
                                 OpRow {
-                                    title: "Return / refund";
+                                    title: @tr("op.return.title");
                                     last: true;
                                     clicked => {
                                         root.nav = "return";
@@ -627,21 +307,20 @@ export component MainWindow inherits Window {
                             }
                         }
 
-                        // Reports & cash
                         VerticalLayout {
                             spacing: 7px;
                             SectionHeader {
-                                text: "REPORTS & CASH";
+                                text: @tr("section.reports");
                             }
                             ListCard {
                                 OpRow {
-                                    title: "Fiscal report (X / Z)";
+                                    title: @tr("home.report");
                                     clicked => {
                                         root.nav = "report";
                                     }
                                 }
                                 OpRow {
-                                    title: "Cash in / out";
+                                    title: @tr("op.cash.title");
                                     last: true;
                                     clicked => {
                                         root.nav = "cash";
@@ -650,39 +329,38 @@ export component MainWindow inherits Window {
                             }
                         }
 
-                        // Device
                         VerticalLayout {
                             spacing: 7px;
                             SectionHeader {
-                                text: "DEVICE";
+                                text: @tr("section.device");
                             }
                             ListCard {
                                 OpRow {
-                                    title: "Header / footer";
+                                    title: @tr("op.header_footer.title");
                                     clicked => {
                                         root.nav = "header-footer";
                                     }
                                 }
                                 OpRow {
-                                    title: "Header logo";
+                                    title: @tr("op.logo.title");
                                     clicked => {
                                         root.nav = "logo";
                                     }
                                 }
                                 OpRow {
-                                    title: "Sample receipt";
+                                    title: @tr("op.sample.title");
                                     clicked => {
                                         root.nav = "sample";
                                     }
                                 }
                                 OpRow {
-                                    title: "Sync with tax authority";
+                                    title: @tr("home.time_sync");
                                     clicked => {
                                         root.nav = "time-sync";
                                     }
                                 }
                                 OpRow {
-                                    title: "Submit eMark";
+                                    title: @tr("op.emark.title");
                                     last: true;
                                     clicked => {
                                         root.nav = "emark";
@@ -692,7 +370,7 @@ export component MainWindow inherits Window {
                         }
 
                         OpRow {
-                            title: "Privacy";
+                            title: @tr("op.privacy.title");
                             clicked => {
                                 root.privacy-requested();
                                 root.nav = "privacy";
@@ -709,58 +387,81 @@ export component MainWindow inherits Window {
             // ===================== SETTINGS =====================
             if root.nav == "settings": VerticalLayout {
                 NavBar {
-                    title: "Connection";
+                    title: @tr("settings.title");
                     back => {
                         root.nav = "";
                     }
                 }
                 set-sv := ScrollView {
+                    vertical-stretch: 1;
                     VerticalLayout {
                         width: set-sv.visible-width;
+                        alignment: start;
                         padding: Theme.gap;
                         spacing: Theme.gap;
+
                         Card {
                             Field {
-                                label: "Host";
+                                label: @tr("field.host");
                                 value <=> root.host;
-                                placeholder: "10.0.0.5";
+                                placeholder: "192.168.1.5";
                                 enabled-state: !root.busy && !root.demo-mode;
                             }
-                            HorizontalLayout {
-                                spacing: 10px;
-                                Field {
-                                    label: "Port";
-                                    value <=> root.port;
-                                    placeholder: "1025";
-                                    numeric: true;
-                                    enabled-state: !root.busy && !root.demo-mode;
-                                }
-                                Field {
-                                    label: "Timeout (s)";
-                                    value <=> root.timeout-seconds;
-                                    placeholder: "50";
-                                    numeric: true;
-                                    enabled-state: !root.busy && !root.demo-mode;
-                                }
+                            Field {
+                                label: @tr("field.port");
+                                value <=> root.port;
+                                placeholder: "1025";
+                                numeric: true;
+                                enabled-state: !root.busy && !root.demo-mode;
                             }
                             Field {
-                                label: "Password";
+                                label: @tr("field.timeout");
+                                value <=> root.timeout-seconds;
+                                placeholder: "50";
+                                numeric: true;
+                                enabled-state: !root.busy && !root.demo-mode;
+                            }
+                            Field {
+                                label: @tr("field.password");
                                 value <=> root.password;
-                                placeholder: "HDM password";
+                                placeholder: @tr("ph.hdm_password");
                                 secret: true;
                                 enabled-state: !root.busy && !root.demo-mode;
                             }
-                            HorizontalLayout {
-                                spacing: 10px;
+                        }
+
+                        VerticalLayout {
+                            spacing: 7px;
+                            SectionHeader {
+                                text: @tr("section.operator");
+                            }
+                            if !root.advanced: ListCard {
+                                PickerRow {
+                                    label: @tr("field.operator");
+                                    placeholder: @tr("ph.choose_operator");
+                                    choices: root.operator-choices;
+                                    value: root.cashier;
+                                    enabled-state: !root.busy && !root.demo-mode;
+                                    last: true;
+                                    open => {
+                                        keyboard-sink.focus();
+                                        root.picker-note = "";
+                                        root.picker-kind = "cashier";
+                                    }
+                                }
+                            }
+                            if root.advanced: Card {
                                 Field {
-                                    label: "Cashier";
+                                    label: @tr("field.cashier_id");
                                     value <=> root.cashier;
                                     placeholder: "3";
                                     numeric: true;
                                     enabled-state: !root.busy && !root.demo-mode;
                                 }
+                            }
+                            Card {
                                 Field {
-                                    label: "PIN";
+                                    label: @tr("field.pin");
                                     value <=> root.pin;
                                     placeholder: "1234";
                                     secret: true;
@@ -768,14 +469,49 @@ export component MainWindow inherits Window {
                                     enabled-state: !root.busy && !root.demo-mode;
                                 }
                             }
+                            PrimaryButton {
+                                text: root.picker-busy ? @tr("common.loading") : @tr("settings.load_directory");
+                                enabled-state: !root.busy && !root.demo-mode && !root.picker-busy;
+                                clicked => {
+                                    keyboard-sink.focus();
+                                    root.load-directory-requested();
+                                }
+                            }
+                            if root.picker-note != "": Text {
+                                text: root.picker-note;
+                                color: Theme.sub;
+                                font-size: 13px;
+                                wrap: word-wrap;
+                            }
                         }
+
                         Card {
                             LabeledToggle {
-                                label: "Demo mode (no network, synthetic responses)";
+                                label: @tr("settings.advanced");
+                                on <=> root.advanced;
+                                enabled-state: !root.busy;
+                            }
+                            LabeledToggle {
+                                label: @tr("settings.demo");
                                 on <=> root.demo-mode;
                                 enabled-state: !root.busy;
                             }
                         }
+
+                        VerticalLayout {
+                            spacing: 7px;
+                            SectionHeader {
+                                text: @tr("section.language");
+                            }
+                            Card {
+                                SegmentedField {
+                                    options: root.language-choices;
+                                    value <=> root.language;
+                                    enabled-state: !root.busy;
+                                }
+                            }
+                        }
+
                         Rectangle {
                             height: 24px;
                         }
@@ -786,14 +522,16 @@ export component MainWindow inherits Window {
             // ===================== PRIVACY =====================
             if root.nav == "privacy": VerticalLayout {
                 NavBar {
-                    title: "Privacy";
+                    title: @tr("op.privacy.title");
                     back => {
                         root.nav = "";
                     }
                 }
                 priv-sv := ScrollView {
+                    vertical-stretch: 1;
                     VerticalLayout {
                         width: priv-sv.visible-width;
+                        alignment: start;
                         padding: Theme.gap;
                         spacing: Theme.gap;
                         Card {
@@ -813,9 +551,9 @@ export component MainWindow inherits Window {
 
             // ===================== OPERATIONS =====================
             if root.nav == "probe": OpDetail {
-                title: "Probe";
-                description: "Check whether the endpoint speaks the HDM protocol, without logging in.";
-                run-label: "Run probe";
+                title: @tr("op.probe.title");
+                description: @tr("op.probe.desc");
+                run-label: @tr("op.probe.run");
                 busy: root.busy;
                 status: root.status;
                 detail: root.detail;
@@ -825,9 +563,9 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "operators": OpDetail {
-                title: "Operators";
-                description: "List the operators and departments registered on the device.";
-                run-label: "List operators";
+                title: @tr("op.operators.title");
+                description: @tr("op.operators.desc");
+                run-label: @tr("op.operators.run");
                 busy: root.busy;
                 status: root.status;
                 detail: root.detail;
@@ -837,9 +575,9 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "login": OpDetail {
-                title: "Verify login";
-                description: "Log in with the cashier credentials and immediately log out.";
-                run-label: "Verify login";
+                title: @tr("op.login.title");
+                description: @tr("op.login.desc");
+                run-label: @tr("op.login.title");
                 busy: root.busy;
                 status: root.status;
                 detail: root.detail;
@@ -849,9 +587,9 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "datetime": OpDetail {
-                title: "Date & time";
-                description: "Read the device's current date and time.";
-                run-label: "Read date & time";
+                title: @tr("op.datetime.title");
+                description: @tr("op.datetime.desc");
+                run-label: @tr("op.datetime.run");
                 busy: root.busy;
                 status: root.status;
                 detail: root.detail;
@@ -861,9 +599,9 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "payments": OpDetail {
-                title: "Payment systems";
-                description: "List the payment systems configured on the device.";
-                run-label: "List payment systems";
+                title: @tr("op.payments.title");
+                description: @tr("op.payments.desc");
+                run-label: @tr("op.payments.run");
                 busy: root.busy;
                 status: root.status;
                 detail: root.detail;
@@ -873,9 +611,9 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "receipt": OpDetail {
-                title: "Print receipt";
-                description: "Print a fiscal receipt. For products mode, set the items JSON path.";
-                run-label: "Print receipt";
+                title: @tr("op.receipt.title");
+                description: @tr("op.receipt.desc");
+                run-label: @tr("op.receipt.title");
                 side-effect: true;
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
@@ -885,110 +623,145 @@ export component MainWindow inherits Window {
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.receipt-requested(); }
+
                 Card {
-                    Field {
-                        label: "Mode";
+                    SegmentedField {
+                        label: @tr("field.mode");
+                        options: root.mode-choices;
                         value <=> root.receipt-mode;
-                        placeholder: "simple / products / prepayment";
                         enabled-state: !root.busy;
                     }
-                    HorizontalLayout {
-                        spacing: 10px;
-                        Field {
-                            label: "Cash";
-                            value <=> root.amount;
-                            placeholder: "0.00";
-                            decimal-kb: true;
-                            enabled-state: !root.busy;
-                        }
-                        Field {
-                            label: "Card";
-                            value <=> root.card-amount;
-                            placeholder: "0.00";
-                            decimal-kb: true;
-                            enabled-state: !root.busy;
-                        }
-                    }
-                    HorizontalLayout {
-                        spacing: 10px;
-                        Field {
-                            label: "Partial";
-                            value <=> root.partial-amount;
-                            placeholder: "0.00";
-                            decimal-kb: true;
-                            enabled-state: !root.busy;
-                        }
-                        Field {
-                            label: "Prepayment";
-                            value <=> root.prepayment-amount;
-                            placeholder: "0.00";
-                            decimal-kb: true;
-                            enabled-state: !root.busy;
-                        }
-                    }
-                    HorizontalLayout {
-                        spacing: 10px;
-                        Field {
-                            label: "Department";
-                            value <=> root.department;
-                            placeholder: "1";
-                            numeric: true;
-                            enabled-state: !root.busy;
-                        }
-                        Field {
-                            label: "Partner TIN";
-                            value <=> root.partner-tin;
-                            placeholder: "optional";
-                            numeric: true;
-                            enabled-state: !root.busy;
-                        }
+                }
+
+                Card {
+                    Field {
+                        label: @tr("field.cash");
+                        value <=> root.amount;
+                        placeholder: "0.00";
+                        decimal-kb: true;
+                        enabled-state: !root.busy;
                     }
                     Field {
-                        label: "Payment system code";
-                        value <=> root.payment-system;
-                        placeholder: "optional";
+                        label: @tr("field.card");
+                        value <=> root.card-amount;
+                        placeholder: "0.00";
+                        decimal-kb: true;
+                        enabled-state: !root.busy;
+                    }
+                    if root.advanced: Field {
+                        label: @tr("field.partial");
+                        value <=> root.partial-amount;
+                        placeholder: "0.00";
+                        decimal-kb: true;
+                        enabled-state: !root.busy;
+                    }
+                    if root.advanced: Field {
+                        label: @tr("field.prepayment");
+                        value <=> root.prepayment-amount;
+                        placeholder: "0.00";
+                        decimal-kb: true;
+                        enabled-state: !root.busy;
+                    }
+                }
+
+                if !root.advanced: ListCard {
+                    PickerRow {
+                        label: @tr("field.department");
+                        placeholder: @tr("ph.choose_department");
+                        choices: root.department-choices;
+                        value: root.department;
+                        enabled-state: !root.busy;
+                        last: true;
+                        open => {
+                            keyboard-sink.focus();
+                            root.picker-note = "";
+                            root.picker-kind = "department";
+                        }
+                    }
+                }
+                if root.advanced: Card {
+                    Field {
+                        label: @tr("field.department_id");
+                        value <=> root.department;
+                        placeholder: "1";
                         numeric: true;
                         enabled-state: !root.busy;
                     }
-                    LabeledToggle {
-                        label: "External POS";
-                        on <=> root.use-ext-pos;
-                        enabled-state: !root.busy;
-                    }
-                    HorizontalLayout {
-                        spacing: 10px;
-                        Field {
-                            label: "RRN";
-                            value <=> root.rrn;
-                            placeholder: "12 chars";
-                            enabled-state: !root.busy;
-                        }
-                        Field {
-                            label: "Terminal ID";
-                            value <=> root.terminal-id;
-                            placeholder: "8 chars";
-                            enabled-state: !root.busy;
-                        }
-                    }
+                }
+
+                if root.receipt-mode == "products": Card {
                     Field {
-                        label: "eMarks (comma-separated)";
-                        value <=> root.emarks;
-                        placeholder: "optional";
-                        enabled-state: !root.busy;
-                    }
-                    Field {
-                        label: "Items JSON path (products mode)";
+                        label: @tr("field.items_json");
                         value <=> root.json-path;
                         placeholder: "items.json";
                         enabled-state: !root.busy;
                     }
                 }
+
+                if root.advanced: Card {
+                    Field {
+                        label: @tr("field.partner_tin");
+                        value <=> root.partner-tin;
+                        placeholder: @tr("ph.partner_tin");
+                        numeric: true;
+                        enabled-state: !root.busy;
+                    }
+                }
+
+                if root.advanced: VerticalLayout {
+                    spacing: 7px;
+                    SectionHeader {
+                        text: @tr("section.payment");
+                    }
+                    ListCard {
+                        PickerRow {
+                            label: @tr("field.payment_system");
+                            placeholder: @tr("ph.device_default");
+                            choices: root.payment-choices;
+                            value: root.payment-system;
+                            enabled-state: !root.busy && !root.use-ext-pos;
+                            last: true;
+                            open => {
+                                keyboard-sink.focus();
+                                root.picker-note = "";
+                                root.picker-kind = "payment";
+                            }
+                        }
+                    }
+                    Card {
+                        LabeledToggle {
+                            label: @tr("field.ext_pos");
+                            on <=> root.use-ext-pos;
+                            enabled-state: !root.busy;
+                        }
+                        if root.use-ext-pos: Field {
+                            label: @tr("field.rrn");
+                            value <=> root.rrn;
+                            placeholder: @tr("ph.rrn12");
+                            enabled-state: !root.busy;
+                        }
+                        if root.use-ext-pos: Field {
+                            label: @tr("field.terminal_id");
+                            value <=> root.terminal-id;
+                            placeholder: @tr("ph.term8");
+                            enabled-state: !root.busy;
+                        }
+                    }
+                    Card {
+                        Field {
+                            label: @tr("field.emarks");
+                            value <=> root.emarks;
+                            placeholder: @tr("ph.optional");
+                            enabled-state: !root.busy;
+                        }
+                    }
+                }
             }
 
             if root.nav == "print-last": OpDetail {
-                title: "Reprint last";
-                description: "Reprint a copy of the operator's most recent receipt.";
-                run-label: "Reprint last receipt";
+                title: @tr("op.print_last.title");
+                description: @tr("op.print_last.desc");
+                run-label: @tr("home.print_last");
                 side-effect: true;
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
@@ -1001,9 +774,9 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "lookup": OpDetail {
-                title: "Look up receipt";
-                description: "Look up a previous receipt's contents by number. Registers nothing.";
-                run-label: "Look up";
+                title: @tr("op.lookup.title");
+                description: @tr("op.lookup.desc");
+                run-label: @tr("op.lookup.run");
                 busy: root.busy;
                 status: root.status;
                 detail: root.detail;
@@ -1012,25 +785,25 @@ export component MainWindow inherits Window {
                 run => { root.lookup-requested(); }
                 Card {
                     Field {
-                        label: "CRN";
+                        label: @tr("field.crn");
                         value <=> root.crn;
                         placeholder: "51815332";
                         numeric: true;
                         enabled-state: !root.busy;
                     }
                     Field {
-                        label: "Receipt ID";
+                        label: @tr("field.receipt_id");
                         value <=> root.receipt-id;
-                        placeholder: "receipt number";
+                        placeholder: @tr("ph.receipt_number");
                         enabled-state: !root.busy;
                     }
                 }
             }
 
             if root.nav == "return": OpDetail {
-                title: "Return / refund";
-                description: "Register a return for a prior receipt: full, by-amount, or per-item.";
-                run-label: "Register return";
+                title: @tr("op.return.title");
+                description: @tr("op.return.desc");
+                run-label: @tr("op.return.run");
                 side-effect: true;
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
@@ -1041,81 +814,72 @@ export component MainWindow inherits Window {
                 back => { root.nav = ""; }
                 run => { root.return-requested(); }
                 Card {
-                    HorizontalLayout {
-                        spacing: 10px;
-                        Field {
-                            label: "CRN";
-                            value <=> root.crn;
-                            placeholder: "51815332";
-                            numeric: true;
-                            enabled-state: !root.busy;
-                        }
-                        Field {
-                            label: "Ticket #";
-                            value <=> root.ticket;
-                            placeholder: "receipt to return";
-                            numeric: true;
-                            enabled-state: !root.busy;
-                        }
-                    }
-                    HorizontalLayout {
-                        spacing: 10px;
-                        Field {
-                            label: "Cash";
-                            value <=> root.amount;
-                            placeholder: "optional";
-                            decimal-kb: true;
-                            enabled-state: !root.busy;
-                        }
-                        Field {
-                            label: "Card";
-                            value <=> root.card-amount;
-                            placeholder: "optional";
-                            decimal-kb: true;
-                            enabled-state: !root.busy;
-                        }
+                    Field {
+                        label: @tr("field.crn");
+                        value <=> root.crn;
+                        placeholder: "51815332";
+                        numeric: true;
+                        enabled-state: !root.busy;
                     }
                     Field {
-                        label: "Prepayment";
-                        value <=> root.prepayment-amount;
-                        placeholder: "optional";
+                        label: @tr("field.ticket");
+                        value <=> root.ticket;
+                        placeholder: @tr("ph.receipt_number");
+                        numeric: true;
+                        enabled-state: !root.busy;
+                    }
+                    Field {
+                        label: @tr("field.cash_return");
+                        value <=> root.amount;
+                        placeholder: @tr("ph.optional_full");
                         decimal-kb: true;
                         enabled-state: !root.busy;
                     }
-                    HorizontalLayout {
-                        spacing: 10px;
-                        Field {
-                            label: "RRN";
-                            value <=> root.rrn;
-                            placeholder: "optional";
-                            enabled-state: !root.busy;
-                        }
-                        Field {
-                            label: "Terminal ID";
-                            value <=> root.terminal-id;
-                            placeholder: "optional";
-                            enabled-state: !root.busy;
-                        }
-                    }
                     Field {
-                        label: "eMarks (comma-separated)";
-                        value <=> root.emarks;
-                        placeholder: "optional";
+                        label: @tr("field.card_return");
+                        value <=> root.card-amount;
+                        placeholder: @tr("ph.optional");
+                        decimal-kb: true;
                         enabled-state: !root.busy;
                     }
-                    Field {
-                        label: "Per-item JSON path";
+                    if root.advanced: Field {
+                        label: @tr("field.prepayment_return");
+                        value <=> root.prepayment-amount;
+                        placeholder: @tr("ph.optional");
+                        decimal-kb: true;
+                        enabled-state: !root.busy;
+                    }
+                    if root.advanced: Field {
+                        label: @tr("field.rrn");
+                        value <=> root.rrn;
+                        placeholder: @tr("ph.optional");
+                        enabled-state: !root.busy;
+                    }
+                    if root.advanced: Field {
+                        label: @tr("field.terminal_id");
+                        value <=> root.terminal-id;
+                        placeholder: @tr("ph.optional");
+                        enabled-state: !root.busy;
+                    }
+                    if root.advanced: Field {
+                        label: @tr("field.emarks");
+                        value <=> root.emarks;
+                        placeholder: @tr("ph.optional");
+                        enabled-state: !root.busy;
+                    }
+                    if root.advanced: Field {
+                        label: @tr("field.peritem_json");
                         value <=> root.json-path;
-                        placeholder: "optional";
+                        placeholder: @tr("ph.optional");
                         enabled-state: !root.busy;
                     }
                 }
             }
 
             if root.nav == "report": OpDetail {
-                title: "Fiscal report";
-                description: "Print an X (interim) or Z (end-of-day) report. Z closes the fiscal day.";
-                run-label: root.report-kind == "z" ? "Print Z report" : "Print X report";
+                title: @tr("op.report.title");
+                description: @tr("op.report.desc");
+                run-label: root.report-kind == "z" ? @tr("op.report.run_z") : @tr("op.report.run_x");
                 side-effect: root.report-kind == "z";
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
@@ -1125,53 +889,84 @@ export component MainWindow inherits Window {
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.report-requested(); }
+
                 Card {
-                    Field {
-                        label: "Kind (x / z)";
+                    SegmentedField {
+                        label: @tr("field.report_kind");
+                        options: root.report-kind-choices;
                         value <=> root.report-kind;
-                        placeholder: "x";
                         enabled-state: !root.busy;
                     }
-                    HorizontalLayout {
-                        spacing: 10px;
-                        Field {
-                            label: "Filter kind";
-                            value <=> root.report-filter-kind;
-                            placeholder: "dept / cashier / transaction";
-                            enabled-state: !root.busy;
-                        }
-                        Field {
-                            label: "Filter value";
-                            value <=> root.report-filter-value;
-                            placeholder: "optional";
-                            numeric: true;
-                            enabled-state: !root.busy;
+                    SegmentedField {
+                        label: @tr("field.filter");
+                        options: root.filter-kind-choices;
+                        value <=> root.report-filter-kind;
+                        enabled-state: !root.busy;
+                    }
+                }
+
+                if root.report-filter-kind == "dept": ListCard {
+                    PickerRow {
+                        label: @tr("field.department");
+                        placeholder: @tr("ph.choose_department");
+                        choices: root.department-choices;
+                        value: root.report-filter-value;
+                        enabled-state: !root.busy;
+                        last: true;
+                        open => {
+                            keyboard-sink.focus();
+                            root.picker-note = "";
+                            root.picker-kind = "filter-dept";
                         }
                     }
-                    HorizontalLayout {
-                        spacing: 10px;
-                        Field {
-                            label: "Start";
-                            value <=> root.report-start;
-                            placeholder: "0";
-                            numeric: true;
-                            enabled-state: !root.busy;
+                }
+                if root.report-filter-kind == "cashier": ListCard {
+                    PickerRow {
+                        label: @tr("field.operator");
+                        placeholder: @tr("ph.choose_operator");
+                        choices: root.operator-choices;
+                        value: root.report-filter-value;
+                        enabled-state: !root.busy;
+                        last: true;
+                        open => {
+                            keyboard-sink.focus();
+                            root.picker-note = "";
+                            root.picker-kind = "filter-cashier";
                         }
-                        Field {
-                            label: "End";
-                            value <=> root.report-end;
-                            placeholder: "0";
-                            numeric: true;
-                            enabled-state: !root.busy;
-                        }
+                    }
+                }
+                if root.report-filter-kind == "transaction": Card {
+                    Field {
+                        label: @tr("field.transaction_type");
+                        value <=> root.report-filter-value;
+                        placeholder: @tr("ph.type_code");
+                        numeric: true;
+                        enabled-state: !root.busy;
+                    }
+                }
+
+                if root.advanced: Card {
+                    Field {
+                        label: @tr("field.start");
+                        value <=> root.report-start;
+                        placeholder: "0";
+                        numeric: true;
+                        enabled-state: !root.busy;
+                    }
+                    Field {
+                        label: @tr("field.end");
+                        value <=> root.report-end;
+                        placeholder: "0";
+                        numeric: true;
+                        enabled-state: !root.busy;
                     }
                 }
             }
 
             if root.nav == "cash": OpDetail {
-                title: "Cash in / out";
-                description: "Record a cash-drawer adjustment.";
-                run-label: "Record cash op";
+                title: @tr("op.cash.title");
+                description: @tr("op.cash.desc");
+                run-label: @tr("op.cash.run");
                 side-effect: true;
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
@@ -1183,30 +978,30 @@ export component MainWindow inherits Window {
                 run => { root.cash-requested(); }
                 Card {
                     LabeledToggle {
-                        label: "Cash in (off = cash out)";
+                        label: @tr("field.cash_in");
                         on <=> root.cash-in;
                         enabled-state: !root.busy;
                     }
                     Field {
-                        label: "Amount";
+                        label: @tr("field.amount");
                         value <=> root.amount;
                         placeholder: "0.00";
                         decimal-kb: true;
                         enabled-state: !root.busy;
                     }
                     Field {
-                        label: "Description";
+                        label: @tr("field.description");
                         value <=> root.description;
-                        placeholder: "optional note";
+                        placeholder: @tr("ph.optional_note");
                         enabled-state: !root.busy;
                     }
                 }
             }
 
             if root.nav == "header-footer": OpDetail {
-                title: "Header / footer";
-                description: "Configure the receipt header and footer lines from a JSON file.";
-                run-label: "Apply header/footer";
+                title: @tr("op.header_footer.title");
+                description: @tr("op.header_footer.desc");
+                run-label: @tr("op.header_footer.run");
                 side-effect: true;
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
@@ -1218,7 +1013,7 @@ export component MainWindow inherits Window {
                 run => { root.header-footer-requested(); }
                 Card {
                     Field {
-                        label: "JSON path";
+                        label: @tr("field.json_path");
                         value <=> root.json-path;
                         placeholder: "header-footer.json";
                         enabled-state: !root.busy;
@@ -1227,9 +1022,9 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "logo": OpDetail {
-                title: "Header logo";
-                description: "Upload a header logo bitmap (BMP, colour depth ≤ 4 bits).";
-                run-label: "Upload logo";
+                title: @tr("op.logo.title");
+                description: @tr("op.logo.desc");
+                run-label: @tr("op.logo.run");
                 side-effect: true;
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
@@ -1241,7 +1036,7 @@ export component MainWindow inherits Window {
                 run => { root.logo-requested(); }
                 Card {
                     Field {
-                        label: "Logo path";
+                        label: @tr("field.logo_path");
                         value <=> root.logo-path;
                         placeholder: "logo.bmp";
                         enabled-state: !root.busy;
@@ -1250,9 +1045,9 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "sample": OpDetail {
-                title: "Sample receipt";
-                description: "Print a non-fiscal sample receipt for layout verification. Consumes paper.";
-                run-label: "Print sample";
+                title: @tr("op.sample.title");
+                description: @tr("op.sample.desc");
+                run-label: @tr("op.sample.run");
                 side-effect: true;
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
@@ -1265,9 +1060,9 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "time-sync": OpDetail {
-                title: "Time sync";
-                description: "Synchronise the device with the tax authority's clock / state.";
-                run-label: "Sync now";
+                title: @tr("op.time_sync.title");
+                description: @tr("op.time_sync.desc");
+                run-label: @tr("op.time_sync.run");
                 side-effect: true;
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
@@ -1280,9 +1075,9 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "emark": OpDetail {
-                title: "Submit eMark";
-                description: "Submit a single eMark traceability code (29–110 ASCII chars).";
-                run-label: "Submit eMark";
+                title: @tr("op.emark.title");
+                description: @tr("op.emark.desc");
+                run-label: @tr("op.emark.title");
                 side-effect: true;
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
@@ -1294,9 +1089,9 @@ export component MainWindow inherits Window {
                 run => { root.emark-requested(); }
                 Card {
                     Field {
-                        label: "eMark code";
+                        label: @tr("field.emark_code");
                         value <=> root.emarks;
-                        placeholder: "29–110 characters";
+                        placeholder: @tr("ph.emark_len");
                         enabled-state: !root.busy;
                     }
                 }
@@ -1307,6 +1102,40 @@ export component MainWindow inherits Window {
         Rectangle {
             height: root.safe-bottom;
             background: Theme.bg;
+        }
+    }
+
+    // ---- modal selection sheet (on top of everything) ----
+    PickerSheet {
+        open: root.picker-kind != "";
+        title: root.sheet-title;
+        choices: root.sheet-choices;
+        current: root.sheet-current;
+        loadable: true;
+        busy: root.picker-busy;
+        note: root.picker-note;
+        safe-bottom: root.safe-bottom;
+        pick(key) => {
+            if (root.picker-kind == "cashier") {
+                root.cashier = key;
+            } else if (root.picker-kind == "department") {
+                root.department = key;
+            } else if (root.picker-kind == "payment") {
+                root.payment-system = key;
+            } else {
+                root.report-filter-value = key;
+            }
+            root.picker-kind = "";
+        }
+        refresh => {
+            if (root.picker-kind == "payment") {
+                root.load-payments-requested();
+            } else {
+                root.load-directory-requested();
+            }
+        }
+        cancel => {
+            root.picker-kind = "";
         }
     }
 }

@@ -1,0 +1,545 @@
+// Structural and display components: cards, rows, nav bar, buttons, result, and the per-operation
+// screen scaffold. Input controls live in inputs.slint.
+
+import { Switch, ScrollView } from "std-widgets.slint";
+import { Theme, Choice } from "theme.slint";
+
+// Padded rounded container for free-form content.
+export component Card inherits Rectangle {
+    background: Theme.card;
+    border-radius: Theme.radius;
+
+    VerticalLayout {
+        padding: Theme.gap;
+        spacing: 14px;
+        @children
+    }
+}
+
+// Grouped-list container: rounded card, no inner padding, clipped corners. Holds rows with
+// their own hairline separators (OpRow / ToggleRow / PickerRow).
+export component ListCard inherits Rectangle {
+    background: Theme.card;
+    border-radius: Theme.radius;
+    clip: true;
+
+    VerticalLayout {
+        @children
+    }
+}
+
+export component SectionHeader inherits Text {
+    color: Theme.sub;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+// Tappable navigation row with a trailing chevron.
+export component OpRow inherits Rectangle {
+    in property <string> title;
+    in property <string> subtitle;
+    in property <bool> last: false;
+    callback clicked;
+
+    height: root.subtitle == "" ? 50px : 60px;
+    background: ta.pressed ? Theme.pressed : Theme.card;
+
+    ta := TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    HorizontalLayout {
+        padding-left: Theme.gap;
+        padding-right: Theme.gap;
+        spacing: 8px;
+
+        VerticalLayout {
+            horizontal-stretch: 1;
+            alignment: center;
+            spacing: 2px;
+            Text {
+                text: root.title;
+                color: Theme.ink;
+                font-size: 17px;
+                overflow: elide;
+            }
+            if root.subtitle != "": Text {
+                text: root.subtitle;
+                color: Theme.sub;
+                font-size: 13px;
+                overflow: elide;
+            }
+        }
+
+        Text {
+            text: "›";
+            color: Theme.sub;
+            font-size: 22px;
+            vertical-alignment: center;
+        }
+    }
+
+    if !root.last: Rectangle {
+        x: Theme.gap;
+        y: root.height - 1px;
+        width: root.width - Theme.gap;
+        height: 1px;
+        background: Theme.line;
+    }
+}
+
+export component ToggleRow inherits Rectangle {
+    in property <string> title;
+    in-out property <bool> on;
+    in property <bool> enabled-state: true;
+    in property <bool> last: false;
+
+    height: Theme.row;
+    background: Theme.card;
+
+    HorizontalLayout {
+        padding-left: Theme.gap;
+        padding-right: Theme.gap;
+        spacing: 8px;
+        Text {
+            text: root.title;
+            color: Theme.ink;
+            font-size: 17px;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            overflow: elide;
+        }
+        Switch {
+            checked <=> root.on;
+            enabled: root.enabled-state;
+        }
+    }
+
+    if !root.last: Rectangle {
+        x: Theme.gap;
+        y: root.height - 1px;
+        width: root.width - Theme.gap;
+        height: 1px;
+        background: Theme.line;
+    }
+}
+
+// Standalone label + switch (used inside padded Cards, not grouped lists).
+export component LabeledToggle inherits HorizontalLayout {
+    in property <string> label;
+    in-out property <bool> on;
+    in property <bool> enabled-state: true;
+
+    spacing: 8px;
+    Text {
+        text: root.label;
+        color: Theme.ink;
+        font-size: 16px;
+        vertical-alignment: center;
+        horizontal-stretch: 1;
+        wrap: word-wrap;
+    }
+    Switch {
+        checked <=> root.on;
+        enabled: root.enabled-state;
+    }
+}
+
+export component NavBar inherits Rectangle {
+    in property <string> title;
+    callback back;
+
+    height: 48px;
+    background: Theme.bg;
+
+    HorizontalLayout {
+        padding-left: 6px;
+        padding-right: 6px;
+
+        back-ta := TouchArea {
+            width: 90px;
+            clicked => {
+                root.back();
+            }
+            HorizontalLayout {
+                alignment: start;
+                spacing: 1px;
+                Text {
+                    text: "‹";
+                    color: Theme.accent;
+                    font-size: 30px;
+                    vertical-alignment: center;
+                }
+                Text {
+                    text: @tr("common.home");
+                    color: back-ta.pressed ? Theme.accent.darker(0.2) : Theme.accent;
+                    font-size: 17px;
+                    vertical-alignment: center;
+                }
+            }
+        }
+
+        Text {
+            text: root.title;
+            color: Theme.ink;
+            font-size: 17px;
+            font-weight: 600;
+            horizontal-alignment: center;
+            vertical-alignment: center;
+            horizontal-stretch: 1;
+            overflow: elide;
+        }
+
+        Rectangle {
+            width: 90px;
+        }
+    }
+}
+
+export component PrimaryButton inherits Rectangle {
+    in property <string> text;
+    in property <bool> enabled-state: true;
+    in property <color> tint: Theme.accent;
+    callback clicked;
+
+    height: 50px;
+    border-radius: 12px;
+    background: !root.enabled-state
+        ? Theme.line
+        : (ta.pressed ? root.tint.darker(0.12) : root.tint);
+
+    ta := TouchArea {
+        enabled: root.enabled-state;
+        clicked => {
+            root.clicked();
+        }
+    }
+
+    Text {
+        text: root.text;
+        color: #ffffff;
+        font-size: 17px;
+        font-weight: 600;
+        horizontal-alignment: center;
+        vertical-alignment: center;
+    }
+}
+
+export component ResultCard inherits Rectangle {
+    in property <bool> busy;
+    in property <string> status;
+    in property <string> detail;
+    in property <string> result;
+
+    background: Theme.card;
+    border-radius: Theme.radius;
+
+    VerticalLayout {
+        padding: Theme.gap;
+        spacing: 10px;
+
+        HorizontalLayout {
+            spacing: 8px;
+            Rectangle {
+                width: 10px;
+                height: 10px;
+                y: 5px;
+                border-radius: 5px;
+                background: root.busy
+                    ? Theme.warn
+                    : (root.status == "Error" ? Theme.danger : Theme.ok);
+            }
+            Text {
+                text: root.status;
+                color: Theme.ink;
+                font-size: 17px;
+                font-weight: 600;
+                horizontal-stretch: 1;
+                vertical-alignment: center;
+            }
+        }
+
+        Text {
+            text: root.detail;
+            color: Theme.sub;
+            font-size: 14px;
+            wrap: word-wrap;
+        }
+
+        if root.result != "": Text {
+            text: root.result;
+            color: Theme.ink;
+            font-size: 14px;
+            wrap: word-wrap;
+        }
+    }
+}
+
+// Modal selection sheet: a scrim plus a bottom card with a scrollable list of choices. Used for
+// device-backed lists (operators, departments, payment systems). Fills the whole window and is
+// shown only while `open`. Selection and refresh are reported via callbacks; the parent owns the
+// data and the write-back so this component stays generic.
+export component PickerSheet inherits Rectangle {
+    in property <bool> open;
+    in property <string> title;
+    in property <[Choice]> choices;
+    in property <string> current;
+    in property <bool> loadable: false;
+    in property <bool> busy;
+    in property <string> note;
+    in property <length> safe-bottom: 0;
+    callback pick(string);
+    callback refresh();
+    callback cancel();
+
+    visible: root.open;
+    // Natural height of the content, capped so the sheet never covers the whole screen.
+    property <length> natural: 56px
+        + (root.choices.length * 50px)
+        + (root.loadable ? 52px : 0)
+        + (root.choices.length == 0 ? 64px : 0)
+        + 8px + root.safe-bottom;
+
+    // Tapping outside the sheet dismisses it.
+    scrim := TouchArea {
+        clicked => {
+            root.cancel();
+        }
+        Rectangle {
+            background: #00000059;
+        }
+    }
+
+    Rectangle {
+        width: 100%;
+        height: min(root.height * 0.82, root.natural);
+        y: root.height - self.height;
+        background: Theme.bg;
+        border-top-left-radius: 16px;
+        border-top-right-radius: 16px;
+
+        // Swallow taps so they don't reach the scrim behind.
+        TouchArea { }
+
+        VerticalLayout {
+            padding-top: 8px;
+
+            // grabber
+            HorizontalLayout {
+                alignment: center;
+                Rectangle {
+                    height: 5px;
+                    width: 36px;
+                    border-radius: 3px;
+                    background: Theme.line;
+                }
+            }
+
+            HorizontalLayout {
+                height: 44px;
+                padding-left: Theme.gap;
+                padding-right: Theme.gap;
+                Text {
+                    text: root.title;
+                    color: Theme.ink;
+                    font-size: 17px;
+                    font-weight: 600;
+                    vertical-alignment: center;
+                    horizontal-stretch: 1;
+                    overflow: elide;
+                }
+                cancel-ta := TouchArea {
+                    width: 60px;
+                    clicked => {
+                        root.cancel();
+                    }
+                    Text {
+                        text: @tr("common.cancel");
+                        color: cancel-ta.pressed ? Theme.accent.darker(0.2) : Theme.accent;
+                        font-size: 17px;
+                        horizontal-alignment: right;
+                        vertical-alignment: center;
+                    }
+                }
+            }
+
+            list := ScrollView {
+                vertical-stretch: 1;
+                VerticalLayout {
+                    width: list.visible-width;
+                    alignment: start;
+
+                    if root.choices.length == 0: Rectangle {
+                        height: 64px;
+                        Text {
+                            text: root.loadable
+                                ? @tr("sheet.empty_loadable")
+                                : @tr("sheet.empty");
+                            color: Theme.sub;
+                            font-size: 15px;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                            wrap: word-wrap;
+                        }
+                    }
+
+                    for c in root.choices: Rectangle {
+                        height: 50px;
+                        background: opt-ta.pressed ? Theme.pressed : Theme.bg;
+
+                        opt-ta := TouchArea {
+                            clicked => {
+                                root.pick(c.key);
+                            }
+                        }
+
+                        HorizontalLayout {
+                            padding-left: Theme.gap;
+                            padding-right: Theme.gap;
+                            spacing: 8px;
+                            VerticalLayout {
+                                horizontal-stretch: 1;
+                                alignment: center;
+                                spacing: 2px;
+                                Text {
+                                    text: c.label;
+                                    color: Theme.ink;
+                                    font-size: 17px;
+                                    overflow: elide;
+                                }
+                                if c.detail != "": Text {
+                                    text: c.detail;
+                                    color: Theme.sub;
+                                    font-size: 13px;
+                                    overflow: elide;
+                                }
+                            }
+                            Text {
+                                text: c.key == root.current ? "✓" : "";
+                                color: Theme.accent;
+                                font-size: 18px;
+                                font-weight: 700;
+                                vertical-alignment: center;
+                            }
+                        }
+
+                        Rectangle {
+                            x: Theme.gap;
+                            y: parent.height - 1px;
+                            width: parent.width - Theme.gap;
+                            height: 1px;
+                            background: Theme.line;
+                        }
+                    }
+                }
+            }
+
+            if root.loadable: Rectangle {
+                height: 52px;
+                background: refresh-ta.pressed ? Theme.pressed : Theme.bg;
+                refresh-ta := TouchArea {
+                    enabled: !root.busy;
+                    clicked => {
+                        root.refresh();
+                    }
+                }
+                VerticalLayout {
+                    alignment: center;
+                    spacing: 1px;
+                    Text {
+                        text: root.busy ? @tr("common.loading") : @tr("common.refresh");
+                        color: Theme.accent;
+                        font-size: 16px;
+                        horizontal-alignment: center;
+                    }
+                    if root.note != "": Text {
+                        text: root.note;
+                        color: Theme.sub;
+                        font-size: 12px;
+                        horizontal-alignment: center;
+                        overflow: elide;
+                    }
+                }
+            }
+
+            Rectangle {
+                height: root.safe-bottom;
+            }
+        }
+    }
+}
+
+// Reusable per-operation screen: nav bar, description, the operation's own fields (passed as
+// @children), an optional confirmation gate, the Run button, and the result.
+export component OpDetail inherits VerticalLayout {
+    in property <string> title;
+    in property <string> description;
+    in property <string> run-label: "Run";
+    in property <bool> side-effect: false;
+    in-out property <bool> confirm;
+    in property <bool> demo;
+    in property <bool> busy;
+    in property <string> status;
+    in property <string> detail;
+    in property <string> result;
+    callback back;
+    callback run;
+
+    NavBar {
+        title: root.title;
+        back => {
+            root.back();
+        }
+    }
+
+    sv := ScrollView {
+        vertical-stretch: 1;
+        VerticalLayout {
+            width: sv.visible-width;
+            alignment: start;
+            padding: Theme.gap;
+            spacing: Theme.gap;
+
+            if root.description != "": Card {
+                Text {
+                    text: root.description;
+                    color: Theme.sub;
+                    font-size: 14px;
+                    wrap: word-wrap;
+                }
+            }
+
+            @children
+
+            if root.side-effect: Card {
+                LabeledToggle {
+                    label: @tr("common.confirm");
+                    on <=> root.confirm;
+                    enabled-state: !root.busy;
+                }
+            }
+
+            PrimaryButton {
+                text: root.busy ? @tr("common.running") : root.run-label;
+                enabled-state: !root.busy && (!root.side-effect || root.confirm || root.demo);
+                clicked => {
+                    root.run();
+                }
+            }
+
+            ResultCard {
+                busy: root.busy;
+                status: root.status;
+                detail: root.detail;
+                result: root.result;
+            }
+
+            // tail spacer so the result clears the keyboard / bottom inset
+            Rectangle {
+                height: 24px;
+            }
+        }
+    }
+}

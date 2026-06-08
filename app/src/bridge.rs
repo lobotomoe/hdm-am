@@ -2,10 +2,13 @@ use std::net::{TcpStream, ToSocketAddrs};
 use std::thread;
 use std::time::Instant;
 
-use hdm_am::{Client, Error as HdmError, FiscalReportKind, InMemorySeq, identify};
-use slint::{ComponentHandle, SharedString, Weak};
+use hdm_am::{
+    Client, Error as HdmError, FiscalReportKind, InMemorySeq, ListOpsAndDepsResponse,
+    PaymentSystemsListResponse, identify,
+};
+use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
-use crate::generated::MainWindow;
+use crate::generated::{Choice, MainWindow};
 use crate::validation::{ConnectionInput, ConnectionSettings, OperationInputs};
 use crate::{format as ui_format, validation};
 
@@ -87,6 +90,15 @@ impl Action {
 /// Returns a Slint platform error if the native windowing backend cannot be initialised.
 pub fn run() -> Result<(), slint::PlatformError> {
     let window = MainWindow::new()?;
+
+    // Symbolic translation keys have no automatic fallback, so a language must be selected
+    // explicitly — even English — or the UI would render the raw keys. Sync the picker to it.
+    let language = crate::i18n::initial_language();
+    if let Err(err) = slint::select_bundled_translation(&language) {
+        log::warn!("failed to select translation '{language}': {err}");
+    }
+    window.set_language(language.into());
+
     wire_callbacks(&window);
     window.run()
 }
@@ -142,6 +154,18 @@ fn wire_callbacks(window: &MainWindow) {
 
     let weak = window.as_weak();
     window.on_privacy_requested(move || show_privacy(&weak));
+
+    let weak = window.as_weak();
+    window.on_load_directory_requested(move || start_load_directory(&weak));
+
+    let weak = window.as_weak();
+    window.on_load_payments_requested(move || start_load_payments(&weak));
+
+    window.on_language_changed(move |code| {
+        if let Err(err) = slint::select_bundled_translation(code.as_str()) {
+            log::warn!("failed to select translation '{code}': {err}");
+        }
+    });
 }
 
 fn start_action(weak: &Weak<MainWindow>, action: Action) {
@@ -528,6 +552,250 @@ fn emark(settings: &ConnectionSettings, inputs: &OperationInputs) -> Result<Stri
             .map_err(|err| ui_format::hdm_error("submitting eMark", &err))?;
         Ok("eMark accepted.".to_owned())
     })
+}
+
+// ---------------------------------------------------------------------------
+// Picker models: fetch the device's operator/department/payment lists so the GUI can offer them
+// as native selections instead of free-typed numeric ids.
+// ---------------------------------------------------------------------------
+
+fn make_choice(key: String, label: String, detail: String) -> Choice {
+    Choice {
+        key: key.into(),
+        label: label.into(),
+        detail: detail.into(),
+    }
+}
+
+/// Build operator and department choices from the directory response, resolving each operator's
+/// department ids to their names for the secondary line.
+fn directory_choices(response: &ListOpsAndDepsResponse) -> (Vec<Choice>, Vec<Choice>) {
+    let dep_name = |id: u32| -> String {
+        response
+            .departments
+            .iter()
+            .find(|dep| dep.id == id)
+            .map_or_else(
+                || format!("Department {id}"),
+                |dep| {
+                    if dep.name.is_empty() {
+                        format!("Department {id}")
+                    } else {
+                        dep.name.clone()
+                    }
+                },
+            )
+    };
+
+    let operators = response
+        .operators
+        .iter()
+        .map(|op| {
+            let label = if op.name.is_empty() {
+                format!("Operator {}", op.id)
+            } else {
+                op.name.clone()
+            };
+            let detail = if op.deps.is_empty() {
+                String::new()
+            } else {
+                let names: Vec<String> = op.deps.iter().map(|&id| dep_name(id)).collect();
+                format!("Departments: {}", names.join(", "))
+            };
+            make_choice(op.id.to_string(), label, detail)
+        })
+        .collect();
+
+    let departments = response
+        .departments
+        .iter()
+        .map(|dep| {
+            let label = if dep.name.is_empty() {
+                format!("Department {}", dep.id)
+            } else {
+                dep.name.clone()
+            };
+            make_choice(dep.id.to_string(), label, String::new())
+        })
+        .collect();
+
+    (operators, departments)
+}
+
+fn payment_choices(response: &PaymentSystemsListResponse) -> Vec<Choice> {
+    response
+        .payment_systems
+        .iter()
+        .map(|entry| {
+            let label = if entry.name.is_empty() {
+                format!("System {}", entry.code)
+            } else {
+                entry.name.clone()
+            };
+            make_choice(entry.code.to_string(), label, String::new())
+        })
+        .collect()
+}
+
+fn demo_directory() -> (Vec<Choice>, Vec<Choice>) {
+    (
+        vec![
+            make_choice(
+                "1".to_owned(),
+                "Administrator".to_owned(),
+                "Departments: Sales, Service".to_owned(),
+            ),
+            make_choice(
+                "3".to_owned(),
+                "Cashier".to_owned(),
+                "Departments: Sales".to_owned(),
+            ),
+        ],
+        vec![
+            make_choice("1".to_owned(), "Sales".to_owned(), String::new()),
+            make_choice("2".to_owned(), "Service".to_owned(), String::new()),
+        ],
+    )
+}
+
+fn demo_payments() -> Vec<Choice> {
+    vec![
+        make_choice("1".to_owned(), "ArCa".to_owned(), String::new()),
+        make_choice("2".to_owned(), "Visa/Mastercard".to_owned(), String::new()),
+    ]
+}
+
+fn start_load_directory(weak: &Weak<MainWindow>) {
+    let Some(window) = weak.upgrade() else {
+        return;
+    };
+
+    if window.get_demo_mode() {
+        let (operators, departments) = demo_directory();
+        let note = format!(
+            "Demo: {} operators, {} departments.",
+            operators.len(),
+            departments.len()
+        );
+        window.set_operator_choices(ModelRc::new(VecModel::from(operators)));
+        window.set_department_choices(ModelRc::new(VecModel::from(departments)));
+        window.set_picker_note(note.into());
+        return;
+    }
+
+    let settings = match read_settings(&window, Action::Operators) {
+        Ok(settings) => settings,
+        Err(message) => {
+            window.set_picker_note(format!("Load failed: {message}").into());
+            return;
+        }
+    };
+
+    window.set_picker_busy(true);
+    window.set_picker_note("Loading from device…".into());
+
+    let weak = weak.clone();
+    thread::spawn(move || {
+        let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(
+            || -> Result<(Vec<Choice>, Vec<Choice>), String> {
+                let mut client = client(&settings)?;
+                let response = client.list_operators_and_departments().map_err(|err| {
+                    ui_format::hdm_error("listing operators and departments", &err)
+                })?;
+                Ok(directory_choices(&response))
+            },
+        ))
+        .unwrap_or_else(|_| Err("Internal error: the load panicked.".to_owned()));
+
+        let invoke_result = slint::invoke_from_event_loop(move || {
+            if let Some(window) = weak.upgrade() {
+                match outcome {
+                    Ok((operators, departments)) => {
+                        let note = format!(
+                            "Loaded {} operators, {} departments.",
+                            operators.len(),
+                            departments.len()
+                        );
+                        window.set_operator_choices(ModelRc::new(VecModel::from(operators)));
+                        window.set_department_choices(ModelRc::new(VecModel::from(departments)));
+                        window.set_picker_note(note.into());
+                    }
+                    Err(message) => {
+                        window.set_picker_note(message.into());
+                    }
+                }
+                window.set_picker_busy(false);
+            }
+        });
+        if let Err(err) = invoke_result {
+            log::warn!("failed to report directory load: {err}");
+        }
+    });
+}
+
+fn start_load_payments(weak: &Weak<MainWindow>) {
+    let Some(window) = weak.upgrade() else {
+        return;
+    };
+
+    if window.get_demo_mode() {
+        let payments = demo_payments();
+        let note = format!("Demo: {} payment systems.", payments.len());
+        window.set_payment_choices(ModelRc::new(VecModel::from(payments)));
+        window.set_picker_note(note.into());
+        return;
+    }
+
+    let settings = match read_settings(&window, Action::PaymentSystems) {
+        Ok(settings) => settings,
+        Err(message) => {
+            window.set_picker_note(format!("Load failed: {message}").into());
+            return;
+        }
+    };
+
+    window.set_picker_busy(true);
+    window.set_picker_note("Loading from device…".into());
+
+    let weak = weak.clone();
+    thread::spawn(move || {
+        let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(
+            || -> Result<Vec<Choice>, String> {
+                let mut client = client(&settings)?;
+                client
+                    .login(settings.cashier, settings.pin.clone())
+                    .map_err(|err| ui_format::hdm_error("logging in", &err))?;
+                let result = client
+                    .payment_systems_list()
+                    .map_err(|err| ui_format::hdm_error("listing payment systems", &err))
+                    .map(|response| payment_choices(&response));
+                if let Err(err) = client.logout() {
+                    log::warn!("logout failed: {err}");
+                }
+                result
+            },
+        ))
+        .unwrap_or_else(|_| Err("Internal error: the load panicked.".to_owned()));
+
+        let invoke_result = slint::invoke_from_event_loop(move || {
+            if let Some(window) = weak.upgrade() {
+                match outcome {
+                    Ok(payments) => {
+                        let note = format!("Loaded {} payment systems.", payments.len());
+                        window.set_payment_choices(ModelRc::new(VecModel::from(payments)));
+                        window.set_picker_note(note.into());
+                    }
+                    Err(message) => {
+                        window.set_picker_note(message.into());
+                    }
+                }
+                window.set_picker_busy(false);
+            }
+        });
+        if let Err(err) = invoke_result {
+            log::warn!("failed to report payment-systems load: {err}");
+        }
+    });
 }
 
 fn with_session(

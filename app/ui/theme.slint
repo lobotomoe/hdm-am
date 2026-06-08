@@ -1,0 +1,28 @@
+// Shared theme tokens and data types.
+
+// One selectable option in a segmented control or picker sheet. `key` is the value written into
+// the underlying input string (e.g. an operator id "3"); `label` / `detail` are display-only.
+export struct Choice {
+    key: string,
+    label: string,
+    detail: string,
+}
+
+export global Theme {
+    out property <color> bg: #f2f2f7;
+    out property <color> card: #ffffff;
+    out property <color> pressed: #e4e4ea;
+    out property <color> ink: #1c1c1e;
+    out property <color> sub: #8a8a8e;
+    out property <color> line: #d6d6db;
+    out property <color> accent: #007aff;
+    out property <color> ok: #34c759;
+    out property <color> warn: #ff9f0a;
+    out property <color> danger: #ff3b30;
+    // iOS segmented-control track tint.
+    out property <color> track: #78788014;
+
+    out property <length> radius: 12px;
+    out property <length> gap: 16px;
+    out property <length> row: 44px;
+}

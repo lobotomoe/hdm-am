@@ -1,0 +1,701 @@
+# Translation source of truth. Every UI string keyed; all languages are peers (no default/source
+# language). The .po files under lang/<locale>/LC_MESSAGES/ are GENERATED from this file by
+# lang/generate.py — edit translations here, then run the generator.
+#
+# NOTE: hy (Armenian) is a machine-assisted first pass and MUST be reviewed by a native speaker
+# before release. en and ru are authoritative.
+
+["common.home"]
+en = "Home"
+ru = "Главная"
+hy = "Գլխավոր"
+
+["common.cancel"]
+en = "Cancel"
+ru = "Отмена"
+hy = "Չեղարկել"
+
+["common.refresh"]
+en = "Refresh from device"
+ru = "Загрузить с устройства"
+hy = "Թարմացնել սարքից"
+
+["common.loading"]
+en = "Loading…"
+ru = "Загрузка…"
+hy = "Բեռնում…"
+
+["common.running"]
+en = "Running…"
+ru = "Выполняется…"
+hy = "Կատարվում է…"
+
+["common.confirm"]
+en = "I confirm this prints or registers on the device"
+ru = "Подтверждаю: операция печатает или регистрируется на устройстве"
+hy = "Հաստատում եմ՝ սա տպում կամ գրանցում է սարքում"
+
+["common.select"]
+en = "Select"
+ru = "Выбрать"
+hy = "Ընտրել"
+
+["sheet.empty_loadable"]
+en = "No items yet. Tap “Refresh from device”."
+ru = "Список пуст. Нажмите «Загрузить с устройства»."
+hy = "Ցուցակը դատարկ է։ Սեղմեք «Թարմացնել սարքից»։"
+
+["sheet.empty"]
+en = "No items available."
+ru = "Нет доступных значений."
+hy = "Հասանելի տարրեր չկան։"
+
+["sheet.select_operator"]
+en = "Select operator"
+ru = "Выберите оператора"
+hy = "Ընտրեք օպերատորին"
+
+["sheet.select_department"]
+en = "Select department"
+ru = "Выберите отдел"
+hy = "Ընտրեք բաժինը"
+
+["sheet.select_payment"]
+en = "Select payment system"
+ru = "Выберите платёжную систему"
+hy = "Ընտրեք վճարային համակարգը"
+
+["sheet.filter_operator"]
+en = "Filter by operator"
+ru = "Фильтр по оператору"
+hy = "Զտել ըստ օպերատորի"
+
+["sheet.filter_department"]
+en = "Filter by department"
+ru = "Фильтр по отделу"
+hy = "Զտել ըստ բաժնի"
+
+["section.connection"]
+en = "CONNECTION"
+ru = "ПОДКЛЮЧЕНИЕ"
+hy = "ՄԻԱՑՈՒՄ"
+
+["section.diagnostics"]
+en = "DIAGNOSTICS"
+ru = "ДИАГНОСТИКА"
+hy = "ԱԽՏՈՐՈՇՈՒՄ"
+
+["section.receipts"]
+en = "RECEIPTS & RETURNS"
+ru = "ЧЕКИ И ВОЗВРАТЫ"
+hy = "ԿՏՐՈՆՆԵՐ ԵՎ ՎԵՐԱԴԱՐՁ"
+
+["section.reports"]
+en = "REPORTS & CASH"
+ru = "ОТЧЁТЫ И КАССА"
+hy = "ՀԱՇՎԵՏՎՈՒԹՅՈՒՆ ԵՎ ԿԱՆԽԻԿ"
+
+["section.device"]
+en = "DEVICE"
+ru = "УСТРОЙСТВО"
+hy = "ՍԱՐՔ"
+
+["section.operator"]
+en = "OPERATOR"
+ru = "ОПЕРАТОР"
+hy = "ՕՊԵՐԱՏՈՐ"
+
+["section.payment"]
+en = "PAYMENT"
+ru = "ОПЛАТА"
+hy = "ՎՃԱՐՈՒՄ"
+
+["section.language"]
+en = "LANGUAGE"
+ru = "ЯЗЫК"
+hy = "ԼԵԶՈՒ"
+
+["home.connection_settings"]
+en = "Connection settings"
+ru = "Настройки подключения"
+hy = "Միացման կարգավորումներ"
+
+["home.demo"]
+en = "Demo mode"
+ru = "Демо-режим"
+hy = "Դեմո ռեժիմ"
+
+["home.operators"]
+en = "Operators & departments"
+ru = "Операторы и отделы"
+hy = "Օպերատորներ և բաժիններ"
+
+["home.print_last"]
+en = "Reprint last receipt"
+ru = "Повторить печать чека"
+hy = "Վերատպել վերջին կտրոնը"
+
+["home.report"]
+en = "Fiscal report (X / Z)"
+ru = "Фискальный отчёт (X / Z)"
+hy = "Ֆիսկալ հաշվետվություն (X / Z)"
+
+["home.time_sync"]
+en = "Sync with tax authority"
+ru = "Синхронизация с налоговой"
+hy = "Համաժամեցում հարկային մարմնի հետ"
+
+["op.probe.title"]
+en = "Probe"
+ru = "Проверка"
+hy = "Ստուգում"
+
+["op.probe.desc"]
+en = "Check whether the endpoint speaks the HDM protocol, without logging in."
+ru = "Проверить, отвечает ли адрес по протоколу ХДМ, без входа в систему."
+hy = "Ստուգել՝ արդյոք հասցեն խոսում է ՀԴՄ արձանագրությամբ՝ առանց մուտքի։"
+
+["op.probe.run"]
+en = "Run probe"
+ru = "Запустить проверку"
+hy = "Գործարկել ստուգումը"
+
+["op.operators.title"]
+en = "Operators"
+ru = "Операторы"
+hy = "Օպերատորներ"
+
+["op.operators.desc"]
+en = "List the operators and departments registered on the device."
+ru = "Показать операторов и отделы, зарегистрированные на устройстве."
+hy = "Ցուցադրել սարքում գրանցված օպերատորներն ու բաժինները։"
+
+["op.operators.run"]
+en = "List operators"
+ru = "Показать операторов"
+hy = "Ցուցադրել օպերատորներին"
+
+["op.login.title"]
+en = "Verify login"
+ru = "Проверка входа"
+hy = "Մուտքի ստուգում"
+
+["op.login.desc"]
+en = "Log in with the operator credentials and immediately log out."
+ru = "Войти с учётными данными оператора и сразу выйти."
+hy = "Մուտք գործել օպերատորի տվյալներով և անմիջապես դուրս գալ։"
+
+["op.datetime.title"]
+en = "Date & time"
+ru = "Дата и время"
+hy = "Ամսաթիվ և ժամ"
+
+["op.datetime.desc"]
+en = "Read the device's current date and time."
+ru = "Прочитать текущие дату и время устройства."
+hy = "Կարդալ սարքի ընթացիկ ամսաթիվն ու ժամը։"
+
+["op.datetime.run"]
+en = "Read date & time"
+ru = "Прочитать дату и время"
+hy = "Կարդալ ամսաթիվն ու ժամը"
+
+["op.payments.title"]
+en = "Payment systems"
+ru = "Платёжные системы"
+hy = "Վճարային համակարգեր"
+
+["op.payments.desc"]
+en = "List the payment systems configured on the device."
+ru = "Показать платёжные системы, настроенные на устройстве."
+hy = "Ցուցադրել սարքում կարգավորված վճարային համակարգերը։"
+
+["op.payments.run"]
+en = "List payment systems"
+ru = "Показать платёжные системы"
+hy = "Ցուցադրել վճարային համակարգերը"
+
+["op.receipt.title"]
+en = "Print receipt"
+ru = "Печать чека"
+hy = "Տպել կտրոն"
+
+["op.receipt.desc"]
+en = "Print a fiscal receipt. Pick the mode, enter the payment, and choose the department."
+ru = "Напечатать фискальный чек. Выберите режим, введите оплату и выберите отдел."
+hy = "Տպել ֆիսկալ կտրոն։ Ընտրեք ռեժիմը, մուտքագրեք վճարումը և ընտրեք բաժինը։"
+
+["op.print_last.title"]
+en = "Reprint last"
+ru = "Повтор чека"
+hy = "Վերատպել"
+
+["op.print_last.desc"]
+en = "Reprint a copy of the operator's most recent receipt."
+ru = "Повторно напечатать копию последнего чека оператора."
+hy = "Վերատպել օպերատորի վերջին կտրոնի պատճենը։"
+
+["op.lookup.title"]
+en = "Look up receipt"
+ru = "Найти чек"
+hy = "Գտնել կտրոնը"
+
+["op.lookup.desc"]
+en = "Look up a previous receipt's contents by number. Registers nothing."
+ru = "Найти содержимое прежнего чека по номеру. Ничего не регистрирует."
+hy = "Գտնել նախկին կտրոնի բովանդակությունը ըստ համարի։ Ոչինչ չի գրանցում։"
+
+["op.lookup.run"]
+en = "Look up"
+ru = "Найти"
+hy = "Գտնել"
+
+["op.return.title"]
+en = "Return / refund"
+ru = "Возврат"
+hy = "Վերադարձ"
+
+["op.return.desc"]
+en = "Register a return for a prior receipt: full, by-amount, or per-item."
+ru = "Оформить возврат по прежнему чеку: полный, по сумме или по позициям."
+hy = "Գրանցել վերադարձ նախկին կտրոնի համար՝ ամբողջական, ըստ գումարի կամ ըստ ապրանքների։"
+
+["op.return.run"]
+en = "Register return"
+ru = "Оформить возврат"
+hy = "Գրանցել վերադարձը"
+
+["op.report.title"]
+en = "Fiscal report"
+ru = "Фискальный отчёт"
+hy = "Ֆիսկալ հաշվետվություն"
+
+["op.report.desc"]
+en = "Print an X (interim) or Z (end-of-day) report. Z closes the fiscal day."
+ru = "Напечатать отчёт X (промежуточный) или Z (закрытие дня). Z закрывает смену."
+hy = "Տպել X (միջանկյալ) կամ Z (օրվա փակում) հաշվետվություն։ Z-ը փակում է ֆիսկալ օրը։"
+
+["op.report.run_x"]
+en = "Print X report"
+ru = "Напечатать X-отчёт"
+hy = "Տպել X հաշվետվություն"
+
+["op.report.run_z"]
+en = "Print Z report"
+ru = "Напечатать Z-отчёт"
+hy = "Տպել Z հաշվետվություն"
+
+["op.cash.title"]
+en = "Cash in / out"
+ru = "Внесение / выемка"
+hy = "Կանխիկի մուտք / ելք"
+
+["op.cash.desc"]
+en = "Record a cash-drawer adjustment."
+ru = "Зарегистрировать движение наличных в кассе."
+hy = "Գրանցել կանխիկի շարժը դրամարկղում։"
+
+["op.cash.run"]
+en = "Record cash op"
+ru = "Зарегистрировать"
+hy = "Գրանցել"
+
+["op.header_footer.title"]
+en = "Header / footer"
+ru = "Шапка / подвал"
+hy = "Վերնագիր / ստորագիր"
+
+["op.header_footer.desc"]
+en = "Configure the receipt header and footer lines from a JSON file."
+ru = "Настроить строки шапки и подвала чека из файла JSON."
+hy = "Կարգավորել կտրոնի վերնագրի և ստորագրի տողերը JSON ֆայլից։"
+
+["op.header_footer.run"]
+en = "Apply header/footer"
+ru = "Применить"
+hy = "Կիրառել"
+
+["op.logo.title"]
+en = "Header logo"
+ru = "Логотип шапки"
+hy = "Վերնագրի լոգո"
+
+["op.logo.desc"]
+en = "Upload a header logo bitmap (BMP, colour depth ≤ 4 bits)."
+ru = "Загрузить логотип шапки (BMP, глубина цвета ≤ 4 бит)."
+hy = "Վերբեռնել վերնագրի լոգոն (BMP, գույնի խորություն ≤ 4 բիթ)։"
+
+["op.logo.run"]
+en = "Upload logo"
+ru = "Загрузить логотип"
+hy = "Վերբեռնել լոգոն"
+
+["op.sample.title"]
+en = "Sample receipt"
+ru = "Образец чека"
+hy = "Կտրոնի նմուշ"
+
+["op.sample.desc"]
+en = "Print a non-fiscal sample receipt for layout verification. Consumes paper."
+ru = "Напечатать нефискальный образец чека для проверки печати. Расходует бумагу."
+hy = "Տպել ոչ ֆիսկալ նմուշ կտրոն՝ դասավորությունը ստուգելու համար։ Ծախսում է թուղթ։"
+
+["op.sample.run"]
+en = "Print sample"
+ru = "Напечатать образец"
+hy = "Տպել նմուշը"
+
+["op.time_sync.title"]
+en = "Time sync"
+ru = "Синхронизация"
+hy = "Համաժամեցում"
+
+["op.time_sync.desc"]
+en = "Synchronise the device with the tax authority's clock / state."
+ru = "Синхронизировать устройство с часами и состоянием налоговой."
+hy = "Համաժամեցնել սարքը հարկային մարմնի ժամի և վիճակի հետ։"
+
+["op.time_sync.run"]
+en = "Sync now"
+ru = "Синхронизировать"
+hy = "Համաժամեցնել"
+
+["op.emark.title"]
+en = "Submit eMark"
+ru = "Отправить eMark"
+hy = "Ուղարկել eMark"
+
+["op.emark.desc"]
+en = "Submit a single eMark traceability code (29–110 ASCII chars)."
+ru = "Отправить один код прослеживаемости eMark (29–110 символов ASCII)."
+hy = "Ուղարկել մեկ eMark հետագծելիության կոդ (29–110 ASCII նիշ)։"
+
+["op.privacy.title"]
+en = "Privacy"
+ru = "Конфиденциальность"
+hy = "Գաղտնիություն"
+
+["settings.title"]
+en = "Connection"
+ru = "Подключение"
+hy = "Միացում"
+
+["settings.advanced"]
+en = "Advanced fields (manual IDs, all options)"
+ru = "Расширенные поля (ручной ввод ID, все опции)"
+hy = "Ընդլայնված դաշտեր (ձեռքով ID, բոլոր ընտրանքները)"
+
+["settings.demo"]
+en = "Demo mode (no network, synthetic responses)"
+ru = "Демо-режим (без сети, синтетические ответы)"
+hy = "Դեմո ռեժիմ (առանց ցանցի, սինթետիկ պատասխաններ)"
+
+["settings.load_directory"]
+en = "Load operators & departments"
+ru = "Загрузить операторов и отделы"
+hy = "Բեռնել օպերատորներն ու բաժինները"
+
+["field.host"]
+en = "Host"
+ru = "Хост"
+hy = "Հոսթ"
+
+["field.port"]
+en = "Port"
+ru = "Порт"
+hy = "Պորտ"
+
+["field.timeout"]
+en = "Timeout (seconds)"
+ru = "Тайм-аут (секунды)"
+hy = "Սպասման ժամանակ (վայրկյան)"
+
+["field.password"]
+en = "Password"
+ru = "Пароль"
+hy = "Գաղտնաբառ"
+
+["field.operator"]
+en = "Operator"
+ru = "Оператор"
+hy = "Օպերատոր"
+
+["field.cashier_id"]
+en = "Cashier ID"
+ru = "ID кассира"
+hy = "Գանձապահի ID"
+
+["field.pin"]
+en = "PIN"
+ru = "PIN"
+hy = "PIN"
+
+["field.mode"]
+en = "Mode"
+ru = "Режим"
+hy = "Ռեժիմ"
+
+["field.cash"]
+en = "Cash"
+ru = "Наличные"
+hy = "Կանխիկ"
+
+["field.card"]
+en = "Card"
+ru = "Карта"
+hy = "Քարտ"
+
+["field.partial"]
+en = "Partial"
+ru = "Частичная"
+hy = "Մասնակի"
+
+["field.prepayment"]
+en = "Prepayment"
+ru = "Предоплата"
+hy = "Կանխավճար"
+
+["field.department"]
+en = "Department"
+ru = "Отдел"
+hy = "Բաժին"
+
+["field.department_id"]
+en = "Department ID"
+ru = "ID отдела"
+hy = "Բաժնի ID"
+
+["field.items_json"]
+en = "Items JSON path"
+ru = "Путь к JSON позиций"
+hy = "Ապրանքների JSON ուղին"
+
+["field.partner_tin"]
+en = "Partner TIN"
+ru = "ИНН партнёра"
+hy = "Գործընկերոջ ՀՎՀՀ"
+
+["field.payment_system"]
+en = "Payment system"
+ru = "Платёжная система"
+hy = "Վճարային համակարգ"
+
+["field.ext_pos"]
+en = "External POS terminal"
+ru = "Внешний POS-терминал"
+hy = "Արտաքին POS տերմինալ"
+
+["field.rrn"]
+en = "RRN"
+ru = "RRN"
+hy = "RRN"
+
+["field.terminal_id"]
+en = "Terminal ID"
+ru = "ID терминала"
+hy = "Տերմինալի ID"
+
+["field.emarks"]
+en = "eMarks (comma-separated)"
+ru = "eMark-коды (через запятую)"
+hy = "eMark կոդեր (ստորակետով)"
+
+["field.crn"]
+en = "CRN"
+ru = "CRN"
+hy = "CRN"
+
+["field.receipt_id"]
+en = "Receipt ID"
+ru = "ID чека"
+hy = "Կտրոնի ID"
+
+["field.ticket"]
+en = "Ticket # (receipt to return)"
+ru = "№ чека (для возврата)"
+hy = "Կտրոնի № (վերադարձի համար)"
+
+["field.cash_return"]
+en = "Cash to return"
+ru = "Возврат наличными"
+hy = "Կանխիկի վերադարձ"
+
+["field.card_return"]
+en = "Card to return"
+ru = "Возврат на карту"
+hy = "Քարտի վերադարձ"
+
+["field.prepayment_return"]
+en = "Prepayment to return"
+ru = "Возврат предоплаты"
+hy = "Կանխավճարի վերադարձ"
+
+["field.peritem_json"]
+en = "Per-item JSON path"
+ru = "Путь к JSON по позициям"
+hy = "Ըստ ապրանքների JSON ուղին"
+
+["field.report_kind"]
+en = "Report kind"
+ru = "Тип отчёта"
+hy = "Հաշվետվության տեսակ"
+
+["field.filter"]
+en = "Filter"
+ru = "Фильтр"
+hy = "Զտիչ"
+
+["field.transaction_type"]
+en = "Transaction type"
+ru = "Тип операции"
+hy = "Գործարքի տեսակ"
+
+["field.start"]
+en = "Start (epoch ms, 0 = all)"
+ru = "Начало (epoch мс, 0 = всё)"
+hy = "Սկիզբ (epoch մվ, 0 = բոլորը)"
+
+["field.end"]
+en = "End (epoch ms, 0 = all)"
+ru = "Конец (epoch мс, 0 = всё)"
+hy = "Վերջ (epoch մվ, 0 = բոլորը)"
+
+["field.cash_in"]
+en = "Cash in (off = cash out)"
+ru = "Внесение (выкл = выемка)"
+hy = "Մուտք (անջատ = ելք)"
+
+["field.amount"]
+en = "Amount"
+ru = "Сумма"
+hy = "Գումար"
+
+["field.description"]
+en = "Description"
+ru = "Описание"
+hy = "Նկարագրություն"
+
+["field.json_path"]
+en = "JSON path"
+ru = "Путь к JSON"
+hy = "JSON ուղի"
+
+["field.logo_path"]
+en = "Logo path"
+ru = "Путь к логотипу"
+hy = "Լոգոյի ուղի"
+
+["field.emark_code"]
+en = "eMark code"
+ru = "Код eMark"
+hy = "eMark կոդ"
+
+["ph.hdm_password"]
+en = "HDM password"
+ru = "Пароль ХДМ"
+hy = "ՀԴՄ գաղտնաբառ"
+
+["ph.choose_operator"]
+en = "Choose operator"
+ru = "Выберите оператора"
+hy = "Ընտրեք օպերատորին"
+
+["ph.choose_department"]
+en = "Choose department"
+ru = "Выберите отдел"
+hy = "Ընտրեք բաժինը"
+
+["ph.partner_tin"]
+en = "8 digits, optional"
+ru = "8 цифр, необязательно"
+hy = "8 նիշ, ըստ ցանկության"
+
+["ph.device_default"]
+en = "Device default"
+ru = "По умолчанию"
+hy = "Սարքի կանխադրված"
+
+["ph.optional"]
+en = "optional"
+ru = "необязательно"
+hy = "ըստ ցանկության"
+
+["ph.optional_full"]
+en = "optional, blank = full"
+ru = "необязательно, пусто = полностью"
+hy = "ըստ ցանկության, դատարկ = ամբողջը"
+
+["ph.optional_note"]
+en = "optional note"
+ru = "необязательная заметка"
+hy = "ըստ ցանկության նշում"
+
+["ph.receipt_number"]
+en = "receipt number"
+ru = "номер чека"
+hy = "կտրոնի համար"
+
+["ph.type_code"]
+en = "type code"
+ru = "код типа"
+hy = "տեսակի կոդ"
+
+["ph.emark_len"]
+en = "29–110 characters"
+ru = "29–110 символов"
+hy = "29–110 նիշ"
+
+["ph.rrn12"]
+en = "12 chars"
+ru = "12 символов"
+hy = "12 նիշ"
+
+["ph.term8"]
+en = "8 chars"
+ru = "8 символов"
+hy = "8 նիշ"
+
+["choice.mode.simple"]
+en = "Simple"
+ru = "Простой"
+hy = "Պարզ"
+
+["choice.mode.products"]
+en = "Products"
+ru = "Товары"
+hy = "Ապրանքներ"
+
+["choice.mode.prepay"]
+en = "Prepay"
+ru = "Предопл."
+hy = "Կանխավճ."
+
+["choice.report.x"]
+en = "X · interim"
+ru = "X · промежут."
+hy = "X · միջանկյալ"
+
+["choice.report.z"]
+en = "Z · close day"
+ru = "Z · закрытие"
+hy = "Z · փակում"
+
+["choice.filter.none"]
+en = "None"
+ru = "Нет"
+hy = "Չկա"
+
+["choice.filter.dept"]
+en = "Dept"
+ru = "Отдел"
+hy = "Բաժին"
+
+["choice.filter.operator"]
+en = "Operator"
+ru = "Оператор"
+hy = "Օպեր."
+
+["choice.filter.txn"]
+en = "Txn"
+ru = "Тип"
+hy = "Գործ."
