@@ -61,8 +61,29 @@ pub async fn serve(config: BridgeConfig) -> anyhow::Result<()> {
 }
 
 async fn shutdown_signal() {
-    if let Err(err) = tokio::signal::ctrl_c().await {
-        log::error!("hdm-bridge: failed to listen for shutdown signal: {err}");
+    let ctrl_c = async {
+        if let Err(err) = tokio::signal::ctrl_c().await {
+            log::error!("hdm-bridge: failed to listen for Ctrl-C: {err}");
+        }
+    };
+
+    // A managed `hdm bridge stop` (and most service managers) terminate with SIGTERM, not SIGINT —
+    // handle both so shutdown is always graceful.
+    #[cfg(unix)]
+    let terminate = async {
+        match tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate()) {
+            Ok(mut term) => {
+                term.recv().await;
+            }
+            Err(err) => log::error!("hdm-bridge: failed to listen for SIGTERM: {err}"),
+        }
+    };
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        () = ctrl_c => {}
+        () = terminate => {}
     }
     log::info!("hdm-bridge: shutting down");
 }

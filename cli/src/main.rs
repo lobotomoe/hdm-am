@@ -10,6 +10,7 @@
 #![warn(missing_docs)]
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used))]
 
+mod bridge;
 mod conn;
 mod format;
 mod run;
@@ -128,6 +129,53 @@ pub enum Command {
 
     /// Upload the receipt header logo bitmap. Persists on the device.
     Logo(LogoArgs),
+
+    /// Manage the local HTTP bridge that exposes this device to a browser: start/stop/status as a
+    /// background process, or `run` in the foreground.
+    Bridge(BridgeArgs),
+}
+
+/// Arguments for the `bridge` command.
+#[derive(Debug, clap::Args)]
+pub struct BridgeArgs {
+    /// What to do with the bridge.
+    #[command(subcommand)]
+    pub action: BridgeAction,
+}
+
+/// Lifecycle actions for the local HTTP bridge.
+#[derive(Debug, Subcommand)]
+pub enum BridgeAction {
+    /// Start the bridge as a background process and return immediately.
+    Start(BridgeRunArgs),
+    /// Run the bridge in the foreground until terminated (for debugging or a service manager).
+    Run(BridgeRunArgs),
+    /// Stop the background bridge.
+    Stop,
+    /// Report whether the background bridge is running.
+    Status,
+}
+
+/// Bridge server settings forwarded to the `hdm-bridge` process. The device connection comes from
+/// the global `--host`/`--password`/`--cashier`/`--pin` flags (or the `HDM_*` env vars).
+#[derive(Debug, clap::Args)]
+pub struct BridgeRunArgs {
+    /// Address to listen on (loopback only in production; defaults to 127.0.0.1:8077).
+    #[arg(long, env = "HDM_BRIDGE_BIND")]
+    pub bind: Option<String>,
+    /// Bearer token required on every route except `/v1/health`.
+    #[arg(long, env = "HDM_BRIDGE_TOKEN")]
+    pub token: Option<String>,
+    /// Start without a token (loopback development only — leaves the device unprotected).
+    #[arg(long)]
+    pub insecure_no_auth: bool,
+    /// Allowed CORS origin (repeatable; env is comma-separated).
+    #[arg(
+        long = "allow-origin",
+        env = "HDM_BRIDGE_ALLOW_ORIGIN",
+        value_delimiter = ','
+    )]
+    pub allow_origins: Vec<String>,
 }
 
 /// Arguments for the `lookup-receipt` command (op 6).

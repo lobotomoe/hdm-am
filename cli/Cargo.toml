@@ -27,5 +27,10 @@ serde_json = "1"
 base64 = "0.22"
 rust_decimal = "1"
 
+# Background bridge supervision (`hdm bridge start/stop/status`) sends signals and probes process
+# liveness. Unix-only; on other platforms `hdm bridge run` (foreground) is offered instead.
+[target.'cfg(unix)'.dependencies]
+nix = { version = "0.29", features = ["signal", "process"] }
+
 [lints]
 workspace = true

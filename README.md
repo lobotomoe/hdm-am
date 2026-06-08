@@ -190,6 +190,19 @@ HDM_HOST=10.0.0.5 HDM_PASSWORD=… HDM_CASHIER=3 HDM_PIN=1234 \
   cargo run -p hdm-am-bridge          # listens on 127.0.0.1:8077 by default
 ```
 
+The `hdm` CLI can also supervise it as a background process (Unix), so you don't have to keep a
+terminal open. It runs the `hdm-bridge` binary as a child — the CLI takes on no dependency on the
+bridge crate; device connection comes from the usual global `--host`/`--password`/`--cashier`/`--pin`
+flags (or `HDM_*` env):
+
+```sh
+hdm --host 10.0.0.5 --password … --cashier 3 --pin 1234 \
+  bridge start --token "$TOKEN" --allow-origin https://your-web-app.example
+hdm bridge status     # running? pid / bind / uptime
+hdm bridge stop       # graceful SIGTERM
+hdm bridge run        # foreground instead (for a service manager: it execs the bridge)
+```
+
 Every operation is a `POST` with a uniform envelope: an optional per-request `connection` override
 (merged field-by-field over the configured default device) and the operation's `params` (the library
 request type verbatim — `PrintReceiptRequest`, `FiscalReportRequest`, …):
