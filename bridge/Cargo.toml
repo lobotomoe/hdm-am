@@ -10,6 +10,10 @@ repository = "https://github.com/lobotomoe/hdm-am"
 # Not published: depends on the library by path. Same rationale as the CLI crate.
 publish = false
 
+[package.metadata.dist]
+# Ship this binary via `dist` even though `publish = false` (path dependency on the lib).
+dist = true
+
 [[bin]]
 name = "hdm-bridge"
 path = "src/main.rs"

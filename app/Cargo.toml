@@ -10,6 +10,11 @@ repository = "https://github.com/lobotomoe/hdm-am"
 publish = false
 build = "build.rs"
 
+[package.metadata.dist]
+# The GUI app has its own per-platform packaging (Android/iOS/macOS/Windows); it is not a `dist`
+# (CLI/server) release artifact.
+dist = false
+
 [lib]
 crate-type = ["rlib", "cdylib"]
 

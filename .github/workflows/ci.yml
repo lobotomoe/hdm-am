@@ -74,6 +74,26 @@ jobs:
       - name: Build on MSRV
         run: cargo build -p hdm-am -p hdm-am-cli
 
+  # The library, CLI, and bridge ship as cross-platform binaries (see dist-workspace.toml). Linux is
+  # covered by `check`; this builds and tests them on macOS and Windows so platform-specific paths
+  # (the CLI's Unix daemon supervision vs its non-Unix fallback, the bridge's SIGTERM handling) can't
+  # regress. The GUI app has its own per-OS jobs and is excluded here.
+  cross-platform:
+    name: cross-platform (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: cross-${{ matrix.os }}
+      - name: Build & test lib, CLI, bridge
+        run: cargo test -p hdm-am -p hdm-am-cli -p hdm-am-bridge --all-features
+
   android:
     runs-on: ubuntu-latest
     env:
