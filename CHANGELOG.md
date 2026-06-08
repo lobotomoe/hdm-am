@@ -9,6 +9,27 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-06-08
+
+Still targets HDM integration spec **v0.7.3**.
+
+### Added
+- `hdm-am-bridge` (binary `hdm-bridge`): a localhost HTTP server that exposes the protocol to a
+  browser over CORS — one `POST /v1/<op>` per operation, a configured default device with optional
+  per-request connection override, bearer-token auth, a CORS origin allow-list, the Private Network
+  Access preflight header, and single-session serialization. Embeddable via `hdm_am_bridge::serve`.
+- `hdm bridge start` / `stop` / `status` / `run` — the CLI supervises the bridge as a background
+  process (Unix) with no compile-time dependency on the bridge crate.
+- `Deserialize` for the operation request types and the request-only enums (`PrintMode`,
+  `FiscalReportKind`, `ReportFilter`), and `Serialize` for `HdmIdentity` — so payloads round-trip
+  through JSON (consumed by the bridge).
+- Prebuilt cross-platform binaries (`hdm`, `hdm-bridge`) for Linux (x86_64/aarch64), macOS
+  (x86_64/aarch64), and Windows (x86_64) via cargo-dist, with shell/PowerShell installers and
+  checksums; CI now builds and tests the library, CLI, and bridge on macOS and Windows.
+
+### Changed
+- The bridge shuts down gracefully on `SIGTERM` as well as Ctrl-C/`SIGINT`.
+
 ## [0.1.0] — 2026-06-05
 
 Initial release. Targets HDM integration spec **v0.7.3** (April 2025).
@@ -24,5 +45,6 @@ Initial release. Targets HDM integration spec **v0.7.3** (April 2025).
 - `hdm-am-cli` (binary `hdm`): one subcommand per operation, text or `--json` output.
 - Offline spec archive under `docs/history/` (v0.3–v0.7.3) with a wire-protocol changelog.
 
-[Unreleased]: https://github.com/lobotomoe/hdm-am/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/lobotomoe/hdm-am/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/lobotomoe/hdm-am/releases/tag/v0.2.0
 [0.1.0]: https://github.com/lobotomoe/hdm-am/releases/tag/v0.1.0
