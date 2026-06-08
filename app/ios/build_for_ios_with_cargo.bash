@@ -10,10 +10,8 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PAT
 
 if [[ "${CONFIGURATION:-Debug}" == "Debug" ]]; then
     cargo_profile="debug"
-    cargo_release_args=()
 else
     cargo_profile="release"
-    cargo_release_args=(--release)
 fi
 
 export CARGO_TARGET_DIR="${DERIVED_FILE_DIR:?}/cargo"
@@ -43,11 +41,18 @@ for arch in ${ARCHS:?}; do
             ;;
     esac
 
-    cargo build \
-        "${cargo_release_args[@]}" \
-        --manifest-path "$app_dir/Cargo.toml" \
-        --target "$cargo_target" \
-        --bin "$binary_name"
+    if [[ "$cargo_profile" == "release" ]]; then
+        cargo build \
+            --release \
+            --manifest-path "$app_dir/Cargo.toml" \
+            --target "$cargo_target" \
+            --bin "$binary_name"
+    else
+        cargo build \
+            --manifest-path "$app_dir/Cargo.toml" \
+            --target "$cargo_target" \
+            --bin "$binary_name"
+    fi
 
     executables+=("$CARGO_TARGET_DIR/$cargo_target/$cargo_profile/$binary_name")
 done
