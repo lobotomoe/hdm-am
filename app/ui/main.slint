@@ -1,0 +1,347 @@
+import {
+    Button,
+    CheckBox,
+    LineEdit,
+    VerticalBox,
+    HorizontalBox,
+} from "std-widgets.slint";
+
+component FieldLabel inherits Text {
+    color: #53616f;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+component SectionLabel inherits Text {
+    color: #53616f;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+component ActionButton inherits Button {
+    min-height: 34px;
+}
+
+component SmallField inherits VerticalBox {
+    in property <string> label;
+    in-out property <string> value;
+    in property <string> placeholder;
+    in property <bool> enabled-state: true;
+
+    spacing: 4px;
+
+    FieldLabel { text: root.label; }
+    LineEdit {
+        text <=> root.value;
+        enabled: root.enabled-state;
+        placeholder-text: root.placeholder;
+    }
+}
+
+export component MainWindow inherits Window {
+    title: "HDM";
+    min-width: 1120px;
+    min-height: 760px;
+    preferred-width: 1220px;
+    preferred-height: 840px;
+
+    in-out property <string> host: "10.0.0.5";
+    in-out property <string> port: "1025";
+    in-out property <string> timeout-seconds: "50";
+    in-out property <string> password: "";
+    in-out property <string> cashier: "";
+    in-out property <string> pin: "";
+    in-out property <bool> remember-profile: false;
+
+    in-out property <string> receipt-mode: "simple";
+    in-out property <string> amount: "";
+    in-out property <string> card-amount: "";
+    in-out property <string> partial-amount: "";
+    in-out property <string> prepayment-amount: "";
+    in-out property <string> department: "";
+    in-out property <string> partner-tin: "";
+    in-out property <string> payment-system: "";
+    in-out property <bool> use-ext-pos: false;
+    in-out property <string> rrn: "";
+    in-out property <string> terminal-id: "";
+    in-out property <string> crn: "";
+    in-out property <string> receipt-id: "";
+    in-out property <string> ticket: "";
+    in-out property <string> emarks: "";
+    in-out property <string> json-path: "";
+    in-out property <string> logo-path: "";
+    in-out property <string> description: "";
+    in-out property <bool> cash-in: true;
+    in-out property <string> report-kind: "x";
+    in-out property <string> report-filter-kind: "";
+    in-out property <string> report-filter-value: "";
+    in-out property <string> report-start: "0";
+    in-out property <string> report-end: "0";
+    in-out property <bool> confirm-operation: false;
+
+    in-out property <bool> busy: false;
+    in-out property <string> status: "Ready";
+    in-out property <string> detail: "Enter connection settings and run a device operation.";
+    in-out property <string> last-result: "";
+
+    callback probe-requested();
+    callback operators-requested();
+    callback login-requested();
+    callback receipt-requested();
+    callback print-last-requested();
+    callback lookup-requested();
+    callback header-footer-requested();
+    callback logo-requested();
+    callback report-requested();
+    callback return-requested();
+    callback cash-requested();
+    callback datetime-requested();
+    callback sample-requested();
+    callback time-sync-requested();
+    callback payment-systems-requested();
+    callback emark-requested();
+
+    background: #f6f7f8;
+
+    HorizontalLayout {
+        spacing: 0px;
+
+        Rectangle {
+            width: 430px;
+            background: #ffffff;
+            border-color: #d7dce2;
+            border-width: 1px;
+
+            VerticalBox {
+                padding: 18px;
+                spacing: 12px;
+
+                Text {
+                    text: "HDM";
+                    color: #1e252e;
+                    font-size: 28px;
+                    font-weight: 700;
+                }
+
+                SectionLabel { text: "Connection"; }
+
+                SmallField {
+                    label: "Host";
+                    value <=> root.host;
+                    placeholder: "10.0.0.5";
+                    enabled-state: !root.busy;
+                }
+
+                HorizontalBox {
+                    spacing: 10px;
+                    SmallField {
+                        label: "Port";
+                        value <=> root.port;
+                        placeholder: "1025";
+                        enabled-state: !root.busy;
+                    }
+                    SmallField {
+                        label: "Timeout";
+                        value <=> root.timeout-seconds;
+                        placeholder: "50";
+                        enabled-state: !root.busy;
+                    }
+                }
+
+                FieldLabel { text: "Password"; }
+                LineEdit {
+                    text <=> root.password;
+                    enabled: !root.busy;
+                    input-type: InputType.password;
+                    placeholder-text: "HDM password";
+                }
+
+                HorizontalBox {
+                    spacing: 10px;
+                    SmallField {
+                        label: "Cashier";
+                        value <=> root.cashier;
+                        placeholder: "3";
+                        enabled-state: !root.busy;
+                    }
+
+                    VerticalBox {
+                        spacing: 4px;
+                        FieldLabel { text: "PIN"; }
+                        LineEdit {
+                            text <=> root.pin;
+                            enabled: !root.busy;
+                            input-type: InputType.password;
+                            placeholder-text: "1234";
+                        }
+                    }
+                }
+
+                CheckBox {
+                    text: "Remember profile";
+                    checked <=> root.remember-profile;
+                    enabled: !root.busy;
+                }
+
+                Rectangle { height: 1px; background: #e2e6ea; }
+
+                SectionLabel { text: "Operations"; }
+
+                HorizontalBox {
+                    spacing: 10px;
+
+                    VerticalBox {
+                        spacing: 7px;
+
+                        ActionButton { text: root.busy ? "Running..." : "Probe"; enabled: !root.busy; clicked => { root.probe-requested(); } }
+                        ActionButton { text: "Operators"; enabled: !root.busy; clicked => { root.operators-requested(); } }
+                        ActionButton { text: "Verify login"; enabled: !root.busy; clicked => { root.login-requested(); } }
+                        ActionButton { text: "Receipt"; enabled: !root.busy; clicked => { root.receipt-requested(); } }
+                        ActionButton { text: "Print last"; enabled: !root.busy; clicked => { root.print-last-requested(); } }
+                        ActionButton { text: "Lookup"; enabled: !root.busy; clicked => { root.lookup-requested(); } }
+                        ActionButton { text: "Header/footer"; enabled: !root.busy; clicked => { root.header-footer-requested(); } }
+                        ActionButton { text: "Logo"; enabled: !root.busy; clicked => { root.logo-requested(); } }
+                    }
+
+                    VerticalBox {
+                        spacing: 7px;
+
+                        ActionButton { text: "Report"; enabled: !root.busy; clicked => { root.report-requested(); } }
+                        ActionButton { text: "Return"; enabled: !root.busy; clicked => { root.return-requested(); } }
+                        ActionButton { text: "Cash"; enabled: !root.busy; clicked => { root.cash-requested(); } }
+                        ActionButton { text: "Datetime"; enabled: !root.busy; clicked => { root.datetime-requested(); } }
+                        ActionButton { text: "Sample"; enabled: !root.busy; clicked => { root.sample-requested(); } }
+                        ActionButton { text: "Time sync"; enabled: !root.busy; clicked => { root.time-sync-requested(); } }
+                        ActionButton { text: "Payments"; enabled: !root.busy; clicked => { root.payment-systems-requested(); } }
+                        ActionButton { text: "eMark"; enabled: !root.busy; clicked => { root.emark-requested(); } }
+                    }
+                }
+            }
+        }
+
+        Rectangle {
+            background: #f6f7f8;
+
+            VerticalBox {
+                padding: 18px;
+                spacing: 14px;
+
+                HorizontalBox {
+                    spacing: 14px;
+
+                    Rectangle {
+                        width: 11px;
+                        height: 11px;
+                        border-radius: 6px;
+                        background: root.busy ? #d88725 : (root.status == "Error" ? #c73a3a : #26724d);
+                    }
+
+                    Text {
+                        text: root.status;
+                        color: #17202a;
+                        font-size: 22px;
+                        font-weight: 700;
+                        vertical-alignment: center;
+                    }
+                }
+
+                Text {
+                    text: root.detail;
+                    color: #5d6875;
+                    font-size: 14px;
+                }
+
+                Rectangle {
+                    background: #ffffff;
+                    border-radius: 6px;
+                    border-color: #d9dee5;
+                    border-width: 1px;
+
+                    VerticalBox {
+                        padding: 14px;
+                        spacing: 10px;
+
+                        SectionLabel { text: "Operation inputs"; }
+
+                        HorizontalBox {
+                            spacing: 10px;
+                            SmallField { label: "Receipt mode"; value <=> root.receipt-mode; placeholder: "simple/products/prepayment"; enabled-state: !root.busy; }
+                            SmallField { label: "Amount"; value <=> root.amount; placeholder: "cash / cash op"; enabled-state: !root.busy; }
+                            SmallField { label: "Card"; value <=> root.card-amount; placeholder: "card amount"; enabled-state: !root.busy; }
+                            SmallField { label: "Partial"; value <=> root.partial-amount; placeholder: "partial"; enabled-state: !root.busy; }
+                        }
+
+                        HorizontalBox {
+                            spacing: 10px;
+                            SmallField { label: "Prepayment"; value <=> root.prepayment-amount; placeholder: "prepayment"; enabled-state: !root.busy; }
+                            SmallField { label: "Department"; value <=> root.department; placeholder: "1"; enabled-state: !root.busy; }
+                            SmallField { label: "Partner TIN"; value <=> root.partner-tin; placeholder: "optional"; enabled-state: !root.busy; }
+                            SmallField { label: "Payment system"; value <=> root.payment-system; placeholder: "optional"; enabled-state: !root.busy; }
+                        }
+
+                        HorizontalBox {
+                            spacing: 10px;
+                            CheckBox { text: "External POS"; checked <=> root.use-ext-pos; enabled: !root.busy; }
+                            SmallField { label: "RRN"; value <=> root.rrn; placeholder: "123456789012"; enabled-state: !root.busy; }
+                            SmallField { label: "Terminal ID"; value <=> root.terminal-id; placeholder: "12345678"; enabled-state: !root.busy; }
+                        }
+
+                        HorizontalBox {
+                            spacing: 10px;
+                            SmallField { label: "CRN"; value <=> root.crn; placeholder: "51815332"; enabled-state: !root.busy; }
+                            SmallField { label: "Receipt ID"; value <=> root.receipt-id; placeholder: "lookup id"; enabled-state: !root.busy; }
+                            SmallField { label: "Ticket"; value <=> root.ticket; placeholder: "return ticket"; enabled-state: !root.busy; }
+                        }
+
+                        HorizontalBox {
+                            spacing: 10px;
+                            SmallField { label: "eMarks"; value <=> root.emarks; placeholder: "comma-separated"; enabled-state: !root.busy; }
+                            SmallField { label: "JSON path"; value <=> root.json-path; placeholder: "items/header/return json"; enabled-state: !root.busy; }
+                            SmallField { label: "Logo path"; value <=> root.logo-path; placeholder: "logo.bmp"; enabled-state: !root.busy; }
+                        }
+
+                        HorizontalBox {
+                            spacing: 10px;
+                            SmallField { label: "Report kind"; value <=> root.report-kind; placeholder: "x/z"; enabled-state: !root.busy; }
+                            SmallField { label: "Filter kind"; value <=> root.report-filter-kind; placeholder: "dept/cashier/transaction"; enabled-state: !root.busy; }
+                            SmallField { label: "Filter value"; value <=> root.report-filter-value; placeholder: "optional"; enabled-state: !root.busy; }
+                            SmallField { label: "Start"; value <=> root.report-start; placeholder: "0"; enabled-state: !root.busy; }
+                            SmallField { label: "End"; value <=> root.report-end; placeholder: "0"; enabled-state: !root.busy; }
+                        }
+
+                        HorizontalBox {
+                            spacing: 10px;
+                            CheckBox { text: "Cash in"; checked <=> root.cash-in; enabled: !root.busy; }
+                            SmallField { label: "Description"; value <=> root.description; placeholder: "cash/header note"; enabled-state: !root.busy; }
+                            CheckBox { text: "Confirm side effect"; checked <=> root.confirm-operation; enabled: !root.busy; }
+                        }
+                    }
+                }
+
+                Rectangle {
+                    min-height: 205px;
+                    background: #ffffff;
+                    border-radius: 6px;
+                    border-color: #d9dee5;
+                    border-width: 1px;
+
+                    VerticalBox {
+                        padding: 16px;
+                        spacing: 10px;
+
+                        SectionLabel { text: "Result"; }
+
+                        Text {
+                            text: root.last-result == "" ? "No operation has been run yet." : root.last-result;
+                            color: root.last-result == "" ? #7c8794 : #202933;
+                            font-size: 14px;
+                            wrap: word-wrap;
+                        }
+                    }
+                }
+
+                Rectangle { background: transparent; }
+            }
+        }
+    }
+}

@@ -14,6 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install Linux GUI dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            jq \
+            libfontconfig1-dev \
+            libwayland-dev \
+            libx11-dev \
+            libx11-xcb-dev \
+            libxcb1-dev \
+            libxcb-render0-dev \
+            libxcb-shape0-dev \
+            libxcb-xfixes0-dev \
+            libxkbcommon-dev \
+            pkg-config
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -21,6 +36,13 @@ jobs:
 
       - name: Format
         run: cargo fmt --all --check
+
+      - name: App packaging metadata
+        run: |
+          bash -n app/scripts/android-apk.bash
+          bash -n app/scripts/generate-icons.bash
+          bash -n app/ios/build_for_ios_with_cargo.bash
+          jq empty app/ios/Assets.xcassets/AppIcon.appiconset/Contents.json
 
       - name: Clippy
         run: cargo clippy --workspace --all-targets --all-features
@@ -40,9 +62,93 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Install Linux GUI dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libfontconfig1-dev \
+            libwayland-dev \
+            libx11-dev \
+            libx11-xcb-dev \
+            libxcb1-dev \
+            libxcb-render0-dev \
+            libxcb-shape0-dev \
+            libxcb-xfixes0-dev \
+            libxkbcommon-dev \
+            pkg-config
       - uses: dtolnay/rust-toolchain@1.85.0
       - uses: Swatinem/rust-cache@v2
       # MSRV covers the default build that consumers depend on; the optional `schema` feature is a
       # dev/tooling concern and is excluded from the guarantee.
       - name: Build on MSRV
         run: cargo build --workspace
+
+  android:
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_NDK_VERSION: 27.1.12297006
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+      - uses: android-actions/setup-android@v3
+      - name: Install Android SDK/NDK
+        run: |
+          sdkmanager \
+            "build-tools;35.0.0" \
+            "ndk;$ANDROID_NDK_VERSION" \
+            "platform-tools" \
+            "platforms;android-35"
+          echo "ANDROID_NDK=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION" >> "$GITHUB_ENV"
+          echo "ANDROID_NDK_ROOT=$ANDROID_HOME/ndk/$ANDROID_NDK_VERSION" >> "$GITHUB_ENV"
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: android
+      - name: Install cargo-apk
+        run: cargo install cargo-apk --version 0.10.0 --locked
+        env:
+          RUSTFLAGS: ""
+      - name: Check Android target
+        run: app/scripts/android-apk.bash check
+      - name: Build Android APK
+        run: app/scripts/android-apk.bash build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hdm-am-android-debug-apk
+          path: target/debug/apk/hdm-am.apk
+          if-no-files-found: error
+
+  ios:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-ios-sim,x86_64-apple-ios
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: ios
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Check iOS Rust target
+        run: cargo check -p hdm-am-app --target aarch64-apple-ios-sim
+      - name: Generate Xcode project
+        working-directory: app/ios
+        run: xcodegen generate
+      - name: Validate iOS metadata
+        run: |
+          plutil -lint app/ios/Info.plist
+          python3 -m json.tool app/ios/Assets.xcassets/AppIcon.appiconset/Contents.json >/dev/null
+      - name: Build iOS simulator app
+        working-directory: app/ios
+        run: |
+          xcodebuild \
+            -project HDM.xcodeproj \
+            -scheme HDM \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO \
+            build

@@ -1,5 +1,5 @@
 [workspace]
-members = ["cli"]
+members = ["app", "cli"]
 resolver = "3"
 
 [workspace.lints.rust]
