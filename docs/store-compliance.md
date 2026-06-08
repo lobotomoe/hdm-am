@@ -2,7 +2,7 @@
 
 Last reviewed: 2026-06-08.
 
-HDM Tester is a technical utility for testing Armenian fiscal cash registers over a user-entered local
+HDM is a technical utility for testing Armenian fiscal cash registers over a user-entered local
 TCP endpoint. Store metadata and review notes must say this clearly: the app is useful with a real HDM
 device, and it also includes Demo mode so reviewers can verify the UI without hardware.
 
@@ -34,11 +34,11 @@ device, and it also includes Demo mode so reviewers can verify the UI without ha
 
 Suggested short description:
 
-> HDM Tester checks and exercises Armenian fiscal cash registers over a local TCP connection.
+> HDM checks and exercises Armenian fiscal cash registers over a local TCP connection.
 
 Suggested full description:
 
-> HDM Tester is a native utility for developers, integrators, and support teams working with Armenian
+> HDM is a native utility for developers, integrators, and support teams working with Armenian
 > fiscal cash registers. It can probe an HDM endpoint, verify operator credentials, list operators and
 > departments, print or return receipts, run reports, test cash operations, configure headers and
 > logos, sync device time, list payment systems, and submit eMarks. Demo mode lets reviewers and new

@@ -11,7 +11,7 @@
     Version="0.1.0.0" />
 
   <Properties>
-    <DisplayName>HDM Tester</DisplayName>
+    <DisplayName>HDM</DisplayName>
     <PublisherDisplayName>Alex Kraiz</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -27,7 +27,7 @@
   <Applications>
     <Application Id="HDMTester" Executable="hdm-app.exe" EntryPoint="Windows.FullTrustApplication">
       <uap:VisualElements
-        DisplayName="HDM Tester"
+        DisplayName="HDM"
         Description="Native utility for testing Armenian fiscal cash registers over a local TCP connection."
         BackgroundColor="#14324A"
         Square44x44Logo="Assets\Square44x44Logo.png"

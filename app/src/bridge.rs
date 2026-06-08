@@ -316,7 +316,7 @@ fn demo_result(action: Action) -> String {
 
 const fn privacy_summary() -> &'static str {
     "Privacy policy\n\
-HDM Tester does not use analytics, ads, tracking, crash reporting, or developer-operated servers.\n\
+HDM does not use analytics, ads, tracking, crash reporting, or developer-operated servers.\n\
 Connection settings, HDM password, cashier PIN, receipt data, eMarks, JSON files, and BMP logo files are used only on the device running the app to send the selected request to the HDM address entered by the user.\n\
 The app does not intentionally persist HDM credentials, fiscal responses, or receipt payloads.\n\
 Full policy: https://github.com/lobotomoe/hdm-am/blob/main/PRIVACY.md"

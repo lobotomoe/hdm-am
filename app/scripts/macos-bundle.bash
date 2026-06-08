@@ -11,11 +11,11 @@ Commands:
   package  Build, sign, and create a Mac App Store .pkg.
 
 Environment:
-  MACOS_APP_NAME              Defaults to "HDM Tester".
+  MACOS_APP_NAME              Defaults to "HDM".
   MACOS_BUNDLE_ID             Defaults to com.lobotomoe.hdmam.macos.
   MACOS_BUNDLE_VERSION        Defaults to 1.
   MACOS_SHORT_VERSION         Defaults to 0.1.0.
-  MACOS_APP_PATH              Defaults to app/macos/build/HDM Tester.app.
+  MACOS_APP_PATH              Defaults to app/macos/build/HDM.app.
   MACOS_CODESIGN_IDENTITY     Required for sign/package.
   MACOS_INSTALLER_IDENTITY    Required for package.
   MACOS_PKG_PATH              Defaults to app/macos/build/HDMTester.pkg.
@@ -45,7 +45,7 @@ app_dir="$(cd -- "$script_dir/.." && pwd)"
 repo_dir="$(cd -- "$app_dir/.." && pwd)"
 macos_dir="$app_dir/macos"
 
-app_name="${MACOS_APP_NAME:-HDM Tester}"
+app_name="${MACOS_APP_NAME:-HDM}"
 bundle_id="${MACOS_BUNDLE_ID:-com.lobotomoe.hdmam.macos}"
 bundle_version="${MACOS_BUNDLE_VERSION:-1}"
 short_version="${MACOS_SHORT_VERSION:-0.1.0}"

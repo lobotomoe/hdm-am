@@ -1,13 +1,12 @@
-# HDM Tester Privacy Policy
+# HDM Privacy Policy
 
 Last updated: 2026-06-08
 
-HDM Tester is a native utility for testing Armenian fiscal cash registers (HDM) over a local TCP
-connection.
+HDM is a native client for Armenian fiscal cash registers over a local TCP connection.
 
 ## Data Handling
 
-HDM Tester does not use analytics, ads, tracking, crash reporting, or developer-operated servers.
+HDM does not use analytics, ads, tracking, crash reporting, or developer-operated servers.
 The developer does not collect, receive, sell, or share personal data through the app.
 
 The app uses the data entered by the user only on the device running the app:
@@ -34,13 +33,13 @@ workflow. Those device-side and tax-authority-side systems are outside the devel
 
 ## Retention And Deletion
 
-Because HDM Tester does not intentionally store app data, closing the app or clearing the input fields
+Because HDM does not intentionally store app data, closing the app or clearing the input fields
 removes the data from the app UI. Data already sent to an HDM is controlled by the HDM and any fiscal
 systems it communicates with.
 
 ## Children
 
-HDM Tester is intended for business and developer use, not for children.
+HDM is intended for business and developer use, not for children.
 
 ## Contact
 

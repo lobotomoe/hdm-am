@@ -5,9 +5,9 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>en</string>
     <key>CFBundleDisplayName</key>
-    <string>HDM Tester</string>
+    <string>HDM</string>
     <key>CFBundleExecutable</key>
-    <string>HDM Tester</string>
+    <string>HDM</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>HDM Tester</string>
+    <string>HDM</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -27,7 +27,7 @@
     <key>NSHumanReadableCopyright</key>
     <string>Copyright © 2026 Alex Kraiz</string>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>HDM Tester needs local network access to connect to Armenian fiscal cash registers over TCP.</string>
+    <string>HDM needs local network access to connect to Armenian fiscal cash registers over TCP.</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
 </dict>
