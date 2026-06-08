@@ -178,7 +178,15 @@ pub fn build_receipt_request(inputs: &OperationInputs) -> Result<PrintReceiptReq
     let paid_amount_card = parse_decimal_or_zero(&inputs.card_amount, "Card", 2)?;
     let partial_amount = parse_decimal_or_zero(&inputs.partial_amount, "Partial", 2)?;
     let pre_payment_amount = parse_decimal_or_zero(&inputs.prepayment_amount, "Prepayment", 2)?;
-    if paid_amount + paid_amount_card + partial_amount + pre_payment_amount <= Decimal::ZERO {
+    // `Decimal + Decimal` panics on overflow; fold with `checked_add` so a pathologically large
+    // entry yields a clean validation error rather than crashing the worker thread.
+    let Some(total) = [paid_amount_card, partial_amount, pre_payment_amount]
+        .into_iter()
+        .try_fold(paid_amount, Decimal::checked_add)
+    else {
+        return Err("Receipt payment amounts are too large to sum.".to_owned());
+    };
+    if total <= Decimal::ZERO {
         return Err("Receipt payment total must be greater than zero.".to_owned());
     }
 
@@ -423,8 +431,18 @@ fn parse_decimal_or_zero(raw: &str, label: &str, max_scale: u32) -> Result<Decim
 }
 
 fn parse_required_decimal(raw: &str, label: &str, max_scale: u32) -> Result<Decimal, String> {
+    let trimmed = raw.trim();
+    // `rust_decimal`'s FromStr also accepts scientific notation (`1e2` -> 100) and digit-group
+    // underscores (`1_000` -> 1000). For a hand-typed fiscal amount those are silent footguns, so a
+    // money/quantity field is restricted to plain notation: digits, one dot, an optional sign.
+    if trimmed
+        .bytes()
+        .any(|b| !matches!(b, b'0'..=b'9' | b'.' | b'-' | b'+'))
+    {
+        return Err(format!("{label} must be a plain decimal number."));
+    }
     let value =
-        Decimal::from_str(raw.trim()).map_err(|_| format!("{label} must be a decimal number."))?;
+        Decimal::from_str(trimmed).map_err(|_| format!("{label} must be a decimal number."))?;
     validate_decimal_scale(value, max_scale, label)?;
     Ok(value)
 }
@@ -697,6 +715,29 @@ mod tests {
             panic!("expected partner TIN validation error");
         };
         assert!(err.contains("Partner TIN"));
+    }
+
+    #[test]
+    fn receipt_rejects_scientific_notation_amount() {
+        let mut inputs = base_inputs();
+        inputs.amount = "1e2".to_owned();
+        let Err(err) = build_receipt_request(&inputs) else {
+            panic!("expected plain-decimal validation error");
+        };
+        assert!(err.contains("plain decimal"), "{err}");
+    }
+
+    #[test]
+    fn receipt_rejects_overflowing_payment_sum() {
+        let mut inputs = base_inputs();
+        // Decimal::MAX in each field overflows the sum; must be a clean error, not a panic.
+        let huge = "79228162514264337593543950335";
+        inputs.amount = huge.to_owned();
+        inputs.card_amount = huge.to_owned();
+        let Err(err) = build_receipt_request(&inputs) else {
+            panic!("expected overflow validation error");
+        };
+        assert!(err.contains("too large to sum"), "{err}");
     }
 
     #[test]

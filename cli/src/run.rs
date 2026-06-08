@@ -194,7 +194,14 @@ fn sample(cli: &Cli) -> Result<()> {
 fn receipt(cli: &Cli, args: &ReceiptArgs) -> Result<()> {
     let request = build_receipt_request(args)?;
 
-    let total = args.cash + args.card + args.partial + args.prepayment;
+    // `Decimal + Decimal` panics on overflow; fold with `checked_add` so absurd amounts surface as
+    // a clean error instead of crashing before the device ever sees the request.
+    let Some(total) = [args.card, args.partial, args.prepayment]
+        .into_iter()
+        .try_fold(args.cash, Decimal::checked_add)
+    else {
+        bail!("payment amounts are too large to sum");
+    };
     let prompt = format!(
         "Print a FISCAL receipt: total {} AMD (cash {} / card {})? This registers a sale.",
         total.round_dp(2),

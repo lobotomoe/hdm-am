@@ -46,8 +46,13 @@ pub struct Cli {
     #[arg(long, env = "HDM_PIN", global = true)]
     pub pin: Option<String>,
 
-    /// Socket read/write/connect timeout, in seconds. The spec caps response wait at 50s.
-    #[arg(long, default_value_t = 50, global = true)]
+    /// Socket read/write/connect timeout, in seconds (1-50). The spec caps response wait at 50s.
+    #[arg(
+        long,
+        default_value_t = 50,
+        value_parser = clap::value_parser!(u64).range(1..=50),
+        global = true
+    )]
     pub timeout: u64,
 
     /// Emit machine-readable JSON instead of formatted text.

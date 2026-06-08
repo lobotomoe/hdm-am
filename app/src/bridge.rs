@@ -195,7 +195,16 @@ fn start_action(weak: &Weak<MainWindow>, action: Action) {
 
     let weak_for_worker = weak.clone();
     thread::spawn(move || {
-        let outcome = run_action(action, &settings, &inputs);
+        // A panic inside run_action (a future regression, a library debug_assert, an allocation
+        // failure on a huge input file) must not strand `busy = true` and freeze every button —
+        // each one is gated on `enabled: !root.busy`. Catch it so the event-loop callback below
+        // always runs and clears the flag.
+        let outcome = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            run_action(action, &settings, &inputs)
+        }))
+        .unwrap_or_else(|_| {
+            Err("Internal error: the operation panicked. Check logs and retry.".to_owned())
+        });
         let invoke_result = slint::invoke_from_event_loop(move || {
             if let Some(window) = weak_for_worker.upgrade() {
                 match outcome {
