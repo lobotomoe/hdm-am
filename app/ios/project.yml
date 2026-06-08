@@ -25,7 +25,7 @@ targets:
       properties:
         CFBundleDisplayName: HDM
         CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "6"
+        CFBundleVersion: "7"
         # The app's only cryptography is the HDM protocol's standard 3DES, used to talk to the
         # device. That qualifies for the export-compliance exemption, so declare it here to skip
         # the per-upload TestFlight prompt. Revisit if the crypto usage ever changes.

@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-06-08 19:26+0000\n"
+"POT-Creation-Date: 2026-06-08 19:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,37 +17,37 @@ msgctxt "NavBar"
 msgid "common.home"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/components.slint:394
+#: /Users/lobotomoe/hdm-am/app/ui/components.slint:396
 msgctxt "PickerSheet"
 msgid "common.cancel"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/components.slint:415
+#: /Users/lobotomoe/hdm-am/app/ui/components.slint:418
 msgctxt "PickerSheet"
 msgid "sheet.empty_loadable"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/components.slint:416
+#: /Users/lobotomoe/hdm-am/app/ui/components.slint:418
 msgctxt "PickerSheet"
 msgid "sheet.empty"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/components.slint:489
+#: /Users/lobotomoe/hdm-am/app/ui/components.slint:491
 msgctxt "PickerSheet"
 msgid "common.loading"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/components.slint:489
+#: /Users/lobotomoe/hdm-am/app/ui/components.slint:491
 msgctxt "PickerSheet"
 msgid "common.refresh"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/components.slint:571
+#: /Users/lobotomoe/hdm-am/app/ui/components.slint:573
 msgctxt "OpDetail"
 msgid "common.confirm"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/components.slint:578
+#: /Users/lobotomoe/hdm-am/app/ui/components.slint:580
 msgctxt "OpDetail"
 msgid "common.running"
 msgstr ""
@@ -57,769 +57,814 @@ msgctxt "PickerRow"
 msgid "common.select"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:83
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:95
 msgctxt "MainWindow"
 msgid "choice.mode.simple"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:84
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:96
 msgctxt "MainWindow"
 msgid "choice.mode.products"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:85
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:97
 msgctxt "MainWindow"
 msgid "choice.mode.prepay"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:88
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:100
 msgctxt "MainWindow"
 msgid "choice.report.x"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:89
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:101
 msgctxt "MainWindow"
 msgid "choice.report.z"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:92
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:104
 msgctxt "MainWindow"
 msgid "choice.filter.none"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:93
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:105
 msgctxt "MainWindow"
 msgid "choice.filter.dept"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:94
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:106
 msgctxt "MainWindow"
 msgid "choice.filter.operator"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:95
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:107
 msgctxt "MainWindow"
 msgid "choice.filter.txn"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:121
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:135
 msgctxt "MainWindow"
-msgid "sheet.select_operator"
-msgstr ""
-
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:122
-msgctxt "MainWindow"
-msgid "sheet.select_department"
-msgstr ""
-
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:123
-msgctxt "MainWindow"
-msgid "sheet.select_payment"
-msgstr ""
-
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:124
-msgctxt "MainWindow"
-msgid "sheet.filter_operator"
-msgstr ""
-
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:125
-msgctxt "MainWindow"
-msgid "sheet.filter_department"
+msgid "sheet.select_profile"
 msgstr ""
 
 #: /Users/lobotomoe/hdm-am/app/ui/main.slint:136
 msgctxt "MainWindow"
-msgid "status.running"
+msgid "sheet.select_operator"
 msgstr ""
 
 #: /Users/lobotomoe/hdm-am/app/ui/main.slint:137
 msgctxt "MainWindow"
-msgid "status.error"
+msgid "sheet.select_department"
 msgstr ""
 
 #: /Users/lobotomoe/hdm-am/app/ui/main.slint:138
 msgctxt "MainWindow"
-msgid "status.input_error"
+msgid "sheet.select_payment"
 msgstr ""
 
 #: /Users/lobotomoe/hdm-am/app/ui/main.slint:139
 msgctxt "MainWindow"
-msgid "status.done"
+msgid "sheet.filter_operator"
 msgstr ""
 
 #: /Users/lobotomoe/hdm-am/app/ui/main.slint:140
 msgctxt "MainWindow"
+msgid "sheet.filter_department"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:151
+msgctxt "MainWindow"
+msgid "status.running"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:152
+msgctxt "MainWindow"
+msgid "status.error"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:153
+msgctxt "MainWindow"
+msgid "status.input_error"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:154
+msgctxt "MainWindow"
+msgid "status.done"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:155
+msgctxt "MainWindow"
 msgid "status.ready"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:142
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:157
 msgctxt "MainWindow"
 msgid "status.waiting"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:143
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:158
 msgctxt "MainWindow"
 msgid "status.completed"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:144
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:159
 msgctxt "MainWindow"
 msgid "status.failed"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:145
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:160
 msgctxt "MainWindow"
 msgid "status.confirm_required"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:146
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:161
 msgctxt "MainWindow"
 msgid "status.fix_inputs"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:147
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:162
 msgctxt "MainWindow"
 msgid "status.demo_done"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:148
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:163
 msgctxt "MainWindow"
 msgid "status.choose"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:247
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:262
 msgctxt "MainWindow"
 msgid "section.connection"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:251
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:266
 msgctxt "MainWindow"
 msgid "home.connection_settings"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:258
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:273
 msgctxt "MainWindow"
 msgid "home.demo"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:269
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:284
 msgctxt "MainWindow"
 msgid "section.diagnostics"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:273
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:273
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:288
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:288
 msgctxt "MainWindow"
 msgid "op.probe.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:279
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:294
 msgctxt "MainWindow"
 msgid "home.operators"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:285
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:285
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:285
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:300
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:300
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:300
 msgctxt "MainWindow"
 msgid "op.login.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:291
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:291
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:306
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:306
 msgctxt "MainWindow"
 msgid "op.datetime.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:297
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:297
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:312
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:312
 msgctxt "MainWindow"
 msgid "op.payments.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:309
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:324
 msgctxt "MainWindow"
 msgid "section.sales"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:313
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:328
 msgctxt "MainWindow"
 msgid "home.sell"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:319
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:319
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:334
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:334
 msgctxt "MainWindow"
 msgid "op.return.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:325
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:325
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:340
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:340
 msgctxt "MainWindow"
 msgid "home.print_last"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:332
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:332
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:347
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:347
 msgctxt "MainWindow"
 msgid "op.lookup.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:344
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:359
 msgctxt "MainWindow"
 msgid "section.cash_reports"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:348
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:348
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:363
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:363
 msgctxt "MainWindow"
 msgid "op.cash_in.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:355
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:355
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:370
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:370
 msgctxt "MainWindow"
 msgid "op.cash_out.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:362
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:377
 msgctxt "MainWindow"
 msgid "home.report"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:374
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:389
 msgctxt "MainWindow"
 msgid "section.device"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:378
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:378
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:393
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:393
 msgctxt "MainWindow"
 msgid "op.header_footer.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:384
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:384
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:399
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:399
 msgctxt "MainWindow"
 msgid "op.logo.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:390
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:390
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:405
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:405
 msgctxt "MainWindow"
 msgid "op.sample.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:396
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:411
 msgctxt "MainWindow"
 msgid "home.time_sync"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:402
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:402
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:402
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:417
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:417
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:417
 msgctxt "MainWindow"
 msgid "op.emark.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:412
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:412
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:427
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:427
 msgctxt "MainWindow"
 msgid "op.privacy.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:429
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:444
 msgctxt "MainWindow"
 msgid "settings.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:449
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:467
 msgctxt "MainWindow"
-msgid "field.host"
-msgstr ""
-
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:455
-msgctxt "MainWindow"
-msgid "field.port"
-msgstr ""
-
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:462
-msgctxt "MainWindow"
-msgid "field.timeout"
-msgstr ""
-
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:469
-msgctxt "MainWindow"
-msgid "field.password"
+msgid "section.profiles"
 msgstr ""
 
 #: /Users/lobotomoe/hdm-am/app/ui/main.slint:471
 msgctxt "MainWindow"
+msgid "field.profile"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:472
+msgctxt "MainWindow"
+msgid "ph.no_profile"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:485
+msgctxt "MainWindow"
+msgid "field.profile_name"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:487
+msgctxt "MainWindow"
+msgid "ph.profile_name"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:492
+msgctxt "MainWindow"
+msgid "settings.save_profile"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:501
+msgctxt "MainWindow"
+msgid "settings.delete_profile"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:512
+msgctxt "MainWindow"
+msgid "field.host"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:518
+msgctxt "MainWindow"
+msgid "field.port"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:525
+msgctxt "MainWindow"
+msgid "field.timeout"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:532
+msgctxt "MainWindow"
+msgid "field.password"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:534
+msgctxt "MainWindow"
 msgid "ph.hdm_password"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:480
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:543
 msgctxt "MainWindow"
 msgid "section.operator"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:484
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:484
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:547
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:547
 msgctxt "MainWindow"
 msgid "field.operator"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:485
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:485
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:548
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:548
 msgctxt "MainWindow"
 msgid "ph.choose_operator"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:499
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:562
 msgctxt "MainWindow"
 msgid "field.cashier_id"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:508
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:571
 msgctxt "MainWindow"
 msgid "field.pin"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:516
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:579
 msgctxt "MainWindow"
 msgid "common.loading"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:516
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:579
 msgctxt "MainWindow"
 msgid "settings.load_directory"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:533
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:596
 msgctxt "MainWindow"
 msgid "settings.advanced"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:538
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:601
 msgctxt "MainWindow"
 msgid "settings.demo"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:547
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:610
 msgctxt "MainWindow"
 msgid "section.language"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:600
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:663
 msgctxt "MainWindow"
 msgid "op.probe.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:601
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:664
 msgctxt "MainWindow"
 msgid "op.probe.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:612
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:675
 msgctxt "MainWindow"
 msgid "op.operators.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:613
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:676
 msgctxt "MainWindow"
 msgid "op.operators.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:614
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:677
 msgctxt "MainWindow"
 msgid "op.operators.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:626
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:689
 msgctxt "MainWindow"
 msgid "op.login.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:639
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:702
 msgctxt "MainWindow"
 msgid "op.datetime.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:640
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:703
 msgctxt "MainWindow"
 msgid "op.datetime.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:652
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:715
 msgctxt "MainWindow"
 msgid "op.payments.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:653
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:716
 msgctxt "MainWindow"
 msgid "op.payments.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:664
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:664
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:727
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:727
 msgctxt "MainWindow"
 msgid "op.receipt.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:665
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:728
 msgctxt "MainWindow"
 msgid "op.receipt.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:680
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:743
 msgctxt "MainWindow"
 msgid "field.mode"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:689
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:752
 msgctxt "MainWindow"
 msgid "field.cash"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:696
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:759
 msgctxt "MainWindow"
 msgid "field.card"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:703
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:766
 msgctxt "MainWindow"
 msgid "field.partial"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:710
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:773
 msgctxt "MainWindow"
 msgid "field.prepayment"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:720
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:720
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:783
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:783
 msgctxt "MainWindow"
 msgid "field.department"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:721
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:721
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:784
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:784
 msgctxt "MainWindow"
 msgid "ph.choose_department"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:735
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:798
 msgctxt "MainWindow"
 msgid "field.department_id"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:745
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:808
 msgctxt "MainWindow"
 msgid "field.items_json"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:754
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:817
 msgctxt "MainWindow"
 msgid "field.partner_tin"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:756
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:819
 msgctxt "MainWindow"
 msgid "ph.partner_tin"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:765
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:828
 msgctxt "MainWindow"
 msgid "section.payment"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:769
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:832
 msgctxt "MainWindow"
 msgid "field.payment_system"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:770
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:833
 msgctxt "MainWindow"
 msgid "ph.device_default"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:784
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:847
 msgctxt "MainWindow"
 msgid "field.ext_pos"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:789
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:789
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:852
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:852
 msgctxt "MainWindow"
 msgid "field.rrn"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:791
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:854
 msgctxt "MainWindow"
 msgid "ph.rrn12"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:795
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:795
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:858
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:858
 msgctxt "MainWindow"
 msgid "field.terminal_id"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:797
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:860
 msgctxt "MainWindow"
 msgid "ph.term8"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:803
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:803
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:866
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:866
 msgctxt "MainWindow"
 msgid "field.emarks"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:805
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:805
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:805
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:805
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:805
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:805
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:805
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:868
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:868
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:868
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:868
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:868
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:868
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:868
 msgctxt "MainWindow"
 msgid "ph.optional"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:813
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:876
 msgctxt "MainWindow"
 msgid "op.print_last.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:814
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:877
 msgctxt "MainWindow"
 msgid "op.print_last.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:830
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:893
 msgctxt "MainWindow"
 msgid "op.lookup.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:831
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:894
 msgctxt "MainWindow"
 msgid "op.lookup.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:841
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:841
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:904
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:904
 msgctxt "MainWindow"
 msgid "field.crn"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:848
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:911
 msgctxt "MainWindow"
 msgid "field.receipt_id"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:850
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:850
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:913
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:913
 msgctxt "MainWindow"
 msgid "ph.receipt_number"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:858
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:921
 msgctxt "MainWindow"
 msgid "op.return.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:859
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:922
 msgctxt "MainWindow"
 msgid "op.return.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:879
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:942
 msgctxt "MainWindow"
 msgid "field.ticket"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:886
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:949
 msgctxt "MainWindow"
 msgid "field.cash_return"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:888
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:951
 msgctxt "MainWindow"
 msgid "ph.optional_full"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:893
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:956
 msgctxt "MainWindow"
 msgid "field.card_return"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:900
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:963
 msgctxt "MainWindow"
 msgid "field.prepayment_return"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:925
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:988
 msgctxt "MainWindow"
 msgid "field.peritem_json"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:934
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:997
 msgctxt "MainWindow"
 msgid "op.report.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:935
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:998
 msgctxt "MainWindow"
 msgid "op.report.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:936
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:999
 msgctxt "MainWindow"
 msgid "op.report.run_z"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:936
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:999
 msgctxt "MainWindow"
 msgid "op.report.run_x"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:950
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1013
 msgctxt "MainWindow"
 msgid "field.report_kind"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:956
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1019
 msgctxt "MainWindow"
 msgid "field.filter"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:995
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1058
 msgctxt "MainWindow"
 msgid "field.transaction_type"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:997
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1060
 msgctxt "MainWindow"
 msgid "ph.type_code"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1005
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1068
 msgctxt "MainWindow"
 msgid "field.start"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1012
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1075
 msgctxt "MainWindow"
 msgid "field.end"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1023
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1086
 msgctxt "MainWindow"
 msgid "op.cash_in.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1023
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1086
 msgctxt "MainWindow"
 msgid "op.cash_out.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1024
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1087
 msgctxt "MainWindow"
 msgid "op.cash_in.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1024
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1087
 msgctxt "MainWindow"
 msgid "op.cash_out.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1039
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1102
 msgctxt "MainWindow"
 msgid "field.cash_in"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1046
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1109
 msgctxt "MainWindow"
 msgid "field.amount"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1053
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1116
 msgctxt "MainWindow"
 msgid "field.description"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1055
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1118
 msgctxt "MainWindow"
 msgid "ph.optional_note"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1063
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1126
 msgctxt "MainWindow"
 msgid "op.header_footer.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1064
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1127
 msgctxt "MainWindow"
 msgid "op.header_footer.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1077
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1140
 msgctxt "MainWindow"
 msgid "field.json_path"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1087
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1150
 msgctxt "MainWindow"
 msgid "op.logo.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1088
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1151
 msgctxt "MainWindow"
 msgid "op.logo.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1101
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1164
 msgctxt "MainWindow"
 msgid "field.logo_path"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1111
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1174
 msgctxt "MainWindow"
 msgid "op.sample.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1112
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1175
 msgctxt "MainWindow"
 msgid "op.sample.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1126
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1189
 msgctxt "MainWindow"
 msgid "op.time_sync.title"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1127
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1190
 msgctxt "MainWindow"
 msgid "op.time_sync.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1128
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1191
 msgctxt "MainWindow"
 msgid "op.time_sync.run"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1143
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1206
 msgctxt "MainWindow"
 msgid "op.emark.desc"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1157
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1220
 msgctxt "MainWindow"
 msgid "field.emark_code"
 msgstr ""
 
-#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1159
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1222
 msgctxt "MainWindow"
 msgid "ph.emark_len"
+msgstr ""
+
+#: /Users/lobotomoe/hdm-am/app/ui/main.slint:1244
+msgctxt "MainWindow"
+msgid "sheet.empty_profiles"
 msgstr ""

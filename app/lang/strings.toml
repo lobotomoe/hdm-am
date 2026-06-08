@@ -141,6 +141,51 @@ en = "CONNECTION"
 ru = "ПОДКЛЮЧЕНИЕ"
 hy = "ՄԻԱՑՈՒՄ"
 
+["section.profiles"]
+en = "SAVED CONNECTIONS"
+ru = "СОХРАНЁННЫЕ ПОДКЛЮЧЕНИЯ"
+hy = "ՊԱՀՊԱՆՎԱԾ ՄԻԱՑՈՒՄՆԵՐ"
+
+["sheet.select_profile"]
+en = "Select connection"
+ru = "Выберите подключение"
+hy = "Ընտրեք միացումը"
+
+["sheet.empty_profiles"]
+en = "No saved connections yet."
+ru = "Пока нет сохранённых подключений."
+hy = "Դեռ պահպանված միացումներ չկան։"
+
+["field.profile"]
+en = "Connection"
+ru = "Подключение"
+hy = "Միացում"
+
+["field.profile_name"]
+en = "Name"
+ru = "Название"
+hy = "Անվանում"
+
+["ph.no_profile"]
+en = "Not saved"
+ru = "Не сохранено"
+hy = "Չպահպանված"
+
+["ph.profile_name"]
+en = "e.g. Shop on Abovyan"
+ru = "напр. Магазин на Абовяна"
+hy = "օր. Խանութ Աբովյանի վրա"
+
+["settings.save_profile"]
+en = "Save current connection"
+ru = "Сохранить подключение"
+hy = "Պահպանել միացումը"
+
+["settings.delete_profile"]
+en = "Delete this connection"
+ru = "Удалить подключение"
+hy = "Ջնջել միացումը"
+
 ["section.diagnostics"]
 en = "DIAGNOSTICS"
 ru = "ДИАГНОСТИКА"

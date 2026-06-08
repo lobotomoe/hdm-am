@@ -1,6 +1,8 @@
+use std::cell::RefCell;
 use std::net::{TcpStream, ToSocketAddrs};
+use std::rc::Rc;
 use std::thread;
-use std::time::Instant;
+use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 use hdm_am::{
     Client, Error as HdmError, FiscalReportKind, InMemorySeq, ListOpsAndDepsResponse,
@@ -9,8 +11,12 @@ use hdm_am::{
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
 use crate::generated::{Choice, MainWindow};
+use crate::storage::{self, Connection, Profile, Store};
 use crate::validation::{ConnectionInput, ConnectionSettings, OperationInputs};
-use crate::{format as ui_format, validation};
+use crate::{format as ui_format, secrets, validation};
+
+/// The persisted store is shared across all UI callbacks; it lives on the (single) UI thread.
+type SharedStore = Rc<RefCell<Store>>;
 
 #[derive(Clone, Copy)]
 enum Action {
@@ -69,20 +75,53 @@ impl Action {
 /// Returns a Slint platform error if the native windowing backend cannot be initialised.
 pub fn run() -> Result<(), slint::PlatformError> {
     let window = MainWindow::new()?;
+    let store = Rc::new(RefCell::new(storage::load()));
+    apply_store_to_window(&window, &store.borrow());
+    wire_callbacks(&window, &store);
+    window.run()
+}
 
+/// Restore persisted state into the freshly built window: language, advanced flag, the last-used
+/// connection draft (and its Keychain secrets), and the saved-favorites list.
+fn apply_store_to_window(window: &MainWindow, store: &Store) {
     // Symbolic translation keys have no automatic fallback, so a language must be selected
-    // explicitly — even English — or the UI would render the raw keys. Sync the picker to it.
-    let language = crate::i18n::initial_language();
+    // explicitly — even English — or the UI would render the raw keys. Prefer the saved choice,
+    // then the system locale.
+    let language = if crate::i18n::SUPPORTED.contains(&store.language.as_str()) {
+        store.language.clone()
+    } else {
+        crate::i18n::initial_language()
+    };
     if let Err(err) = slint::select_bundled_translation(&language) {
         log::warn!("failed to select translation '{language}': {err}");
     }
     window.set_language(language.into());
+    window.set_advanced(store.advanced);
 
-    wire_callbacks(&window);
-    window.run()
+    // A fresh install has an empty draft; leave the .slint default host/port/timeout in place
+    // rather than blanking them.
+    if store.draft != Connection::default() {
+        apply_connection(window, &store.draft);
+    }
+    if let Some(password) = secrets::get(storage::DRAFT_ID, secrets::PASSWORD) {
+        window.set_password(password.into());
+    }
+    if let Some(pin) = secrets::get(storage::DRAFT_ID, secrets::PIN) {
+        window.set_pin(pin.into());
+    }
+
+    window.set_selected_profile(store.selected.clone().into());
+    window.set_profile_choices(profile_choices(&store.favorites));
+    // Prefill the name of the selected favorite so re-saving updates it in place.
+    let selected_name = store
+        .favorites
+        .iter()
+        .find(|p| p.id == store.selected)
+        .map_or_else(String::new, |p| p.name.clone());
+    window.set_profile_name(selected_name.into());
 }
 
-fn wire_callbacks(window: &MainWindow) {
+fn wire_callbacks(window: &MainWindow, store: &SharedStore) {
     let weak = window.as_weak();
     window.on_probe_requested(move || start_action(&weak, Action::Probe));
 
@@ -140,11 +179,205 @@ fn wire_callbacks(window: &MainWindow) {
     let weak = window.as_weak();
     window.on_load_payments_requested(move || start_load_payments(&weak));
 
+    let weak = window.as_weak();
+    let store_c = Rc::clone(store);
     window.on_language_changed(move |code| {
         if let Err(err) = slint::select_bundled_translation(code.as_str()) {
             log::warn!("failed to select translation '{code}': {err}");
         }
+        if let Some(window) = weak.upgrade() {
+            persist(&window, &store_c);
+        }
     });
+
+    let weak = window.as_weak();
+    let store_c = Rc::clone(store);
+    window.on_persist_requested(move || {
+        if let Some(window) = weak.upgrade() {
+            persist(&window, &store_c);
+        }
+    });
+
+    let weak = window.as_weak();
+    let store_c = Rc::clone(store);
+    window.on_save_profile_requested(move |name| {
+        if let Some(window) = weak.upgrade() {
+            save_profile(&window, &store_c, name.as_str());
+        }
+    });
+
+    let weak = window.as_weak();
+    let store_c = Rc::clone(store);
+    window.on_select_profile_requested(move |id| {
+        if let Some(window) = weak.upgrade() {
+            select_profile(&window, &store_c, id.as_str());
+        }
+    });
+
+    let weak = window.as_weak();
+    let store_c = Rc::clone(store);
+    window.on_delete_profile_requested(move |id| {
+        if let Some(window) = weak.upgrade() {
+            delete_profile(&window, &store_c, id.as_str());
+        }
+    });
+}
+
+// ---------------------------------------------------------------------------
+// Persistence: connection draft + saved favorites. Non-secret fields go to the JSON store; the
+// password / PIN go to the Keychain (see `crate::secrets`). All of this runs on the UI thread.
+// ---------------------------------------------------------------------------
+
+fn apply_connection(window: &MainWindow, conn: &Connection) {
+    window.set_host(conn.host.clone().into());
+    window.set_port(conn.port.clone().into());
+    window.set_timeout_seconds(conn.timeout_seconds.clone().into());
+    window.set_cashier(conn.cashier.clone().into());
+    window.set_department(conn.department.clone().into());
+}
+
+fn read_connection(window: &MainWindow) -> Connection {
+    Connection {
+        host: window.get_host().to_string(),
+        port: window.get_port().to_string(),
+        timeout_seconds: window.get_timeout_seconds().to_string(),
+        cashier: window.get_cashier().to_string(),
+        department: window.get_department().to_string(),
+    }
+}
+
+fn profile_choices(favorites: &[Profile]) -> ModelRc<Choice> {
+    let choices: Vec<Choice> = favorites
+        .iter()
+        .map(|profile| {
+            let host = &profile.connection.host;
+            let detail = if host.is_empty() {
+                String::new()
+            } else {
+                format!("{host}:{}", profile.connection.port)
+            };
+            make_choice(profile.id.clone(), profile.name.clone(), detail)
+        })
+        .collect();
+    ModelRc::new(VecModel::from(choices))
+}
+
+/// Store a secret, or delete it when empty — so an empty field never persists a blank secret.
+fn store_secret(profile_id: &str, field: &str, value: &str) {
+    if value.is_empty() {
+        secrets::delete(profile_id, field);
+    } else {
+        secrets::set(profile_id, field, value);
+    }
+}
+
+fn new_profile_id() -> String {
+    let nanos = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_or(0, |elapsed| elapsed.as_nanos());
+    format!("p{nanos}")
+}
+
+/// Snapshot the on-screen draft (connection + language + advanced) and its secrets to disk.
+fn persist(window: &MainWindow, store: &SharedStore) {
+    {
+        let mut store = store.borrow_mut();
+        store.draft = read_connection(window);
+        store.language = window.get_language().to_string();
+        store.advanced = window.get_advanced();
+    }
+    store_secret(
+        storage::DRAFT_ID,
+        secrets::PASSWORD,
+        window.get_password().as_str(),
+    );
+    store_secret(storage::DRAFT_ID, secrets::PIN, window.get_pin().as_str());
+    storage::save(&store.borrow());
+}
+
+/// Save the current connection as a named favorite (upsert by exact name) and select it.
+fn save_profile(window: &MainWindow, store: &SharedStore, name: &str) {
+    let name = name.trim();
+    if name.is_empty() {
+        return;
+    }
+    let conn = read_connection(window);
+    let password = window.get_password().to_string();
+    let pin = window.get_pin().to_string();
+
+    let id = {
+        let mut store_ref = store.borrow_mut();
+        let id = if let Some(existing) = store_ref.favorites.iter_mut().find(|p| p.name == name) {
+            existing.connection = conn.clone();
+            existing.id.clone()
+        } else {
+            let id = new_profile_id();
+            store_ref.favorites.push(Profile {
+                id: id.clone(),
+                name: name.to_owned(),
+                connection: conn.clone(),
+            });
+            id
+        };
+        store_ref.selected.clone_from(&id);
+        store_ref.draft = conn;
+        store_ref.language = window.get_language().to_string();
+        store_ref.advanced = window.get_advanced();
+        id
+    };
+
+    // The favorite and the draft share the same current secrets.
+    store_secret(&id, secrets::PASSWORD, &password);
+    store_secret(&id, secrets::PIN, &pin);
+    store_secret(storage::DRAFT_ID, secrets::PASSWORD, &password);
+    store_secret(storage::DRAFT_ID, secrets::PIN, &pin);
+
+    window.set_selected_profile(id.into());
+    window.set_profile_choices(profile_choices(&store.borrow().favorites));
+    storage::save(&store.borrow());
+}
+
+/// Load a saved favorite into the form (fields + secrets) and remember the selection.
+fn select_profile(window: &MainWindow, store: &SharedStore, id: &str) {
+    let (conn, name) = {
+        let mut store_ref = store.borrow_mut();
+        let Some(profile) = store_ref.favorites.iter().find(|p| p.id == id).cloned() else {
+            return;
+        };
+        id.clone_into(&mut store_ref.selected);
+        store_ref.draft = profile.connection.clone();
+        (profile.connection, profile.name)
+    };
+    apply_connection(window, &conn);
+    // Prefill the name so editing + Save updates this favorite instead of creating a duplicate.
+    window.set_profile_name(name.into());
+
+    let password = secrets::get(id, secrets::PASSWORD).unwrap_or_default();
+    let pin = secrets::get(id, secrets::PIN).unwrap_or_default();
+    window.set_password(password.clone().into());
+    window.set_pin(pin.clone().into());
+    store_secret(storage::DRAFT_ID, secrets::PASSWORD, &password);
+    store_secret(storage::DRAFT_ID, secrets::PIN, &pin);
+
+    window.set_selected_profile(id.into());
+    storage::save(&store.borrow());
+}
+
+/// Delete a saved favorite and its Keychain secrets.
+fn delete_profile(window: &MainWindow, store: &SharedStore, id: &str) {
+    {
+        let mut store_ref = store.borrow_mut();
+        store_ref.favorites.retain(|p| p.id != id);
+        if store_ref.selected == id {
+            store_ref.selected.clear();
+        }
+    }
+    secrets::delete(id, secrets::PASSWORD);
+    secrets::delete(id, secrets::PIN);
+
+    window.set_selected_profile(store.borrow().selected.clone().into());
+    window.set_profile_choices(profile_choices(&store.borrow().favorites));
+    storage::save(&store.borrow());
 }
 
 fn start_action(weak: &Weak<MainWindow>, action: Action) {
@@ -294,7 +527,7 @@ const fn privacy_summary() -> &'static str {
     "Privacy policy\n\
 HDM does not use analytics, ads, tracking, crash reporting, or developer-operated servers.\n\
 Connection settings, HDM password, cashier PIN, receipt data, eMarks, JSON files, and BMP logo files are used only on the device running the app to send the selected request to the HDM address entered by the user.\n\
-The app does not intentionally persist HDM credentials, fiscal responses, or receipt payloads.\n\
+Saved connections are stored on the device only: settings in a private file, and the HDM password and cashier PIN in the iOS Keychain (encrypted, device-only). Deleting a saved connection or the app removes them. The app does not persist fiscal responses or receipt payloads.\n\
 Full policy: https://github.com/lobotomoe/hdm-am/blob/main/PRIVACY.md"
 }
 

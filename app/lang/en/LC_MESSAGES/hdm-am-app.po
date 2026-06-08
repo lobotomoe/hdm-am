@@ -84,6 +84,10 @@ msgid "choice.filter.txn"
 msgstr "Txn"
 
 msgctxt "MainWindow"
+msgid "sheet.select_profile"
+msgstr "Select connection"
+
+msgctxt "MainWindow"
 msgid "sheet.select_operator"
 msgstr "Select operator"
 
@@ -254,6 +258,34 @@ msgstr "Privacy"
 msgctxt "MainWindow"
 msgid "settings.title"
 msgstr "Connection"
+
+msgctxt "MainWindow"
+msgid "section.profiles"
+msgstr "SAVED CONNECTIONS"
+
+msgctxt "MainWindow"
+msgid "field.profile"
+msgstr "Connection"
+
+msgctxt "MainWindow"
+msgid "ph.no_profile"
+msgstr "Not saved"
+
+msgctxt "MainWindow"
+msgid "field.profile_name"
+msgstr "Name"
+
+msgctxt "MainWindow"
+msgid "ph.profile_name"
+msgstr "e.g. Shop on Abovyan"
+
+msgctxt "MainWindow"
+msgid "settings.save_profile"
+msgstr "Save current connection"
+
+msgctxt "MainWindow"
+msgid "settings.delete_profile"
+msgstr "Delete this connection"
 
 msgctxt "MainWindow"
 msgid "field.host"
@@ -634,3 +666,7 @@ msgstr "eMark code"
 msgctxt "MainWindow"
 msgid "ph.emark_len"
 msgstr "29–110 characters"
+
+msgctxt "MainWindow"
+msgid "sheet.empty_profiles"
+msgstr "No saved connections yet."

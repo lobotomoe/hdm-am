@@ -7,6 +7,8 @@
 mod bridge;
 mod format;
 mod i18n;
+mod secrets;
+mod storage;
 #[allow(
     clippy::all,
     clippy::expect_used,

@@ -16,8 +16,22 @@ The app uses the data entered by the user only on the device running the app:
 - User-selected or user-entered JSON and BMP file contents for operations that require structured
   payloads or a logo.
 
-Operation data is sent only to the HDM address entered by the user. The app does not intentionally
-persist HDM credentials, fiscal responses, receipt payloads, or operation history.
+Operation data is sent only to the HDM address entered by the user. The app does not persist fiscal
+responses, receipt payloads, or operation history.
+
+## On-Device Storage
+
+So the user does not have to re-enter connection details every session, the app stores the following
+on the device only, never on any developer or third-party server:
+
+- **Connection settings and saved connections** (host, port, timeout, operator id, default
+  department, interface language, and the names of saved connections) are stored in a local file in
+  the app's private data directory.
+- **The HDM password and cashier PIN** are stored in the operating system's secure credential store
+  (the iOS Keychain), encrypted at rest and marked device-only — they are excluded from iCloud
+  Keychain, encrypted backups, and device-to-device transfer.
+
+This data never leaves the device except as part of the HDM request the user initiates.
 
 ## Local Network
 
@@ -33,9 +47,10 @@ workflow. Those device-side and tax-authority-side systems are outside the devel
 
 ## Retention And Deletion
 
-Because HDM does not intentionally store app data, closing the app or clearing the input fields
-removes the data from the app UI. Data already sent to an HDM is controlled by the HDM and any fiscal
-systems it communicates with.
+Deleting a saved connection in the app removes its stored settings and erases its password and PIN
+from the Keychain. Uninstalling the app removes all of its on-device storage, including the settings
+file and its Keychain credentials. Data already sent to an HDM is controlled by the HDM and any
+fiscal systems it communicates with.
 
 ## Children
 

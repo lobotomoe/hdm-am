@@ -84,6 +84,10 @@ msgid "choice.filter.txn"
 msgstr "Тип"
 
 msgctxt "MainWindow"
+msgid "sheet.select_profile"
+msgstr "Выберите подключение"
+
+msgctxt "MainWindow"
 msgid "sheet.select_operator"
 msgstr "Выберите оператора"
 
@@ -254,6 +258,34 @@ msgstr "Конфиденциальность"
 msgctxt "MainWindow"
 msgid "settings.title"
 msgstr "Подключение"
+
+msgctxt "MainWindow"
+msgid "section.profiles"
+msgstr "СОХРАНЁННЫЕ ПОДКЛЮЧЕНИЯ"
+
+msgctxt "MainWindow"
+msgid "field.profile"
+msgstr "Подключение"
+
+msgctxt "MainWindow"
+msgid "ph.no_profile"
+msgstr "Не сохранено"
+
+msgctxt "MainWindow"
+msgid "field.profile_name"
+msgstr "Название"
+
+msgctxt "MainWindow"
+msgid "ph.profile_name"
+msgstr "напр. Магазин на Абовяна"
+
+msgctxt "MainWindow"
+msgid "settings.save_profile"
+msgstr "Сохранить подключение"
+
+msgctxt "MainWindow"
+msgid "settings.delete_profile"
+msgstr "Удалить подключение"
 
 msgctxt "MainWindow"
 msgid "field.host"
@@ -634,3 +666,7 @@ msgstr "Код eMark"
 msgctxt "MainWindow"
 msgid "ph.emark_len"
 msgstr "29–110 символов"
+
+msgctxt "MainWindow"
+msgid "sheet.empty_profiles"
+msgstr "Пока нет сохранённых подключений."

@@ -46,6 +46,19 @@ slint = { version = "=1.13.1", default-features = false, features = [
     "std",
 ] }
 
+# Keychain-backed secret storage (HDM password / cashier PIN). The `passwords` module is the
+# iOS-safe SecItem path; the device-only accessibility class is set via a small FFI in secrets.rs
+# (the safe API can't set it). Linking of Security.framework / CoreFoundation is automatic on
+# Apple targets, so no build.rs or linker flags are needed.
+[target.'cfg(target_vendor = "apple")'.dependencies]
+security-framework = "3.7"
+# `OSX_10_15` exposes `kSecUseDataProtectionKeychain` on macOS too (it is always present on iOS),
+# so the same secrets.rs compiles for the dev/host build and uses the iOS-style data-protection
+# keychain there for parity.
+security-framework-sys = { version = "2.17", features = ["OSX_10_15"] }
+core-foundation = "0.10"
+core-foundation-sys = "0.8"
+
 [build-dependencies]
 slint-build = "=1.13.1"
 

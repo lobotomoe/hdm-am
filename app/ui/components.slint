@@ -324,6 +324,8 @@ export component PickerSheet inherits Rectangle {
     in property <bool> loadable: false;
     in property <bool> busy;
     in property <string> note;
+    // Optional empty-state text; falls back to the loadable/plain default when "".
+    in property <string> empty-text: "";
     in property <length> safe-bottom: 0;
     callback pick(string);
     callback refresh();
@@ -411,9 +413,9 @@ export component PickerSheet inherits Rectangle {
                     if root.choices.length == 0: Rectangle {
                         height: 64px;
                         Text {
-                            text: root.loadable
-                                ? @tr("sheet.empty_loadable")
-                                : @tr("sheet.empty");
+                            text: root.empty-text != ""
+                                ? root.empty-text
+                                : (root.loadable ? @tr("sheet.empty_loadable") : @tr("sheet.empty"));
                             color: Theme.sub;
                             font-size: 15px;
                             horizontal-alignment: center;

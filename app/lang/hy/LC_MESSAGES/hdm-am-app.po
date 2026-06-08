@@ -84,6 +84,10 @@ msgid "choice.filter.txn"
 msgstr "Գործ."
 
 msgctxt "MainWindow"
+msgid "sheet.select_profile"
+msgstr "Ընտրեք միացումը"
+
+msgctxt "MainWindow"
 msgid "sheet.select_operator"
 msgstr "Ընտրեք օպերատորին"
 
@@ -254,6 +258,34 @@ msgstr "Գաղտնիություն"
 msgctxt "MainWindow"
 msgid "settings.title"
 msgstr "Միացում"
+
+msgctxt "MainWindow"
+msgid "section.profiles"
+msgstr "ՊԱՀՊԱՆՎԱԾ ՄԻԱՑՈՒՄՆԵՐ"
+
+msgctxt "MainWindow"
+msgid "field.profile"
+msgstr "Միացում"
+
+msgctxt "MainWindow"
+msgid "ph.no_profile"
+msgstr "Չպահպանված"
+
+msgctxt "MainWindow"
+msgid "field.profile_name"
+msgstr "Անվանում"
+
+msgctxt "MainWindow"
+msgid "ph.profile_name"
+msgstr "օր. Խանութ Աբովյանի վրա"
+
+msgctxt "MainWindow"
+msgid "settings.save_profile"
+msgstr "Պահպանել միացումը"
+
+msgctxt "MainWindow"
+msgid "settings.delete_profile"
+msgstr "Ջնջել միացումը"
 
 msgctxt "MainWindow"
 msgid "field.host"
@@ -634,3 +666,7 @@ msgstr "eMark կոդ"
 msgctxt "MainWindow"
 msgid "ph.emark_len"
 msgstr "29–110 նիշ"
+
+msgctxt "MainWindow"
+msgid "sheet.empty_profiles"
+msgstr "Դեռ պահպանված միացումներ չկան։"

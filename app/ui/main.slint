@@ -73,6 +73,18 @@ export component MainWindow inherits Window {
     // ---- power-user toggle: reveal raw fields / manual entry ----
     in-out property <bool> advanced: false;
 
+    // ---- saved connections (favorites) ----
+    // The non-secret fields persist to a local JSON file; the password/PIN go to the Keychain.
+    // The bridge owns the store and writes back through these callbacks.
+    in property <[Choice]> profile-choices: [];
+    in-out property <string> selected-profile: "";
+    in-out property <string> profile-name: "";
+    // Snapshot the current draft (connection fields + language + advanced) to disk.
+    callback persist-requested();
+    callback save-profile-requested(string);
+    callback select-profile-requested(string);
+    callback delete-profile-requested(string);
+
     // ---- device-backed choice models (populated by the Rust bridge) ----
     in property <[Choice]> operator-choices: [];
     in property <[Choice]> department-choices: [];
@@ -107,18 +119,21 @@ export component MainWindow inherits Window {
     in-out property <string> picker-note: "";
 
     property <[Choice]> sheet-choices:
-        (root.picker-kind == "cashier" || root.picker-kind == "filter-cashier")
+        root.picker-kind == "profile" ? root.profile-choices
+        : (root.picker-kind == "cashier" || root.picker-kind == "filter-cashier")
             ? root.operator-choices
             : ((root.picker-kind == "department" || root.picker-kind == "filter-dept")
                 ? root.department-choices
                 : root.payment-choices);
     property <string> sheet-current:
-        root.picker-kind == "cashier" ? root.cashier
+        root.picker-kind == "profile" ? root.selected-profile
+        : root.picker-kind == "cashier" ? root.cashier
         : root.picker-kind == "department" ? root.department
         : root.picker-kind == "payment" ? root.payment-system
         : root.report-filter-value;
     property <string> sheet-title:
-        root.picker-kind == "cashier" ? @tr("sheet.select_operator")
+        root.picker-kind == "profile" ? @tr("sheet.select_profile")
+        : root.picker-kind == "cashier" ? @tr("sheet.select_operator")
         : root.picker-kind == "department" ? @tr("sheet.select_department")
         : root.picker-kind == "payment" ? @tr("sheet.select_payment")
         : root.picker-kind == "filter-cashier" ? @tr("sheet.filter_operator")
@@ -428,6 +443,8 @@ export component MainWindow inherits Window {
                 NavBar {
                     title: @tr("settings.title");
                     back => {
+                        // Remember the current connection draft + language + advanced on the way out.
+                        root.persist-requested();
                         root.nav = "";
                     }
                 }
@@ -443,6 +460,53 @@ export component MainWindow inherits Window {
                         alignment: start;
                         padding: Theme.gap;
                         spacing: Theme.gap;
+
+                        VerticalLayout {
+                            spacing: 7px;
+                            SectionHeader {
+                                text: @tr("section.profiles");
+                            }
+                            ListCard {
+                                PickerRow {
+                                    label: @tr("field.profile");
+                                    placeholder: @tr("ph.no_profile");
+                                    choices: root.profile-choices;
+                                    value: root.selected-profile;
+                                    enabled-state: !root.busy;
+                                    last: true;
+                                    open => {
+                                        keyboard-sink.focus();
+                                        root.picker-kind = "profile";
+                                    }
+                                }
+                            }
+                            Card {
+                                Field {
+                                    label: @tr("field.profile_name");
+                                    value <=> root.profile-name;
+                                    placeholder: @tr("ph.profile_name");
+                                    enabled-state: !root.busy;
+                                }
+                            }
+                            PrimaryButton {
+                                text: @tr("settings.save_profile");
+                                enabled-state: !root.busy && root.profile-name != "";
+                                clicked => {
+                                    // Keep the name after saving so tweak + Save updates the same
+                                    // favorite in place (upsert by name).
+                                    keyboard-sink.focus();
+                                    root.save-profile-requested(root.profile-name);
+                                }
+                            }
+                            if root.selected-profile != "": PrimaryButton {
+                                text: @tr("settings.delete_profile");
+                                tint: Theme.danger;
+                                enabled-state: !root.busy;
+                                clicked => {
+                                    root.delete-profile-requested(root.selected-profile);
+                                }
+                            }
+                        }
 
                         Card {
                             Field {
@@ -1176,12 +1240,16 @@ export component MainWindow inherits Window {
         title: root.sheet-title;
         choices: root.sheet-choices;
         current: root.sheet-current;
-        loadable: true;
+        // Device-backed lists can be (re)loaded from the device; saved connections cannot.
+        loadable: root.picker-kind != "profile";
+        empty-text: root.picker-kind == "profile" ? @tr("sheet.empty_profiles") : "";
         busy: root.picker-busy;
         note: root.picker-note;
         safe-bottom: root.safe-bottom;
         pick(key) => {
-            if (root.picker-kind == "cashier") {
+            if (root.picker-kind == "profile") {
+                root.select-profile-requested(key);
+            } else if (root.picker-kind == "cashier") {
                 root.cashier = key;
             } else if (root.picker-kind == "department") {
                 root.department = key;
