@@ -39,7 +39,7 @@ component SmallField inherits VerticalBox {
 }
 
 export component MainWindow inherits Window {
-    title: "HDM";
+    title: "HDM Tester";
     min-width: 1120px;
     min-height: 760px;
     preferred-width: 1220px;
@@ -51,7 +51,7 @@ export component MainWindow inherits Window {
     in-out property <string> password: "";
     in-out property <string> cashier: "";
     in-out property <string> pin: "";
-    in-out property <bool> remember-profile: false;
+    in-out property <bool> demo-mode: false;
 
     in-out property <string> receipt-mode: "simple";
     in-out property <string> amount: "";
@@ -100,6 +100,7 @@ export component MainWindow inherits Window {
     callback time-sync-requested();
     callback payment-systems-requested();
     callback emark-requested();
+    callback privacy-requested();
 
     background: #f6f7f8;
 
@@ -117,7 +118,7 @@ export component MainWindow inherits Window {
                 spacing: 12px;
 
                 Text {
-                    text: "HDM";
+                    text: "HDM Tester";
                     color: #1e252e;
                     font-size: 28px;
                     font-weight: 700;
@@ -129,7 +130,7 @@ export component MainWindow inherits Window {
                     label: "Host";
                     value <=> root.host;
                     placeholder: "10.0.0.5";
-                    enabled-state: !root.busy;
+                    enabled-state: !root.busy && !root.demo-mode;
                 }
 
                 HorizontalBox {
@@ -138,20 +139,20 @@ export component MainWindow inherits Window {
                         label: "Port";
                         value <=> root.port;
                         placeholder: "1025";
-                        enabled-state: !root.busy;
+                        enabled-state: !root.busy && !root.demo-mode;
                     }
                     SmallField {
                         label: "Timeout";
                         value <=> root.timeout-seconds;
                         placeholder: "50";
-                        enabled-state: !root.busy;
+                        enabled-state: !root.busy && !root.demo-mode;
                     }
                 }
 
                 FieldLabel { text: "Password"; }
                 LineEdit {
                     text <=> root.password;
-                    enabled: !root.busy;
+                    enabled: !root.busy && !root.demo-mode;
                     input-type: InputType.password;
                     placeholder-text: "HDM password";
                 }
@@ -162,7 +163,7 @@ export component MainWindow inherits Window {
                         label: "Cashier";
                         value <=> root.cashier;
                         placeholder: "3";
-                        enabled-state: !root.busy;
+                        enabled-state: !root.busy && !root.demo-mode;
                     }
 
                     VerticalBox {
@@ -170,7 +171,7 @@ export component MainWindow inherits Window {
                         FieldLabel { text: "PIN"; }
                         LineEdit {
                             text <=> root.pin;
-                            enabled: !root.busy;
+                            enabled: !root.busy && !root.demo-mode;
                             input-type: InputType.password;
                             placeholder-text: "1234";
                         }
@@ -178,8 +179,8 @@ export component MainWindow inherits Window {
                 }
 
                 CheckBox {
-                    text: "Remember profile";
-                    checked <=> root.remember-profile;
+                    text: "Demo mode";
+                    checked <=> root.demo-mode;
                     enabled: !root.busy;
                 }
 
@@ -215,6 +216,12 @@ export component MainWindow inherits Window {
                         ActionButton { text: "Payments"; enabled: !root.busy; clicked => { root.payment-systems-requested(); } }
                         ActionButton { text: "eMark"; enabled: !root.busy; clicked => { root.emark-requested(); } }
                     }
+                }
+
+                ActionButton {
+                    text: "Privacy";
+                    enabled: !root.busy;
+                    clicked => { root.privacy-requested(); }
                 }
             }
         }

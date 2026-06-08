@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>HDM</string>
+	<string>HDM Tester</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -21,7 +21,7 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>NSLocalNetworkUsageDescription</key>
-	<string>HDM needs local network access to connect to fiscal devices over TCP.</string>
+	<string>HDM Tester needs local network access to connect to Armenian fiscal cash registers over TCP.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

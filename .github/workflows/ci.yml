@@ -40,9 +40,14 @@ jobs:
       - name: App packaging metadata
         run: |
           bash -n app/scripts/android-apk.bash
+          bash -n app/scripts/android-aab.bash
           bash -n app/scripts/generate-icons.bash
+          bash -n app/scripts/ios-build.bash
+          bash -n app/scripts/macos-bundle.bash
           bash -n app/ios/build_for_ios_with_cargo.bash
           jq empty app/ios/Assets.xcassets/AppIcon.appiconset/Contents.json
+          python3 -c "import plistlib; plistlib.load(open('app/ios/Info.plist', 'rb')); plistlib.load(open('app/ios/PrivacyInfo.xcprivacy', 'rb')); plistlib.load(open('app/macos/Info.plist', 'rb')); plistlib.load(open('app/macos/HDMTester.entitlements', 'rb'))"
+          python3 -c "import xml.etree.ElementTree as ET; ET.parse('app/windows/Package.appxmanifest')"
 
       - name: Clippy
         run: cargo clippy --workspace --all-targets --all-features
@@ -96,14 +101,27 @@ jobs:
         run: cargo install cargo-apk --version 0.10.0 --locked
         env:
           RUSTFLAGS: ""
+      - name: Install bundletool
+        run: |
+          curl -L \
+            -o "$RUNNER_TEMP/bundletool.jar" \
+            https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
+          echo "BUNDLETOOL_JAR=$RUNNER_TEMP/bundletool.jar" >> "$GITHUB_ENV"
       - name: Check Android target
         run: app/scripts/android-apk.bash check
       - name: Build Android APK
         run: app/scripts/android-apk.bash build
+      - name: Validate Android AAB packaging
+        run: ANDROID_PROFILE=debug ANDROID_AAB_SOURCE_APK=target/debug/apk/hdm-am.apk app/scripts/android-aab.bash build
       - uses: actions/upload-artifact@v4
         with:
           name: hdm-am-android-debug-apk
           path: target/debug/apk/hdm-am.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hdm-am-android-debug-aab-format-check
+          path: target/debug/aab/*.aab
           if-no-files-found: error
 
   ios:
@@ -126,15 +144,21 @@ jobs:
       - name: Validate iOS metadata
         run: |
           plutil -lint app/ios/Info.plist
+          plutil -lint app/ios/PrivacyInfo.xcprivacy
           python3 -m json.tool app/ios/Assets.xcassets/AppIcon.appiconset/Contents.json >/dev/null
       - name: Build iOS simulator app
-        working-directory: app/ios
-        run: |
-          xcodebuild \
-            -project HDM.xcodeproj \
-            -scheme HDM \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            CODE_SIGNING_ALLOWED=NO \
-            build
+        run: app/scripts/ios-build.bash simulator
+      - name: Build macOS app bundle
+        run: app/scripts/macos-bundle.bash bundle
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: windows
+      - name: Build Windows app layout
+        shell: pwsh
+        run: app/scripts/windows-msix.ps1 layout

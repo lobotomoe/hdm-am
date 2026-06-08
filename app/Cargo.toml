@@ -64,14 +64,13 @@ name = "android.permission.INTERNET"
 name = "android.permission.ACCESS_NETWORK_STATE"
 
 [package.metadata.android.application]
-label = "HDM"
+label = "HDM Tester"
 icon = "@mipmap/ic_launcher"
 theme = "@android:style/Theme.DeviceDefault.NoActionBar"
 extract_native_libs = true
-uses_cleartext_traffic = true
 
 [package.metadata.android.application.activity]
-label = "HDM"
+label = "HDM Tester"
 config_changes = "orientation|keyboardHidden|screenSize"
 launch_mode = "singleTop"
 exported = true

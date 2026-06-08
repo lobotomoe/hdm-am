@@ -60,7 +60,7 @@ done
 mkdir -p "$TARGET_BUILD_DIR/$(dirname "$EXECUTABLE_PATH")"
 lipo -create -output "$TARGET_BUILD_DIR/$EXECUTABLE_PATH" "${executables[@]}"
 
-if [[ "$is_simulator" -eq 0 ]]; then
+if [[ "$is_simulator" -eq 0 && "${CODE_SIGNING_ALLOWED:-YES}" != "NO" ]]; then
     codesign \
         --force \
         --sign "${EXPANDED_CODE_SIGN_IDENTITY:?}" \

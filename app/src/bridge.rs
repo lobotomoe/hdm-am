@@ -139,6 +139,9 @@ fn wire_callbacks(window: &MainWindow) {
 
     let weak = window.as_weak();
     window.on_emark_requested(move || start_action(&weak, Action::Emark));
+
+    let weak = window.as_weak();
+    window.on_privacy_requested(move || show_privacy(&weak));
 }
 
 fn start_action(weak: &Weak<MainWindow>, action: Action) {
@@ -147,7 +150,8 @@ fn start_action(weak: &Weak<MainWindow>, action: Action) {
     };
 
     let inputs = read_inputs(&window);
-    if action.requires_confirmation(&inputs) && !inputs.confirm_operation {
+    let demo_mode = window.get_demo_mode();
+    if !demo_mode && action.requires_confirmation(&inputs) && !inputs.confirm_operation {
         set_result(
             &window,
             "Input error",
@@ -155,6 +159,18 @@ fn start_action(weak: &Weak<MainWindow>, action: Action) {
             "Confirmation required.",
             false,
         );
+        return;
+    }
+
+    if demo_mode {
+        set_result(
+            &window,
+            "Ready",
+            &demo_result(action),
+            "Demo operation completed.",
+            false,
+        );
+        window.set_confirm_operation(false);
         return;
     }
 
@@ -200,6 +216,19 @@ fn start_action(weak: &Weak<MainWindow>, action: Action) {
     });
 }
 
+fn show_privacy(weak: &Weak<MainWindow>) {
+    let Some(window) = weak.upgrade() else {
+        return;
+    };
+    set_result(
+        &window,
+        "Ready",
+        privacy_summary(),
+        "Privacy information.",
+        false,
+    );
+}
+
 fn read_settings(window: &MainWindow, action: Action) -> Result<ConnectionSettings, String> {
     validation::connection_settings(&ConnectionInput {
         host: window.get_host().as_str(),
@@ -241,6 +270,47 @@ fn read_inputs(window: &MainWindow) -> OperationInputs {
         report_end: window.get_report_end().to_string(),
         confirm_operation: window.get_confirm_operation(),
     }
+}
+
+fn demo_result(action: Action) -> String {
+    let suffix = "\n\nDemo mode: no network request was sent and no fiscal data was registered.";
+    let body = match action {
+        Action::Probe => {
+            "10.0.0.5:1025 is an HDM\nTCP connect: 4 ms\nProtocol: 0.7\nSoftware: 1.1.0\nProbe response code: 200"
+        }
+        Action::Operators => {
+            "Operators: 2\nDepartments: 2\n\nOperators\n  [1] Administrator  departments: [1, 2]\n  [3] Cashier  departments: [1]\n\nDepartments\n  [1] Sales\n  [2] Service"
+        }
+        Action::VerifyLogin => "Credentials accepted.",
+        Action::Receipt => {
+            "Fiscal receipt printed\n  fiscal number: 12345678\n  receipt seq:   42\n  reg number:    51815332\n  serial:        HDM-DEMO-001\n  total:         10.00\n  change:        0.00\n  verification:  DEMO-VERIFY"
+        }
+        Action::PrintLast => "Last receipt reprinted.",
+        Action::LookupReceipt => {
+            "Receipt lookup\n  receipt seq: 42\n  cashier id:  3\n  sale type:   sale\n  total:       10.00\n  cash:        10.00\n  card:        0.00\n  eMarks:      0\n  items:       1\n\nItems\n  [1001] Demo item  qty 1 x 10.00"
+        }
+        Action::HeaderFooter => "Header/footer configured.",
+        Action::Logo => "Logo uploaded.",
+        Action::Report => "X-report printed.",
+        Action::Return => {
+            "Return receipt printed\n  return seq: 43\n  fiscal:     12345679\n  reg number: 51815332\n  total:      10.00\n  change:     0.00\n  verification: DEMO-RETURN"
+        }
+        Action::Cash => "Recorded cash-in.",
+        Action::Datetime => "Device time: 2026-06-08T15:40:00+04:00",
+        Action::Sample => "Sample receipt printed.",
+        Action::TimeSync => "Device synchronised with the tax authority.",
+        Action::PaymentSystems => "Payment systems:\n  [1] ArCa\n  [2] Visa/Mastercard",
+        Action::Emark => "eMark accepted.",
+    };
+    format!("{body}{suffix}")
+}
+
+const fn privacy_summary() -> &'static str {
+    "Privacy policy\n\
+HDM Tester does not use analytics, ads, tracking, crash reporting, or developer-operated servers.\n\
+Connection settings, HDM password, cashier PIN, receipt data, eMarks, JSON files, and BMP logo files are used only on the device running the app to send the selected request to the HDM address entered by the user.\n\
+The app does not intentionally persist HDM credentials, fiscal responses, or receipt payloads.\n\
+Full policy: https://github.com/lobotomoe/hdm-am/blob/main/PRIVACY.md"
 }
 
 fn run_action(

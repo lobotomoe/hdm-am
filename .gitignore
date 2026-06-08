@@ -1,4 +1,9 @@
 /target
 /playground
 .claude/
+app/android/build/
 app/ios/*.xcodeproj/
+app/ios/build/
+app/macos/AppIcon.iconset/
+app/macos/build/
+app/windows/build/

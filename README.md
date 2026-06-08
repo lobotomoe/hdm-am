@@ -162,6 +162,11 @@ formats, eMark length/character rules, report ranges, receipt/return item JSON, 
 limits, and BMP logo depth. Device responses are formatted as task-oriented summaries; HDM error
 codes are shown with their meaning and a suggested recovery action.
 
+The GUI includes a Demo mode for store review, training, and first-run checks without fiscal
+hardware. Demo mode returns synthetic responses for every operation and sends no network traffic.
+Privacy policy and store-readiness notes live in [`PRIVACY.md`](PRIVACY.md) and
+[`docs/store-compliance.md`](docs/store-compliance.md).
+
 Slint is pinned to `=1.13.1` because it is the latest checked version whose `rust-version` matches
 this workspace's MSRV (`1.85`). Newer Slint releases currently require Rust 1.88+. Slint's runtime is
 licensed separately (`GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR
