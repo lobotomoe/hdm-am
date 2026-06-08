@@ -1,11 +1,11 @@
 use crate::wire::OperationCode;
 use rust_decimal::Decimal;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use super::{EmptyResponse, Operation};
 
 /// Op 11 request: record a cash-drawer adjustment.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct CashInOutRequest {
     /// Amount; must be greater than zero. Sent as a JSON number on the wire.

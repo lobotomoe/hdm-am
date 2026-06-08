@@ -371,4 +371,78 @@ mod tests {
         assert!(r.rseq.is_none() && r.cid.is_none() && r.ta.is_none());
         assert!(r.e_marks.is_empty() && r.totals.is_empty());
     }
+
+    // --- Request deserialization (the input side the HTTP bridge relies on). ---
+
+    /// `PrintMode` round-trips through its integer wire value and rejects unknown codes.
+    #[test]
+    fn print_mode_deserialises_from_wire_value() {
+        assert_eq!(
+            serde_json::from_str::<PrintMode>("1").unwrap(),
+            PrintMode::Simple
+        );
+        assert_eq!(
+            serde_json::from_str::<PrintMode>("3").unwrap(),
+            PrintMode::Prepayment
+        );
+        assert!(serde_json::from_str::<PrintMode>("9").is_err());
+    }
+
+    /// `FiscalReportKind` round-trips through 1 (X) / 2 (Z) and rejects unknown codes.
+    #[test]
+    fn fiscal_report_kind_deserialises_from_wire_value() {
+        assert_eq!(
+            serde_json::from_str::<FiscalReportKind>("1").unwrap(),
+            FiscalReportKind::X
+        );
+        assert_eq!(
+            serde_json::from_str::<FiscalReportKind>("2").unwrap(),
+            FiscalReportKind::Z
+        );
+        assert!(serde_json::from_str::<FiscalReportKind>("0").is_err());
+    }
+
+    /// A minimal receipt JSON parses, with `eMarks`/`items` defaulting to empty when omitted.
+    #[test]
+    fn print_receipt_request_deserialises_with_defaults() {
+        let json = r#"{
+            "mode": 1, "paidAmount": 1000.0, "paidAmountCard": 0.0,
+            "partialAmount": 0.0, "prePaymentAmount": 0.0,
+            "useExtPOS": false, "dep": 1
+        }"#;
+        let req: PrintReceiptRequest = serde_json::from_str(json).unwrap();
+        assert_eq!(req.mode, PrintMode::Simple);
+        assert_eq!(req.paid_amount, Decimal::from(1000));
+        assert_eq!(req.dep, Some(1));
+        assert!(req.partner_tin.is_none());
+        assert!(req.e_marks.is_empty());
+        assert!(req.items.is_empty());
+    }
+
+    /// The `#[serde(flatten)] Option<ReportFilter>` round-trips: a filter key parses into the
+    /// right variant, and its absence yields `None` (the serde flatten+enum gotcha this guards).
+    #[test]
+    fn fiscal_report_request_filter_round_trips() {
+        let with_filter: FiscalReportRequest =
+            serde_json::from_str(r#"{"reportType":1,"deptId":5,"startDate":0,"endDate":0}"#)
+                .unwrap();
+        assert_eq!(with_filter.kind, FiscalReportKind::X);
+        assert_eq!(with_filter.filter, Some(ReportFilter::Department(5)));
+
+        let no_filter: FiscalReportRequest =
+            serde_json::from_str(r#"{"reportType":2,"startDate":0,"endDate":0}"#).unwrap();
+        assert_eq!(no_filter.kind, FiscalReportKind::Z);
+        assert_eq!(no_filter.filter, None);
+
+        // Build -> serialize -> deserialize preserves the chosen filter.
+        let original = FiscalReportRequest {
+            kind: FiscalReportKind::X,
+            filter: Some(ReportFilter::Cashier(7)),
+            start_date: 0,
+            end_date: 0,
+        };
+        let json = serde_json::to_string(&original).unwrap();
+        let back: FiscalReportRequest = serde_json::from_str(&json).unwrap();
+        assert_eq!(back.filter, Some(ReportFilter::Cashier(7)));
+    }
 }

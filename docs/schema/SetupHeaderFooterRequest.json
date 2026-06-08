@@ -9,20 +9,18 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/TextLine"
-      }
+      },
+      "default": []
     },
     "footers": {
       "description": "Footer lines, in print order (top to bottom).",
       "type": "array",
       "items": {
         "$ref": "#/$defs/TextLine"
-      }
+      },
+      "default": []
     }
   },
-  "required": [
-    "headers",
-    "footers"
-  ],
   "$defs": {
     "TextLine": {
       "description": "A single line of header or footer text.",

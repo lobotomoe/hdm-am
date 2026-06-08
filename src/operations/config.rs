@@ -55,12 +55,14 @@ pub struct TextLine {
 }
 
 /// Op 7 request: configure receipt header and footer lines.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SetupHeaderFooterRequest {
     /// Header lines, in print order (top to bottom).
+    #[serde(default)]
     pub headers: Vec<TextLine>,
     /// Footer lines, in print order (top to bottom).
+    #[serde(default)]
     pub footers: Vec<TextLine>,
 }
 
@@ -70,7 +72,7 @@ impl Operation for SetupHeaderFooterRequest {
 }
 
 /// Op 8 request: upload a header logo image (Base64-encoded BMP, colour depth ≤4 bits).
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SetupHeaderLogoRequest {
     /// Logo image bytes encoded as a Base64 string. Per spec §4.6.4 the image must be in **BMP**

@@ -1,5 +1,5 @@
 use crate::wire::OperationCode;
-use serde::{Serialize, Serializer};
+use serde::{Deserialize, Serialize, Serializer};
 
 use super::{EmptyResponse, Operation};
 
@@ -19,11 +19,26 @@ impl Serialize for FiscalReportKind {
     }
 }
 
+impl<'de> Deserialize<'de> for FiscalReportKind {
+    fn deserialize<D: serde::Deserializer<'de>>(de: D) -> Result<Self, D::Error> {
+        let code = u8::deserialize(de)?;
+        Ok(match code {
+            1 => Self::X,
+            2 => Self::Z,
+            other => {
+                return Err(serde::de::Error::custom(format!(
+                    "unknown fiscal report kind code {other} (expected 1 or 2)"
+                )));
+            }
+        })
+    }
+}
+
 /// Optional single dimension a fiscal report is filtered by (spec §4.6.2).
 ///
 /// The spec allows at most one filter per report and rejects multiple with code 169. Modelling it
 /// as an enum makes "more than one filter" unrepresentable. Each variant maps to one wire key.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub enum ReportFilter {
     /// Restrict to a single department (`deptId`).
@@ -38,7 +53,7 @@ pub enum ReportFilter {
 }
 
 /// Op 9 request: print a fiscal report.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct FiscalReportRequest {
     /// X or Z report.

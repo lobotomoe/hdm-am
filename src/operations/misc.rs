@@ -76,7 +76,7 @@ pub struct PaymentSystemEntry {
 }
 
 /// Op 16 request: submit a single eMark traceability code.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct SingleEmarkRequest {
     /// eMark code. Per spec §4.9: 29-110 chars, ASCII-printable only (33-126 plus 29 as

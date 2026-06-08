@@ -27,6 +27,22 @@ impl Serialize for PrintMode {
     }
 }
 
+impl<'de> Deserialize<'de> for PrintMode {
+    fn deserialize<D: serde::Deserializer<'de>>(de: D) -> Result<Self, D::Error> {
+        let code = u8::deserialize(de)?;
+        Ok(match code {
+            1 => Self::Simple,
+            2 => Self::Products,
+            3 => Self::Prepayment,
+            other => {
+                return Err(serde::de::Error::custom(format!(
+                    "unknown print mode code {other} (expected 1, 2, or 3)"
+                )));
+            }
+        })
+    }
+}
+
 /// Discount semantics per spec §4.5.4. The integer values are the wire encoding.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum DiscountKind {
@@ -81,7 +97,7 @@ impl<'de> Deserialize<'de> for DiscountKind {
 }
 
 /// Op 4 request: print a fiscal receipt. Encrypted with the session key.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PrintReceiptRequest {
     /// Mode (simple / products / prepayment).
@@ -126,9 +142,10 @@ pub struct PrintReceiptRequest {
     pub terminal_id: Option<String>,
     /// eMark traceability codes for marked goods (29-110 chars each, ASCII printable, escaping
     /// rules in spec §4.5.4). Used only in product-mode receipts.
-    #[serde(rename = "eMarks")]
+    #[serde(rename = "eMarks", default)]
     pub e_marks: Vec<String>,
     /// Items (required when `mode = Products`). Use an empty `Vec` for simple/prepayment modes.
+    #[serde(default)]
     pub items: Vec<ReceiptItem>,
 }
 
@@ -263,7 +280,7 @@ impl Operation for PrintLastReceiptRequest {
 /// it "print return receipt"). It returns the receipt's items, amounts, eMarks and sale type so a
 /// caller can construct the actual return via [`PrintReturnReceiptRequest`] (op 10). It registers
 /// nothing.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct GetReturnableReceiptRequest {
     /// Number of the receipt to look up.
@@ -415,7 +432,7 @@ pub struct ReturnableReceiptItem {
 /// "ՀԴՄ վերադարձի կտրոնի տպում" = *print return receipt* (the English spec.md mistitled it "get
 /// receipt info"). The read-only lookup of the receipt being returned is op 6,
 /// [`GetReturnableReceiptRequest`].
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PrintReturnReceiptRequest {
     /// HDM registration number of the device that printed the receipt.
@@ -457,10 +474,14 @@ pub struct PrintReturnReceiptRequest {
     #[serde(rename = "terminalId", skip_serializing_if = "Option::is_none")]
     pub terminal_id: Option<String>,
     /// eMark codes for marked goods.
-    #[serde(rename = "eMarks", skip_serializing_if = "Vec::is_empty")]
+    #[serde(rename = "eMarks", skip_serializing_if = "Vec::is_empty", default)]
     pub e_marks: Vec<String>,
     /// Per-item return list (only set if returning specific items partially).
-    #[serde(rename = "returnItemList", skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        rename = "returnItemList",
+        skip_serializing_if = "Vec::is_empty",
+        default
+    )]
     pub return_item_list: Vec<ReturnItem>,
 }
 

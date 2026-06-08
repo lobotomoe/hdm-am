@@ -2,12 +2,14 @@
 
 A Rust client for the Armenian fiscal cash register protocol — the spec published by the State Revenue Committee of Armenia (ՊԵԿ) for integrating external (commercial) software with fiscal cash registers (Հսկիչ Դրամարկղային Մեքենա — **HDM**, ՀԴՄ).
 
-The workspace contains three crates:
+The workspace contains four crates:
 
 - **`hdm-am`** — the library: wire framing, encryption, and one typed request/response per operation.
 - **`hdm-am-cli`** — a thin command-line tool (binary `hdm`) that maps subcommands onto the library.
 - **`hdm-am-app`** — a native Slint GUI application (binary `hdm-app`) with desktop entrypoint now
   and mobile packaging scaffolds for Android/iOS.
+- **`hdm-am-bridge`** — a localhost HTTP server (binary `hdm-bridge`) that exposes the protocol to a
+  browser over CORS, since a browser cannot open a raw TCP socket. See [HTTP bridge](#http-bridge).
 
 ## Scope
 
@@ -172,6 +174,58 @@ this workspace's MSRV (`1.85`). Newer Slint releases currently require Rust 1.88
 licensed separately (`GPL-3.0-only OR LicenseRef-Slint-Royalty-free-2.0 OR
 LicenseRef-Slint-Software-3.0`), so binary distribution of the GUI must account for Slint's license
 terms.
+
+## HTTP bridge
+
+A browser can speak HTTP/WebSocket but not raw TCP, while the HDM protocol is raw 3DES-over-TCP. The
+[`bridge/`](bridge/) crate closes that gap: `hdm-bridge` is a small localhost HTTP server that takes
+JSON on one side and runs the HDM TCP protocol (via `hdm_am::Client`) on the other — one
+`POST /v1/<op>` per operation. The server logic is exposed as `hdm_am_bridge::serve` so it can also be
+embedded in another process (e.g. the GUI app).
+
+```sh
+HDM_BRIDGE_TOKEN=$(openssl rand -hex 16) \
+HDM_BRIDGE_ALLOW_ORIGIN=https://your-web-app.example \
+HDM_HOST=10.0.0.5 HDM_PASSWORD=… HDM_CASHIER=3 HDM_PIN=1234 \
+  cargo run -p hdm-am-bridge          # listens on 127.0.0.1:8077 by default
+```
+
+Every operation is a `POST` with a uniform envelope: an optional per-request `connection` override
+(merged field-by-field over the configured default device) and the operation's `params` (the library
+request type verbatim — `PrintReceiptRequest`, `FiscalReportRequest`, …):
+
+```jsonc
+// POST /v1/receipt
+{
+  "connection": { "host": "10.0.0.5", "cashier": 3 },  // optional; falls back to the configured default
+  "params": { "mode": 1, "paidAmount": 1000.0, "paidAmountCard": 0, "partialAmount": 0,
+              "prePaymentAmount": 0, "useExtPOS": false, "dep": 1 }
+}
+```
+
+Routes mirror the CLI: `/v1/probe`, `/v1/operators`, `/v1/login`, `/v1/receipt`, `/v1/receipt/last`,
+`/v1/receipt/lookup`, `/v1/return`, `/v1/report`, `/v1/cash`, `/v1/datetime`, `/v1/time-sync`,
+`/v1/payment-systems`, `/v1/emark`, `/v1/sample`, `/v1/header-footer`, `/v1/logo`, plus `/v1/health`
+(public liveness) and `/v1/info`. Errors render as a stable envelope carrying the device error code
+and the library's recovery hints:
+
+```jsonc
+{ "error": { "kind": "device_error", "code": 174, "message": "…",
+             "retryable": false, "requires_relogin": false, "requires_reconnect": true } }
+```
+
+Configuration comes from flags or `HDM_*` / `HDM_BRIDGE_*` environment variables (`--help` lists them).
+Because a per-request `connection` can target any host, the bridge is a security boundary: it binds
+loopback only, requires `Authorization: Bearer <HDM_BRIDGE_TOKEN>` on every route except `/v1/health`
+(refusing to start without a token unless `--insecure-no-auth` is passed), restricts callers to an
+explicit `--allow-origin` allow-list, and serializes device access to one session at a time.
+
+**Calling it from an HTTPS page.** `http://127.0.0.1` is a "potentially trustworthy" origin, so mixed
+content is not the obstacle. The bridge answers Chrome's Private Network Access preflight
+(`Access-Control-Allow-Private-Network: true`), but recent Chrome additionally prompts the user to
+allow a connection to a local device. For a frictionless production deployment, terminate TLS on a
+loopback domain (a real certificate for a name that resolves to `127.0.0.1`) so the page talks
+`https` to `https`; that path is a planned follow-up, not yet shipped.
 
 ## Source spec
 

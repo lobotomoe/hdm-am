@@ -79,14 +79,16 @@
       "type": "array",
       "items": {
         "type": "string"
-      }
+      },
+      "default": []
     },
     "items": {
       "description": "Items (required when `mode = Products`). Use an empty `Vec` for simple/prepayment modes.",
       "type": "array",
       "items": {
         "$ref": "#/$defs/ReceiptItem"
-      }
+      },
+      "default": []
     }
   },
   "required": [
@@ -95,9 +97,7 @@
     "paidAmountCard",
     "partialAmount",
     "prePaymentAmount",
-    "useExtPOS",
-    "eMarks",
-    "items"
+    "useExtPOS"
   ],
   "$defs": {
     "ReceiptItem": {
