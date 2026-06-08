@@ -73,8 +73,16 @@ mod tests {
         assert!(!en.is_empty(), "no translations parsed from en .po");
 
         let en_keys: Vec<&String> = en.keys().collect();
-        assert_eq!(en_keys, ru.keys().collect::<Vec<_>>(), "ru keys differ from en");
-        assert_eq!(en_keys, hy.keys().collect::<Vec<_>>(), "hy keys differ from en");
+        assert_eq!(
+            en_keys,
+            ru.keys().collect::<Vec<_>>(),
+            "ru keys differ from en"
+        );
+        assert_eq!(
+            en_keys,
+            hy.keys().collect::<Vec<_>>(),
+            "hy keys differ from en"
+        );
 
         for (lang, map) in [("en", &en), ("ru", &ru), ("hy", &hy)] {
             for (key, value) in map {
