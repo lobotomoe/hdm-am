@@ -21,6 +21,11 @@ export component MainWindow inherits Window {
 
     // Navigation: "" = home, "settings", "privacy", or an operation key.
     in-out property <string> nav: "";
+    // Drop input focus on every screen change so the soft keyboard can never persist across a
+    // navigation (or strand the user on a screen with no field to tap away from).
+    changed nav => {
+        keyboard-sink.focus();
+    }
 
     // ---- language (active translation code: "en" / "ru" / "hy") ----
     in-out property <string> language: "en";
@@ -120,10 +125,31 @@ export component MainWindow inherits Window {
         : @tr("sheet.filter_department");
 
     // ---- status ----
+    // The bridge sets symbolic state codes (not English prose) so the status card translates with
+    // the rest of the UI. `last-result` stays free-form: it carries dynamic device output.
     in-out property <bool> busy: false;
-    in-out property <string> status: "Ready";
-    in-out property <string> detail: "Choose an operation.";
+    in-out property <string> status-kind: "ready"; // ready | running | done | error | input-error
+    in-out property <string> detail-kind: "choose"; // choose | waiting | completed | failed | confirm-required | fix-inputs | demo-done
     in-out property <string> last-result: "";
+
+    property <string> status-text:
+        root.status-kind == "running" ? @tr("status.running")
+        : root.status-kind == "error" ? @tr("status.error")
+        : root.status-kind == "input-error" ? @tr("status.input_error")
+        : root.status-kind == "done" ? @tr("status.done")
+        : @tr("status.ready");
+    property <string> detail-text:
+        root.detail-kind == "waiting" ? @tr("status.waiting")
+        : root.detail-kind == "completed" ? @tr("status.completed")
+        : root.detail-kind == "failed" ? @tr("status.failed")
+        : root.detail-kind == "confirm-required" ? @tr("status.confirm_required")
+        : root.detail-kind == "fix-inputs" ? @tr("status.fix_inputs")
+        : root.detail-kind == "demo-done" ? @tr("status.demo_done")
+        : @tr("status.choose");
+    property <string> status-tone:
+        (root.status-kind == "error" || root.status-kind == "input-error") ? "danger"
+        : root.status-kind == "running" ? "warn"
+        : "ok";
 
     // ---- callbacks (consumed by the Rust bridge) ----
     callback probe-requested();
@@ -237,7 +263,7 @@ export component MainWindow inherits Window {
                             }
                         }
 
-                        VerticalLayout {
+                        if root.advanced: VerticalLayout {
                             spacing: 7px;
                             SectionHeader {
                                 text: @tr("section.diagnostics");
@@ -280,32 +306,33 @@ export component MainWindow inherits Window {
                         VerticalLayout {
                             spacing: 7px;
                             SectionHeader {
-                                text: @tr("section.receipts");
+                                text: @tr("section.sales");
                             }
                             ListCard {
                                 OpRow {
-                                    title: @tr("op.receipt.title");
+                                    title: @tr("home.sell");
                                     clicked => {
                                         root.nav = "receipt";
                                     }
                                 }
                                 OpRow {
+                                    title: @tr("op.return.title");
+                                    clicked => {
+                                        root.nav = "return";
+                                    }
+                                }
+                                OpRow {
                                     title: @tr("home.print_last");
+                                    last: !root.advanced;
                                     clicked => {
                                         root.nav = "print-last";
                                     }
                                 }
-                                OpRow {
+                                if root.advanced: OpRow {
                                     title: @tr("op.lookup.title");
-                                    clicked => {
-                                        root.nav = "lookup";
-                                    }
-                                }
-                                OpRow {
-                                    title: @tr("op.return.title");
                                     last: true;
                                     clicked => {
-                                        root.nav = "return";
+                                        root.nav = "lookup";
                                     }
                                 }
                             }
@@ -314,26 +341,34 @@ export component MainWindow inherits Window {
                         VerticalLayout {
                             spacing: 7px;
                             SectionHeader {
-                                text: @tr("section.reports");
+                                text: @tr("section.cash_reports");
                             }
                             ListCard {
                                 OpRow {
-                                    title: @tr("home.report");
+                                    title: @tr("op.cash_in.title");
                                     clicked => {
-                                        root.nav = "report";
+                                        root.cash-in = true;
+                                        root.nav = "cash";
                                     }
                                 }
                                 OpRow {
-                                    title: @tr("op.cash.title");
+                                    title: @tr("op.cash_out.title");
+                                    clicked => {
+                                        root.cash-in = false;
+                                        root.nav = "cash";
+                                    }
+                                }
+                                OpRow {
+                                    title: @tr("home.report");
                                     last: true;
                                     clicked => {
-                                        root.nav = "cash";
+                                        root.nav = "report";
                                     }
                                 }
                             }
                         }
 
-                        VerticalLayout {
+                        if root.advanced: VerticalLayout {
                             spacing: 7px;
                             SectionHeader {
                                 text: @tr("section.device");
@@ -473,7 +508,6 @@ export component MainWindow inherits Window {
                                     label: @tr("field.pin");
                                     value <=> root.pin;
                                     placeholder: "1234";
-                                    secret: true;
                                     numeric: true;
                                     enabled-state: !root.busy && !root.demo-mode;
                                 }
@@ -566,8 +600,9 @@ export component MainWindow inherits Window {
                 description: @tr("op.probe.desc");
                 run-label: @tr("op.probe.run");
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.probe-requested(); }
@@ -578,8 +613,9 @@ export component MainWindow inherits Window {
                 description: @tr("op.operators.desc");
                 run-label: @tr("op.operators.run");
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.operators-requested(); }
@@ -590,8 +626,9 @@ export component MainWindow inherits Window {
                 description: @tr("op.login.desc");
                 run-label: @tr("op.login.title");
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.login-requested(); }
@@ -602,8 +639,9 @@ export component MainWindow inherits Window {
                 description: @tr("op.datetime.desc");
                 run-label: @tr("op.datetime.run");
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.datetime-requested(); }
@@ -614,8 +652,9 @@ export component MainWindow inherits Window {
                 description: @tr("op.payments.desc");
                 run-label: @tr("op.payments.run");
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.payment-systems-requested(); }
@@ -629,8 +668,9 @@ export component MainWindow inherits Window {
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.receipt-requested(); }
@@ -777,8 +817,9 @@ export component MainWindow inherits Window {
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.print-last-requested(); }
@@ -789,8 +830,9 @@ export component MainWindow inherits Window {
                 description: @tr("op.lookup.desc");
                 run-label: @tr("op.lookup.run");
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.lookup-requested(); }
@@ -819,8 +861,9 @@ export component MainWindow inherits Window {
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.return-requested(); }
@@ -895,8 +938,9 @@ export component MainWindow inherits Window {
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.report-requested(); }
@@ -975,24 +1019,29 @@ export component MainWindow inherits Window {
             }
 
             if root.nav == "cash": OpDetail {
-                title: @tr("op.cash.title");
-                description: @tr("op.cash.desc");
-                run-label: @tr("op.cash.run");
+                title: root.cash-in ? @tr("op.cash_in.title") : @tr("op.cash_out.title");
+                description: root.cash-in ? @tr("op.cash_in.desc") : @tr("op.cash_out.desc");
+                run-label: root.cash-in ? @tr("op.cash_in.run") : @tr("op.cash_out.run");
                 side-effect: true;
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.cash-requested(); }
-                Card {
+                // Direction is set from the home screen (Cash in / Cash out). The raw toggle is a
+                // power-user affordance only; regular users get two unambiguous actions instead.
+                if root.advanced: Card {
                     LabeledToggle {
                         label: @tr("field.cash_in");
                         on <=> root.cash-in;
                         enabled-state: !root.busy;
                     }
+                }
+                Card {
                     Field {
                         label: @tr("field.amount");
                         value <=> root.amount;
@@ -1017,8 +1066,9 @@ export component MainWindow inherits Window {
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.header-footer-requested(); }
@@ -1040,8 +1090,9 @@ export component MainWindow inherits Window {
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.logo-requested(); }
@@ -1063,8 +1114,9 @@ export component MainWindow inherits Window {
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.sample-requested(); }
@@ -1078,8 +1130,9 @@ export component MainWindow inherits Window {
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.time-sync-requested(); }
@@ -1093,8 +1146,9 @@ export component MainWindow inherits Window {
                 confirm <=> root.confirm-operation;
                 demo: root.demo-mode;
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status: root.status-text;
+                detail: root.detail-text;
+                tone: root.status-tone;
                 result: root.last-result;
                 back => { root.nav = ""; }
                 run => { root.emark-requested(); }

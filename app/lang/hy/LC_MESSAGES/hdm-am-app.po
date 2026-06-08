@@ -104,6 +104,54 @@ msgid "sheet.filter_department"
 msgstr "Զտել ըստ բաժնի"
 
 msgctxt "MainWindow"
+msgid "status.running"
+msgstr "Կատարվում է…"
+
+msgctxt "MainWindow"
+msgid "status.error"
+msgstr "Սխալ"
+
+msgctxt "MainWindow"
+msgid "status.input_error"
+msgstr "Ստուգեք մուտքը"
+
+msgctxt "MainWindow"
+msgid "status.done"
+msgstr "Կատարված է"
+
+msgctxt "MainWindow"
+msgid "status.ready"
+msgstr "Պատրաստ է"
+
+msgctxt "MainWindow"
+msgid "status.waiting"
+msgstr "Սպասում է սարքին…"
+
+msgctxt "MainWindow"
+msgid "status.completed"
+msgstr "Գործողությունը կատարվեց։"
+
+msgctxt "MainWindow"
+msgid "status.failed"
+msgstr "Գործողությունը ձախողվեց։"
+
+msgctxt "MainWindow"
+msgid "status.confirm_required"
+msgstr "Պահանջվում է հաստատում։"
+
+msgctxt "MainWindow"
+msgid "status.fix_inputs"
+msgstr "Ուղղեք միացման կարգավորումները։"
+
+msgctxt "MainWindow"
+msgid "status.demo_done"
+msgstr "Դեմո գործողությունը կատարվեց։"
+
+msgctxt "MainWindow"
+msgid "status.choose"
+msgstr "Ընտրեք գործողություն։"
+
+msgctxt "MainWindow"
 msgid "section.connection"
 msgstr "ՄԻԱՑՈՒՄ"
 
@@ -140,12 +188,16 @@ msgid "op.payments.title"
 msgstr "Վճարային համակարգեր"
 
 msgctxt "MainWindow"
-msgid "section.receipts"
-msgstr "ԿՏՐՈՆՆԵՐ ԵՎ ՎԵՐԱԴԱՐՁ"
+msgid "section.sales"
+msgstr "ՎԱՃԱՌՔ"
 
 msgctxt "MainWindow"
-msgid "op.receipt.title"
-msgstr "Տպել կտրոն"
+msgid "home.sell"
+msgstr "Վաճառք"
+
+msgctxt "MainWindow"
+msgid "op.return.title"
+msgstr "Վերադարձ"
 
 msgctxt "MainWindow"
 msgid "home.print_last"
@@ -156,20 +208,20 @@ msgid "op.lookup.title"
 msgstr "Գտնել կտրոնը"
 
 msgctxt "MainWindow"
-msgid "op.return.title"
-msgstr "Վերադարձ"
+msgid "section.cash_reports"
+msgstr "ԿԱՆԽԻԿ ԵՎ ՀԱՇՎԵՏՎՈՒԹՅՈՒՆ"
 
 msgctxt "MainWindow"
-msgid "section.reports"
-msgstr "ՀԱՇՎԵՏՎՈՒԹՅՈՒՆ ԵՎ ԿԱՆԽԻԿ"
+msgid "op.cash_in.title"
+msgstr "Կանխիկի մուտք"
+
+msgctxt "MainWindow"
+msgid "op.cash_out.title"
+msgstr "Կանխիկի ելք"
 
 msgctxt "MainWindow"
 msgid "home.report"
 msgstr "Ֆիսկալ հաշվետվություն (X / Z)"
-
-msgctxt "MainWindow"
-msgid "op.cash.title"
-msgstr "Կանխիկի մուտք / ելք"
 
 msgctxt "MainWindow"
 msgid "section.device"
@@ -302,6 +354,10 @@ msgstr "Ցուցադրել սարքում կարգավորված վճարայի�
 msgctxt "MainWindow"
 msgid "op.payments.run"
 msgstr "Ցուցադրել վճարային համակարգերը"
+
+msgctxt "MainWindow"
+msgid "op.receipt.title"
+msgstr "Տպել կտրոն"
 
 msgctxt "MainWindow"
 msgid "op.receipt.desc"
@@ -492,12 +548,20 @@ msgid "field.end"
 msgstr "Վերջ (epoch մվ, 0 = բոլորը)"
 
 msgctxt "MainWindow"
-msgid "op.cash.desc"
-msgstr "Գրանցել կանխիկի շարժը դրամարկղում։"
+msgid "op.cash_in.desc"
+msgstr "Ավելացնել կանխիկը դրամարկղում։"
 
 msgctxt "MainWindow"
-msgid "op.cash.run"
-msgstr "Գրանցել"
+msgid "op.cash_out.desc"
+msgstr "Հանել կանխիկը դրամարկղից։"
+
+msgctxt "MainWindow"
+msgid "op.cash_in.run"
+msgstr "Մուտքագրել"
+
+msgctxt "MainWindow"
+msgid "op.cash_out.run"
+msgstr "Հանել"
 
 msgctxt "MainWindow"
 msgid "field.cash_in"

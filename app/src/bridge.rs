@@ -33,27 +33,6 @@ enum Action {
 }
 
 impl Action {
-    const fn label(self) -> &'static str {
-        match self {
-            Self::Probe => "Probe",
-            Self::Operators => "Operators",
-            Self::VerifyLogin => "Verify login",
-            Self::Receipt => "Receipt",
-            Self::PrintLast => "Print last",
-            Self::LookupReceipt => "Lookup receipt",
-            Self::HeaderFooter => "Header/footer",
-            Self::Logo => "Logo",
-            Self::Report => "Report",
-            Self::Return => "Return",
-            Self::Cash => "Cash",
-            Self::Datetime => "Datetime",
-            Self::Sample => "Sample",
-            Self::TimeSync => "Time sync",
-            Self::PaymentSystems => "Payment systems",
-            Self::Emark => "eMark",
-        }
-    }
-
     const fn needs_password(self) -> bool {
         !matches!(self, Self::Probe)
     }
@@ -176,24 +155,12 @@ fn start_action(weak: &Weak<MainWindow>, action: Action) {
     let inputs = read_inputs(&window);
     let demo_mode = window.get_demo_mode();
     if !demo_mode && action.requires_confirmation(&inputs) && !inputs.confirm_operation {
-        set_result(
-            &window,
-            "Input error",
-            "This operation changes device state or prints paper. Enable \"Confirm side effect\" and retry.",
-            "Confirmation required.",
-            false,
-        );
+        set_state(&window, "input-error", "confirm-required", "", false);
         return;
     }
 
     if demo_mode {
-        set_result(
-            &window,
-            "Ready",
-            &demo_result(action),
-            "Demo operation completed.",
-            false,
-        );
+        set_state(&window, "done", "demo-done", &demo_result(action), false);
         window.set_confirm_operation(false);
         return;
     }
@@ -201,21 +168,12 @@ fn start_action(weak: &Weak<MainWindow>, action: Action) {
     let settings = match read_settings(&window, action) {
         Ok(settings) => settings,
         Err(message) => {
-            set_result(
-                &window,
-                "Input error",
-                &message,
-                "Fix connection inputs and retry.",
-                false,
-            );
+            set_state(&window, "input-error", "fix-inputs", &message, false);
             return;
         }
     };
 
-    window.set_busy(true);
-    window.set_status(format!("{label} running...", label = action.label()).into());
-    window.set_detail("Waiting for HDM response.".into());
-    window.set_last_result("".into());
+    set_state(&window, "running", "waiting", "", true);
 
     let weak_for_worker = weak.clone();
     thread::spawn(move || {
@@ -233,10 +191,10 @@ fn start_action(weak: &Weak<MainWindow>, action: Action) {
             if let Some(window) = weak_for_worker.upgrade() {
                 match outcome {
                     Ok(message) => {
-                        set_result(&window, "Ready", &message, "Operation completed.", false);
+                        set_state(&window, "done", "completed", &message, false);
                     }
                     Err(message) => {
-                        set_result(&window, "Error", &message, "Operation failed.", false);
+                        set_state(&window, "error", "failed", &message, false);
                     }
                 }
                 window.set_confirm_operation(false);
@@ -253,13 +211,7 @@ fn show_privacy(weak: &Weak<MainWindow>) {
     let Some(window) = weak.upgrade() else {
         return;
     };
-    set_result(
-        &window,
-        "Ready",
-        privacy_summary(),
-        "Privacy information.",
-        false,
-    );
+    set_state(&window, "done", "completed", privacy_summary(), false);
 }
 
 fn read_settings(window: &MainWindow, action: Action) -> Result<ConnectionSettings, String> {
@@ -857,9 +809,12 @@ fn connect(settings: &ConnectionSettings) -> Result<TcpStream, String> {
     Ok(stream)
 }
 
-fn set_result(window: &MainWindow, status: &str, result: &str, detail: &str, busy: bool) {
-    window.set_status(SharedString::from(status));
+/// Push a status update to the UI as symbolic state codes (translated in Slint) plus the free-form
+/// result body. `status_kind`: ready | running | done | error | input-error. `detail_kind`: choose
+/// | waiting | completed | failed | confirm-required | fix-inputs | demo-done.
+fn set_state(window: &MainWindow, status_kind: &str, detail_kind: &str, result: &str, busy: bool) {
+    window.set_status_kind(SharedString::from(status_kind));
+    window.set_detail_kind(SharedString::from(detail_kind));
     window.set_last_result(SharedString::from(result));
-    window.set_detail(SharedString::from(detail));
     window.set_busy(busy);
 }

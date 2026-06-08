@@ -104,6 +104,54 @@ msgid "sheet.filter_department"
 msgstr "Фильтр по отделу"
 
 msgctxt "MainWindow"
+msgid "status.running"
+msgstr "Выполняется…"
+
+msgctxt "MainWindow"
+msgid "status.error"
+msgstr "Ошибка"
+
+msgctxt "MainWindow"
+msgid "status.input_error"
+msgstr "Проверьте ввод"
+
+msgctxt "MainWindow"
+msgid "status.done"
+msgstr "Готово"
+
+msgctxt "MainWindow"
+msgid "status.ready"
+msgstr "Готово"
+
+msgctxt "MainWindow"
+msgid "status.waiting"
+msgstr "Ожидание устройства…"
+
+msgctxt "MainWindow"
+msgid "status.completed"
+msgstr "Операция выполнена."
+
+msgctxt "MainWindow"
+msgid "status.failed"
+msgstr "Операция не выполнена."
+
+msgctxt "MainWindow"
+msgid "status.confirm_required"
+msgstr "Требуется подтверждение."
+
+msgctxt "MainWindow"
+msgid "status.fix_inputs"
+msgstr "Исправьте настройки подключения."
+
+msgctxt "MainWindow"
+msgid "status.demo_done"
+msgstr "Демо-операция выполнена."
+
+msgctxt "MainWindow"
+msgid "status.choose"
+msgstr "Выберите операцию."
+
+msgctxt "MainWindow"
 msgid "section.connection"
 msgstr "ПОДКЛЮЧЕНИЕ"
 
@@ -140,12 +188,16 @@ msgid "op.payments.title"
 msgstr "Платёжные системы"
 
 msgctxt "MainWindow"
-msgid "section.receipts"
-msgstr "ЧЕКИ И ВОЗВРАТЫ"
+msgid "section.sales"
+msgstr "ПРОДАЖИ"
 
 msgctxt "MainWindow"
-msgid "op.receipt.title"
-msgstr "Печать чека"
+msgid "home.sell"
+msgstr "Продажа"
+
+msgctxt "MainWindow"
+msgid "op.return.title"
+msgstr "Возврат"
 
 msgctxt "MainWindow"
 msgid "home.print_last"
@@ -156,20 +208,20 @@ msgid "op.lookup.title"
 msgstr "Найти чек"
 
 msgctxt "MainWindow"
-msgid "op.return.title"
-msgstr "Возврат"
+msgid "section.cash_reports"
+msgstr "КАССА И ОТЧЁТЫ"
 
 msgctxt "MainWindow"
-msgid "section.reports"
-msgstr "ОТЧЁТЫ И КАССА"
+msgid "op.cash_in.title"
+msgstr "Внесение наличных"
+
+msgctxt "MainWindow"
+msgid "op.cash_out.title"
+msgstr "Изъятие наличных"
 
 msgctxt "MainWindow"
 msgid "home.report"
 msgstr "Фискальный отчёт (X / Z)"
-
-msgctxt "MainWindow"
-msgid "op.cash.title"
-msgstr "Внесение / выемка"
 
 msgctxt "MainWindow"
 msgid "section.device"
@@ -221,7 +273,7 @@ msgstr "Пароль"
 
 msgctxt "MainWindow"
 msgid "ph.hdm_password"
-msgstr "Пароль ХДМ"
+msgstr "Пароль ККМ"
 
 msgctxt "MainWindow"
 msgid "section.operator"
@@ -265,7 +317,7 @@ msgstr "ЯЗЫК"
 
 msgctxt "MainWindow"
 msgid "op.probe.desc"
-msgstr "Проверить, отвечает ли адрес по протоколу ХДМ, без входа в систему."
+msgstr "Проверить, отвечает ли адрес по протоколу ККМ, без входа в систему."
 
 msgctxt "MainWindow"
 msgid "op.probe.run"
@@ -302,6 +354,10 @@ msgstr "Показать платёжные системы, настроенны
 msgctxt "MainWindow"
 msgid "op.payments.run"
 msgstr "Показать платёжные системы"
+
+msgctxt "MainWindow"
+msgid "op.receipt.title"
+msgstr "Печать чека"
 
 msgctxt "MainWindow"
 msgid "op.receipt.desc"
@@ -492,12 +548,20 @@ msgid "field.end"
 msgstr "Конец (epoch мс, 0 = всё)"
 
 msgctxt "MainWindow"
-msgid "op.cash.desc"
-msgstr "Зарегистрировать движение наличных в кассе."
+msgid "op.cash_in.desc"
+msgstr "Внести наличные в кассу."
 
 msgctxt "MainWindow"
-msgid "op.cash.run"
-msgstr "Зарегистрировать"
+msgid "op.cash_out.desc"
+msgstr "Изъять наличные из кассы."
+
+msgctxt "MainWindow"
+msgid "op.cash_in.run"
+msgstr "Внести"
+
+msgctxt "MainWindow"
+msgid "op.cash_out.run"
+msgstr "Изъять"
 
 msgctxt "MainWindow"
 msgid "field.cash_in"

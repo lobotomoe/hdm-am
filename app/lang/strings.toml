@@ -40,6 +40,67 @@ en = "Select"
 ru = "Выбрать"
 hy = "Ընտրել"
 
+# Status card state codes (set as symbolic kinds by the Rust bridge, rendered here).
+["status.ready"]
+en = "Ready"
+ru = "Готово"
+hy = "Պատրաստ է"
+
+["status.running"]
+en = "Working…"
+ru = "Выполняется…"
+hy = "Կատարվում է…"
+
+["status.done"]
+en = "Done"
+ru = "Готово"
+hy = "Կատարված է"
+
+["status.error"]
+en = "Error"
+ru = "Ошибка"
+hy = "Սխալ"
+
+["status.input_error"]
+en = "Check input"
+ru = "Проверьте ввод"
+hy = "Ստուգեք մուտքը"
+
+["status.choose"]
+en = "Choose an operation."
+ru = "Выберите операцию."
+hy = "Ընտրեք գործողություն։"
+
+["status.waiting"]
+en = "Waiting for the device…"
+ru = "Ожидание устройства…"
+hy = "Սպասում է սարքին…"
+
+["status.completed"]
+en = "Operation completed."
+ru = "Операция выполнена."
+hy = "Գործողությունը կատարվեց։"
+
+["status.failed"]
+en = "Operation failed."
+ru = "Операция не выполнена."
+hy = "Գործողությունը ձախողվեց։"
+
+["status.confirm_required"]
+en = "Confirmation required."
+ru = "Требуется подтверждение."
+hy = "Պահանջվում է հաստատում։"
+
+["status.fix_inputs"]
+en = "Fix the connection settings and retry."
+ru = "Исправьте настройки подключения."
+hy = "Ուղղեք միացման կարգավորումները։"
+
+["status.demo_done"]
+en = "Demo operation completed."
+ru = "Демо-операция выполнена."
+hy = "Դեմո գործողությունը կատարվեց։"
+
 ["sheet.empty_loadable"]
 en = "No items yet. Tap “Refresh from device”."
 ru = "Список пуст. Нажмите «Загрузить с устройства»."
@@ -85,15 +146,15 @@ en = "DIAGNOSTICS"
 ru = "ДИАГНОСТИКА"
 hy = "ԱԽՏՈՐՈՇՈՒՄ"
 
-["section.receipts"]
-en = "RECEIPTS & RETURNS"
-ru = "ЧЕКИ И ВОЗВРАТЫ"
-hy = "ԿՏՐՈՆՆԵՐ ԵՎ ՎԵՐԱԴԱՐՁ"
+["section.sales"]
+en = "SALES"
+ru = "ПРОДАЖИ"
+hy = "ՎԱՃԱՌՔ"
 
-["section.reports"]
-en = "REPORTS & CASH"
-ru = "ОТЧЁТЫ И КАССА"
-hy = "ՀԱՇՎԵՏՎՈՒԹՅՈՒՆ ԵՎ ԿԱՆԽԻԿ"
+["section.cash_reports"]
+en = "CASH & REPORTS"
+ru = "КАССА И ОТЧЁТЫ"
+hy = "ԿԱՆԽԻԿ ԵՎ ՀԱՇՎԵՏՎՈՒԹՅՈՒՆ"
 
 ["section.device"]
 en = "DEVICE"
@@ -114,6 +175,11 @@ hy = "ՎՃԱՐՈՒՄ"
 en = "LANGUAGE"
 ru = "ЯЗЫК"
 hy = "ԼԵԶՈՒ"
+
+["home.sell"]
+en = "Sell"
+ru = "Продажа"
+hy = "Վաճառք"
 
 ["home.connection_settings"]
 en = "Connection settings"
@@ -152,7 +218,7 @@ hy = "Ստուգում"
 
 ["op.probe.desc"]
 en = "Check whether the endpoint speaks the HDM protocol, without logging in."
-ru = "Проверить, отвечает ли адрес по протоколу ХДМ, без входа в систему."
+ru = "Проверить, отвечает ли адрес по протоколу ККМ, без входа в систему."
 hy = "Ստուգել՝ արդյոք հասցեն խոսում է ՀԴՄ արձանագրությամբ՝ առանց մուտքի։"
 
 ["op.probe.run"]
@@ -285,20 +351,35 @@ en = "Print Z report"
 ru = "Напечатать Z-отчёт"
 hy = "Տպել Z հաշվետվություն"
 
-["op.cash.title"]
-en = "Cash in / out"
-ru = "Внесение / выемка"
-hy = "Կանխիկի մուտք / ելք"
+["op.cash_in.title"]
+en = "Cash in"
+ru = "Внесение наличных"
+hy = "Կանխիկի մուտք"
 
-["op.cash.desc"]
-en = "Record a cash-drawer adjustment."
-ru = "Зарегистрировать движение наличных в кассе."
-hy = "Գրանցել կանխիկի շարժը դրամարկղում։"
+["op.cash_in.desc"]
+en = "Add cash to the drawer."
+ru = "Внести наличные в кассу."
+hy = "Ավելացնել կանխիկը դրամարկղում։"
 
-["op.cash.run"]
-en = "Record cash op"
-ru = "Зарегистрировать"
-hy = "Գրանցել"
+["op.cash_in.run"]
+en = "Record cash in"
+ru = "Внести"
+hy = "Մուտքագրել"
+
+["op.cash_out.title"]
+en = "Cash out"
+ru = "Изъятие наличных"
+hy = "Կանխիկի ելք"
+
+["op.cash_out.desc"]
+en = "Remove cash from the drawer."
+ru = "Изъять наличные из кассы."
+hy = "Հանել կանխիկը դրամարկղից։"
+
+["op.cash_out.run"]
+en = "Record cash out"
+ru = "Изъять"
+hy = "Հանել"
 
 ["op.header_footer.title"]
 en = "Header / footer"
@@ -592,7 +673,7 @@ hy = "eMark կոդ"
 
 ["ph.hdm_password"]
 en = "HDM password"
-ru = "Пароль ХДМ"
+ru = "Пароль ККМ"
 hy = "ՀԴՄ գաղտնաբառ"
 
 ["ph.choose_operator"]

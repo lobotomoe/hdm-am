@@ -1,8 +1,41 @@
 // Structural and display components: cards, rows, nav bar, buttons, result, and the per-operation
 // screen scaffold. Input controls live in inputs.slint.
 
-import { Switch } from "std-widgets.slint";
 import { Theme, Choice } from "theme.slint";
+
+// iOS-style switch. Built in-house rather than reusing std-widgets `Switch` so we control the
+// size (the platform switch rendered too small) and match the iOS track/knob geometry exactly.
+export component IosSwitch inherits Rectangle {
+    in-out property <bool> on;
+    in property <bool> enabled-state: true;
+
+    width: 52px;
+    height: 32px;
+    border-radius: self.height / 2;
+    background: root.on ? Theme.ok : Theme.line;
+    opacity: root.enabled-state ? 1.0 : 0.45;
+    animate background { duration: 150ms; }
+
+    Rectangle {
+        width: 28px;
+        height: 28px;
+        border-radius: self.height / 2;
+        y: 2px;
+        x: root.on ? root.width - self.width - 2px : 2px;
+        background: white;
+        drop-shadow-blur: 2px;
+        drop-shadow-color: #00000038;
+        drop-shadow-offset-y: 1px;
+        animate x { duration: 150ms; easing: ease-out; }
+    }
+
+    TouchArea {
+        enabled: root.enabled-state;
+        clicked => {
+            root.on = !root.on;
+        }
+    }
+}
 
 // Padded rounded container for free-form content.
 export component Card inherits Rectangle {
@@ -111,9 +144,9 @@ export component ToggleRow inherits Rectangle {
             horizontal-stretch: 1;
             overflow: elide;
         }
-        Switch {
-            checked <=> root.on;
-            enabled: root.enabled-state;
+        IosSwitch {
+            on <=> root.on;
+            enabled-state: root.enabled-state;
         }
     }
 
@@ -141,9 +174,9 @@ export component LabeledToggle inherits HorizontalLayout {
         horizontal-stretch: 1;
         wrap: word-wrap;
     }
-    Switch {
-        checked <=> root.on;
-        enabled: root.enabled-state;
+    IosSwitch {
+        on <=> root.on;
+        enabled-state: root.enabled-state;
     }
 }
 
@@ -229,8 +262,10 @@ export component PrimaryButton inherits Rectangle {
 
 export component ResultCard inherits Rectangle {
     in property <bool> busy;
-    in property <string> status;
-    in property <string> detail;
+    // Resolved (already-translated) display text plus a semantic tone for the status dot.
+    in property <string> status-text;
+    in property <string> detail-text;
+    in property <string> tone: "ok"; // ok | warn | danger
     in property <string> result;
 
     background: Theme.card;
@@ -249,10 +284,10 @@ export component ResultCard inherits Rectangle {
                 border-radius: 5px;
                 background: root.busy
                     ? Theme.warn
-                    : (root.status == "Error" ? Theme.danger : Theme.ok);
+                    : (root.tone == "danger" ? Theme.danger : (root.tone == "warn" ? Theme.warn : Theme.ok));
             }
             Text {
-                text: root.status;
+                text: root.status-text;
                 color: Theme.ink;
                 font-size: 17px;
                 font-weight: 600;
@@ -262,7 +297,7 @@ export component ResultCard inherits Rectangle {
         }
 
         Text {
-            text: root.detail;
+            text: root.detail-text;
             color: Theme.sub;
             font-size: 14px;
             wrap: word-wrap;
@@ -483,8 +518,10 @@ export component OpDetail inherits VerticalLayout {
     in-out property <bool> confirm;
     in property <bool> demo;
     in property <bool> busy;
+    // Resolved status/detail text (translated by the parent) plus a semantic tone.
     in property <string> status;
     in property <string> detail;
+    in property <string> tone: "ok";
     in property <string> result;
     callback back;
     callback run;
@@ -547,8 +584,9 @@ export component OpDetail inherits VerticalLayout {
 
             ResultCard {
                 busy: root.busy;
-                status: root.status;
-                detail: root.detail;
+                status-text: root.status;
+                detail-text: root.detail;
+                tone: root.tone;
                 result: root.result;
             }
 

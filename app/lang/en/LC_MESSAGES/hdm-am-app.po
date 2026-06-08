@@ -104,6 +104,54 @@ msgid "sheet.filter_department"
 msgstr "Filter by department"
 
 msgctxt "MainWindow"
+msgid "status.running"
+msgstr "Working…"
+
+msgctxt "MainWindow"
+msgid "status.error"
+msgstr "Error"
+
+msgctxt "MainWindow"
+msgid "status.input_error"
+msgstr "Check input"
+
+msgctxt "MainWindow"
+msgid "status.done"
+msgstr "Done"
+
+msgctxt "MainWindow"
+msgid "status.ready"
+msgstr "Ready"
+
+msgctxt "MainWindow"
+msgid "status.waiting"
+msgstr "Waiting for the device…"
+
+msgctxt "MainWindow"
+msgid "status.completed"
+msgstr "Operation completed."
+
+msgctxt "MainWindow"
+msgid "status.failed"
+msgstr "Operation failed."
+
+msgctxt "MainWindow"
+msgid "status.confirm_required"
+msgstr "Confirmation required."
+
+msgctxt "MainWindow"
+msgid "status.fix_inputs"
+msgstr "Fix the connection settings and retry."
+
+msgctxt "MainWindow"
+msgid "status.demo_done"
+msgstr "Demo operation completed."
+
+msgctxt "MainWindow"
+msgid "status.choose"
+msgstr "Choose an operation."
+
+msgctxt "MainWindow"
 msgid "section.connection"
 msgstr "CONNECTION"
 
@@ -140,12 +188,16 @@ msgid "op.payments.title"
 msgstr "Payment systems"
 
 msgctxt "MainWindow"
-msgid "section.receipts"
-msgstr "RECEIPTS & RETURNS"
+msgid "section.sales"
+msgstr "SALES"
 
 msgctxt "MainWindow"
-msgid "op.receipt.title"
-msgstr "Print receipt"
+msgid "home.sell"
+msgstr "Sell"
+
+msgctxt "MainWindow"
+msgid "op.return.title"
+msgstr "Return / refund"
 
 msgctxt "MainWindow"
 msgid "home.print_last"
@@ -156,20 +208,20 @@ msgid "op.lookup.title"
 msgstr "Look up receipt"
 
 msgctxt "MainWindow"
-msgid "op.return.title"
-msgstr "Return / refund"
+msgid "section.cash_reports"
+msgstr "CASH & REPORTS"
 
 msgctxt "MainWindow"
-msgid "section.reports"
-msgstr "REPORTS & CASH"
+msgid "op.cash_in.title"
+msgstr "Cash in"
+
+msgctxt "MainWindow"
+msgid "op.cash_out.title"
+msgstr "Cash out"
 
 msgctxt "MainWindow"
 msgid "home.report"
 msgstr "Fiscal report (X / Z)"
-
-msgctxt "MainWindow"
-msgid "op.cash.title"
-msgstr "Cash in / out"
 
 msgctxt "MainWindow"
 msgid "section.device"
@@ -302,6 +354,10 @@ msgstr "List the payment systems configured on the device."
 msgctxt "MainWindow"
 msgid "op.payments.run"
 msgstr "List payment systems"
+
+msgctxt "MainWindow"
+msgid "op.receipt.title"
+msgstr "Print receipt"
 
 msgctxt "MainWindow"
 msgid "op.receipt.desc"
@@ -492,12 +548,20 @@ msgid "field.end"
 msgstr "End (epoch ms, 0 = all)"
 
 msgctxt "MainWindow"
-msgid "op.cash.desc"
-msgstr "Record a cash-drawer adjustment."
+msgid "op.cash_in.desc"
+msgstr "Add cash to the drawer."
 
 msgctxt "MainWindow"
-msgid "op.cash.run"
-msgstr "Record cash op"
+msgid "op.cash_out.desc"
+msgstr "Remove cash from the drawer."
+
+msgctxt "MainWindow"
+msgid "op.cash_in.run"
+msgstr "Record cash in"
+
+msgctxt "MainWindow"
+msgid "op.cash_out.run"
+msgstr "Record cash out"
 
 msgctxt "MainWindow"
 msgid "field.cash_in"
