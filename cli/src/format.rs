@@ -2,8 +2,7 @@
 //! decoration — so output is easy to pipe and grep.
 
 use hdm_am::{
-    ListOpsAndDepsResponse, PaymentSystemsListResponse, ReceiptResponse, ReturnableReceiptResponse,
-    TaxationKind,
+    ListOpsAndDepsResponse, PaymentSystemsListResponse, ReturnableReceiptResponse, TaxationKind,
 };
 
 /// Render the operators-and-departments listing (op 1).
@@ -47,26 +46,6 @@ pub fn payment_systems(response: &PaymentSystemsListResponse) {
     println!("Payment systems:");
     for ps in &response.payment_systems {
         println!("  [{}] {}", ps.code, ps.name);
-    }
-}
-
-/// Render a printed-receipt acknowledgement (op 4).
-pub fn receipt(response: &ReceiptResponse) {
-    println!("Fiscal receipt printed:");
-    println!("  fiscal number: {}", response.fiscal);
-    println!("  receipt seq:   {}", response.rseq);
-    println!("  reg number:    {}", response.crn);
-    println!("  serial:        {}", response.sn);
-    println!("  total:         {:.2}", response.total);
-    println!("  change:        {:.2}", response.change);
-    if !response.lottery.is_empty() {
-        println!("  lottery:       {}", response.lottery);
-    }
-    if let Some(vn) = &response.verification_number {
-        println!("  verification:  {vn}");
-    }
-    if let Some(qr) = &response.qr {
-        println!("  qr:            {qr}");
     }
 }
 

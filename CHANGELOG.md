@@ -10,6 +10,14 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 ## [Unreleased]
 
 ### Added
+- **`format_receipt` — render a fiscal receipt as human-friendly text.** The device prints the legal
+  receipt itself and returns only structured identifiers, so this reconstructs a faithful *summary*
+  from the request/response pair (`hdm_am::format_receipt(&PrintReceiptRequest, &ReceiptResponse)`).
+  Returns a width- and locale-agnostic `ReceiptLayout` of semantic `ReceiptLine`s with the device's
+  own Armenian labels (Գ/Հ = registration number, ԱՀ = serial, ԿՀ = receipt number); render it with
+  `ReceiptLayout::to_plain_text(width)` (or `Display` at `DEFAULT_WIDTH`). Not a pixel clone of the
+  government layout — per-line VAT and taxation captions depend on data outside the pair and are
+  omitted. `hdm receipt` now prints the rendered receipt instead of a field dump.
 - **OpenAPI 3.1 document for the bridge.** Assembled from the same `schemars`-derived schemas the
   handlers serialize (`cargo run -p hdm-am-bridge --example dump-openapi --features schema`),
   committed at `docs/openapi.json` and CI-checked with `--check`, served at `GET /v1/openapi.json`,
