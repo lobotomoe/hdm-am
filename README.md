@@ -255,6 +255,41 @@ npx openapi-typescript http://127.0.0.1:8077/v1/openapi.json -o client.ts
 
 ## TypeScript clients & web demo
 
+A browser cannot open a raw TCP socket, so the demo never talks to the device directly — it goes
+through the bridge. One operation is a single round trip: the React UI calls a typed hook, which
+calls a typed client method, which `POST`s JSON to the loopback bridge; the bridge runs the HDM TCP
+protocol against the cash register and sends a typed result (or a typed error) back up the same
+chain.
+
+```mermaid
+flowchart LR
+    subgraph browser["Browser tab"]
+        direction TB
+        ui["demo<br/>Vite + React + shadcn/ui"]
+        react["@hdm-am/react<br/>provider + typed hooks"]
+        client["@hdm-am/client<br/>typed fetch, one method per operation"]
+        ui --> react --> client
+    end
+
+    subgraph host["Local machine (loopback only)"]
+        direction TB
+        bridge["hdm-bridge :8077<br/>axum HTTP server, security boundary<br/>Bearer token, origin allow-list, one session at a time"]
+        lib["hdm_am::Client<br/>12-byte header, 3DES-ECB, SHA-256 keys"]
+        bridge --> lib
+    end
+
+    device["HDM device<br/>fiscal cash register"]
+
+    client ==>|"POST /v1/{op}: JSON + Bearer (HTTP/CORS)"| bridge
+    lib ==>|"encrypted JSON (raw TCP)"| device
+    device -.->|"encrypted JSON"| lib
+    bridge -.->|"2xx: response JSON / non-2xx: { error: code, retryable, ... }"| client
+```
+
+The bridge is the only component that holds the device password and decrypts the wire protocol; the
+browser only ever sees the typed JSON envelope. Solid arrows are the request path, dashed arrows the
+response.
+
 The [`clients/`](clients/) pnpm workspace builds three packages on top of that document:
 
 - **`@hdm-am/client`** — an isomorphic, zero-dependency TS client (one typed method per operation,
