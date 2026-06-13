@@ -19,8 +19,8 @@ This builds the `hdm-app` binary for macOS, Windows, or Linux.
 Local `.app` bundle:
 
 ```sh
-app/scripts/generate-icons.bash
-app/scripts/macos-bundle.bash bundle
+crates/hdm-am-app/scripts/generate-icons.bash
+crates/hdm-am-app/scripts/macos-bundle.bash bundle
 ```
 
 Mac App Store package, after installing Apple signing identities:
@@ -28,7 +28,7 @@ Mac App Store package, after installing Apple signing identities:
 ```sh
 MACOS_CODESIGN_IDENTITY="3rd Party Mac Developer Application: Your Name (TEAMID)" \
 MACOS_INSTALLER_IDENTITY="3rd Party Mac Developer Installer: Your Name (TEAMID)" \
-app/scripts/macos-bundle.bash package
+crates/hdm-am-app/scripts/macos-bundle.bash package
 ```
 
 The macOS bundle includes the privacy manifest and App Sandbox entitlements for outbound network
@@ -39,27 +39,27 @@ access. Store submission still needs Apple-side app metadata and a production si
 On Windows with the Windows SDK installed:
 
 ```powershell
-app/scripts/windows-msix.ps1 layout
-app/scripts/windows-msix.ps1 pack
+crates/hdm-am-app/scripts/windows-msix.ps1 layout
+crates/hdm-am-app/scripts/windows-msix.ps1 pack
 ```
 
 Signing requires a certificate visible to `signtool`:
 
 ```powershell
 $env:WINDOWS_SIGN_CERT_THUMBPRINT = "..."
-app/scripts/windows-msix.ps1 sign
+crates/hdm-am-app/scripts/windows-msix.ps1 sign
 ```
 
-`app/windows/Package.appxmanifest` is a Store-oriented MSIX manifest template. Partner Center may
+`crates/hdm-am-app/windows/Package.appxmanifest` is a Store-oriented MSIX manifest template. Partner Center may
 replace the package identity after app association.
 
 ## Android
 
 Android support is set up for Slint's Rust-only Android backend:
 
-- `app/src/lib.rs` exports `android_main`.
-- `app/Cargo.toml` builds the app as a `cdylib`.
-- `app/Cargo.toml` contains `cargo-apk` metadata, including the package id and network
+- `crates/hdm-am-app/src/lib.rs` exports `android_main`.
+- `crates/hdm-am-app/Cargo.toml` builds the app as a `cdylib`.
+- `crates/hdm-am-app/Cargo.toml` contains `cargo-apk` metadata, including the package id and network
   permissions required for TCP access to the HDM.
 
 One-time toolchain setup:
@@ -76,8 +76,8 @@ environment variables are `ANDROID_HOME`, `ANDROID_NDK_ROOT`, and, for Skia fall
 Build and run with `cargo-apk`:
 
 ```sh
-app/scripts/android-apk.bash build
-app/scripts/android-apk.bash run
+crates/hdm-am-app/scripts/android-apk.bash build
+crates/hdm-am-app/scripts/android-apk.bash run
 ```
 
 The script defaults to `aarch64-linux-android`, discovers the newest installed NDK under
@@ -97,7 +97,7 @@ x build --platform android --arch arm64 --format apk --release
 The repository also includes a Play-oriented AAB wrapper:
 
 ```sh
-app/scripts/android-aab.bash build
+crates/hdm-am-app/scripts/android-aab.bash build
 ```
 
 The wrapper uses `cargo-apk`, `aapt2`, and `bundletool`. By default it builds a release APK first,
@@ -111,7 +111,7 @@ For Google Play upload, sign the final AAB with the upload key:
 ANDROID_AAB_KEYSTORE=/secure/upload.jks \
 ANDROID_AAB_KEYSTORE_PASSWORD=... \
 ANDROID_AAB_KEY_ALIAS=upload \
-app/scripts/android-aab.bash build
+crates/hdm-am-app/scripts/android-aab.bash build
 ```
 
 CI runs the same conversion and `bundletool validate` against the debug APK as a packaging format
@@ -121,10 +121,10 @@ check; it is not a Play release artifact.
 
 iOS support is set up through XcodeGen plus a Cargo build script:
 
-- `app/ios/project.yml` describes an Xcode application target.
-- `app/ios/build_for_ios_with_cargo.bash` builds `hdm-app` for the selected iOS architecture and
+- `crates/hdm-am-app/ios/project.yml` describes an Xcode application target.
+- `crates/hdm-am-app/ios/build_for_ios_with_cargo.bash` builds `hdm-app` for the selected iOS architecture and
   copies it into the app bundle executable path.
-- `app/src/lib.rs` selects Slint's Winit + Skia backend on iOS.
+- `crates/hdm-am-app/src/lib.rs` selects Slint's Winit + Skia backend on iOS.
 
 One-time toolchain setup:
 
@@ -136,7 +136,7 @@ brew install xcodegen
 Generate and open the Xcode project:
 
 ```sh
-cd app/ios
+cd crates/hdm-am-app/ios
 xcodegen generate
 open HDM.xcodeproj
 ```
@@ -150,19 +150,19 @@ rustup target add aarch64-apple-ios aarch64-apple-ios-sim x86_64-apple-ios
 brew install xcodegen
 
 # Compile-check a device app without signing.
-app/scripts/ios-build.bash unsigned
+crates/hdm-am-app/scripts/ios-build.bash unsigned
 
 # Build a signed device app. Replace the team id with your Apple Developer team id.
-IOS_TEAM_ID=T822AUM7XY app/scripts/ios-build.bash build
+IOS_TEAM_ID=T822AUM7XY crates/hdm-am-app/scripts/ios-build.bash build
 
 # Create an .xcarchive.
-IOS_TEAM_ID=T822AUM7XY app/scripts/ios-build.bash archive
+IOS_TEAM_ID=T822AUM7XY crates/hdm-am-app/scripts/ios-build.bash archive
 
 # Export an .ipa for local device testing.
-IOS_TEAM_ID=T822AUM7XY IOS_EXPORT_METHOD=debugging app/scripts/ios-build.bash export
+IOS_TEAM_ID=T822AUM7XY IOS_EXPORT_METHOD=debugging crates/hdm-am-app/scripts/ios-build.bash export
 
 # For TestFlight/App Store export, use:
-IOS_TEAM_ID=T822AUM7XY IOS_EXPORT_METHOD=app-store-connect app/scripts/ios-build.bash export
+IOS_TEAM_ID=T822AUM7XY IOS_EXPORT_METHOD=app-store-connect crates/hdm-am-app/scripts/ios-build.bash export
 ```
 
 `xcodebuild -allowProvisioningUpdates` is enabled for signed commands, so Xcode can create or update

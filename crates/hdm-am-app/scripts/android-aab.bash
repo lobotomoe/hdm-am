@@ -44,7 +44,7 @@ fi
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 app_dir="$(cd -- "$script_dir/.." && pwd)"
-repo_dir="$(cd -- "$app_dir/.." && pwd)"
+repo_dir="$(cd -- "$app_dir/../.." && pwd)"
 
 export ANDROID_HOME="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
 if [[ -z "${ANDROID_NDK:-}" ]]; then

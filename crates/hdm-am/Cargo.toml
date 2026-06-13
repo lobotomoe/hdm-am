@@ -1,0 +1,45 @@
+[package]
+name = "hdm-am"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+description = "Client for the Armenian fiscal cash register (HDM) protocol per the State Revenue Committee spec"
+keywords = ["armenia", "fiscal", "hdm", "ecr", "cash-register"]
+categories = ["api-bindings", "hardware-support"]
+readme = "README.md"
+
+[package.metadata.docs.rs]
+# Build docs with the schema feature so the JsonSchema impls and the dump-schema example surface.
+features = ["schema"]
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+rust_decimal = { workspace = true, features = ["serde-with-float"] }
+base64 = { workspace = true }
+log = { workspace = true }
+schemars = { workspace = true, optional = true }
+sha2 = "0.11"
+des = "0.9"
+ecb = "0.2"
+cipher = { version = "0.5", features = ["block-padding"] }
+thiserror = "2"
+
+[features]
+# Derive JSON Schema for every wire request/response type. Off by default — keeps `schemars`
+# out of the default dependency graph. Generate the schema files with `examples/dump-schema.rs`.
+schema = ["dep:schemars"]
+
+[dev-dependencies]
+hex = "0.4"
+serde_json = { workspace = true, features = ["preserve_order"] }
+
+[[example]]
+name = "dump-schema"
+required-features = ["schema"]
+
+[lints]
+workspace = true

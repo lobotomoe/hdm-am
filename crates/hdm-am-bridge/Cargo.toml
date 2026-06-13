@@ -1,12 +1,12 @@
 [package]
 name = "hdm-am-bridge"
-version = "0.3.0"
-edition = "2024"
-rust-version = "1.85"
-authors = ["Alex Kraiz <selfsurfer@gmail.com>"]
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
 description = "Local HTTP bridge that exposes an Armenian fiscal cash register (HDM) to a browser over CORS"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/lobotomoe/hdm-am"
 # Not published: depends on the library by path. Same rationale as the CLI crate.
 publish = false
 
@@ -19,17 +19,17 @@ name = "hdm-bridge"
 path = "src/main.rs"
 
 [dependencies]
-hdm-am = { path = ".." }
+hdm-am = { workspace = true }
 axum = "0.8"
 tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal", "net"] }
 tower-http = { version = "0.6", features = ["cors", "trace"] }
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-anyhow = "1"
-clap = { version = "4", features = ["derive", "env", "wrap_help"] }
-log = "0.4"
-env_logger = "0.11"
-schemars = { version = "1", optional = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+clap = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+schemars = { workspace = true, optional = true }
 
 [features]
 # Generate the OpenAPI 3.1 document for the bridge's HTTP surface. Off by default — keeps

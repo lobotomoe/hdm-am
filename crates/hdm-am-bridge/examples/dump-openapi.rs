@@ -16,7 +16,7 @@ use std::process::ExitCode;
 
 fn main() -> ExitCode {
     let check = std::env::args().any(|arg| arg == "--check");
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../docs/openapi.json");
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../docs/openapi.json");
 
     let document = hdm_am_bridge::openapi::document(env!("CARGO_PKG_VERSION"));
     let mut json = match serde_json::to_string_pretty(&document) {

@@ -1,12 +1,14 @@
 [package]
 name = "hdm-am-app"
+# The GUI app is versioned independently of the library/CLI/bridge (still pre-1.0 on its own track),
+# so it pins its own version rather than inheriting the workspace one.
 version = "0.1.0"
-edition = "2024"
-rust-version = "1.85"
-authors = ["Alex Kraiz <selfsurfer@gmail.com>"]
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
 description = "Native cross-platform GUI for Armenian fiscal cash registers (HDM)"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/lobotomoe/hdm-am"
 publish = false
 build = "build.rs"
 
@@ -23,11 +25,11 @@ name = "hdm-app"
 path = "src/main.rs"
 
 [dependencies]
-base64 = "0.22"
-hdm-am = { path = ".." }
-log = "0.4"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+base64 = { workspace = true }
+hdm-am = { workspace = true }
+log = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 sys-locale = "0.3"
 slint = { version = "=1.13.1", default-features = false, features = [
     "backend-android-activity-06",

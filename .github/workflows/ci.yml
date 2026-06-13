@@ -39,15 +39,15 @@ jobs:
 
       - name: App packaging metadata
         run: |
-          bash -n app/scripts/android-apk.bash
-          bash -n app/scripts/android-aab.bash
-          bash -n app/scripts/generate-icons.bash
-          bash -n app/scripts/ios-build.bash
-          bash -n app/scripts/macos-bundle.bash
-          bash -n app/ios/build_for_ios_with_cargo.bash
-          jq empty app/ios/Assets.xcassets/AppIcon.appiconset/Contents.json
-          python3 -c "import plistlib; plistlib.load(open('app/ios/Info.plist', 'rb')); plistlib.load(open('app/ios/PrivacyInfo.xcprivacy', 'rb')); plistlib.load(open('app/macos/Info.plist', 'rb')); plistlib.load(open('app/macos/HDMTester.entitlements', 'rb'))"
-          python3 -c "import xml.etree.ElementTree as ET; ET.parse('app/windows/Package.appxmanifest')"
+          bash -n crates/hdm-am-app/scripts/android-apk.bash
+          bash -n crates/hdm-am-app/scripts/android-aab.bash
+          bash -n crates/hdm-am-app/scripts/generate-icons.bash
+          bash -n crates/hdm-am-app/scripts/ios-build.bash
+          bash -n crates/hdm-am-app/scripts/macos-bundle.bash
+          bash -n crates/hdm-am-app/ios/build_for_ios_with_cargo.bash
+          jq empty crates/hdm-am-app/ios/Assets.xcassets/AppIcon.appiconset/Contents.json
+          python3 -c "import plistlib; plistlib.load(open('crates/hdm-am-app/ios/Info.plist', 'rb')); plistlib.load(open('crates/hdm-am-app/ios/PrivacyInfo.xcprivacy', 'rb')); plistlib.load(open('crates/hdm-am-app/macos/Info.plist', 'rb')); plistlib.load(open('crates/hdm-am-app/macos/HDMTester.entitlements', 'rb'))"
+          python3 -c "import xml.etree.ElementTree as ET; ET.parse('crates/hdm-am-app/windows/Package.appxmanifest')"
 
       - name: Clippy
         run: cargo clippy --workspace --all-targets --all-features
@@ -61,7 +61,7 @@ jobs:
           RUSTDOCFLAGS: -D warnings
 
       - name: Schema is up to date
-        run: cargo run --example dump-schema --features schema -- --check
+        run: cargo run -p hdm-am --example dump-schema --features schema -- --check
 
       - name: OpenAPI document is up to date
         run: cargo run -p hdm-am-bridge --example dump-openapi --features schema -- --check
@@ -164,11 +164,11 @@ jobs:
             https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar
           echo "BUNDLETOOL_JAR=$RUNNER_TEMP/bundletool.jar" >> "$GITHUB_ENV"
       - name: Check Android target
-        run: app/scripts/android-apk.bash check
+        run: crates/hdm-am-app/scripts/android-apk.bash check
       - name: Build Android APK
-        run: app/scripts/android-apk.bash build
+        run: crates/hdm-am-app/scripts/android-apk.bash build
       - name: Validate Android AAB packaging
-        run: ANDROID_PROFILE=debug ANDROID_AAB_SOURCE_APK=target/debug/apk/hdm-am.apk app/scripts/android-aab.bash build
+        run: ANDROID_PROFILE=debug ANDROID_AAB_SOURCE_APK=target/debug/apk/hdm-am.apk crates/hdm-am-app/scripts/android-aab.bash build
       - uses: actions/upload-artifact@v4
         with:
           name: hdm-am-android-debug-apk
@@ -195,17 +195,17 @@ jobs:
       - name: Check iOS Rust target
         run: cargo check -p hdm-am-app --target aarch64-apple-ios-sim
       - name: Generate Xcode project
-        working-directory: app/ios
+        working-directory: crates/hdm-am-app/ios
         run: xcodegen generate
       - name: Validate iOS metadata
         run: |
-          plutil -lint app/ios/Info.plist
-          plutil -lint app/ios/PrivacyInfo.xcprivacy
-          python3 -m json.tool app/ios/Assets.xcassets/AppIcon.appiconset/Contents.json >/dev/null
+          plutil -lint crates/hdm-am-app/ios/Info.plist
+          plutil -lint crates/hdm-am-app/ios/PrivacyInfo.xcprivacy
+          python3 -m json.tool crates/hdm-am-app/ios/Assets.xcassets/AppIcon.appiconset/Contents.json >/dev/null
       - name: Build iOS simulator app
-        run: app/scripts/ios-build.bash simulator
+        run: crates/hdm-am-app/scripts/ios-build.bash simulator
       - name: Build macOS app bundle
-        run: app/scripts/macos-bundle.bash bundle
+        run: crates/hdm-am-app/scripts/macos-bundle.bash bundle
 
   windows:
     runs-on: windows-latest
@@ -217,4 +217,4 @@ jobs:
           shared-key: windows
       - name: Build Windows app layout
         shell: pwsh
-        run: app/scripts/windows-msix.ps1 layout
+        run: crates/hdm-am-app/scripts/windows-msix.ps1 layout

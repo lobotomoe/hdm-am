@@ -16,8 +16,8 @@ exactly:
 ## Regenerating / checking
 
 ```sh
-cargo run --example dump-schema --features schema             # rewrite docs/schema/*.json
-cargo run --example dump-schema --features schema -- --check  # exit non-zero if out of date
+cargo run -p hdm-am --example dump-schema --features schema             # rewrite docs/schema/*.json
+cargo run -p hdm-am --example dump-schema --features schema -- --check  # exit non-zero if out of date
 ```
 
 Because the schemas are derived from the same serde-annotated types the client uses, they cannot

@@ -200,7 +200,7 @@ pub fn app(state: AppState) -> Router {
 /// by `examples/dump-openapi.rs` and the CI `--check` gate, so the served bytes always match the
 /// types the handlers use. Served publicly so client generators can read it off a running bridge.
 const OPENAPI_JSON: &str =
-    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../docs/openapi.json"));
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../../docs/openapi.json"));
 
 /// Minimal Scalar-based API explorer that renders [`OPENAPI_JSON`] from `/v1/openapi.json`.
 const DOCS_HTML: &str = include_str!("docs.html");

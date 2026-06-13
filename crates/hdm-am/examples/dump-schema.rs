@@ -4,8 +4,8 @@
 //! the implementation as long as this is run.
 //!
 //! ```text
-//! cargo run --example dump-schema --features schema            # (re)write docs/schema/*.json
-//! cargo run --example dump-schema --features schema -- --check # verify they are up to date
+//! cargo run -p hdm-am --example dump-schema --features schema            # (re)write docs/schema/*.json
+//! cargo run -p hdm-am --example dump-schema --features schema -- --check # verify they are up to date
 //! ```
 //!
 //! `--check` exits non-zero if any committed schema differs from what the current types produce —
@@ -46,7 +46,7 @@ fn main() -> ExitCode {
 /// Returns `Ok(true)` on success, `Ok(false)` if `--check` found a stale file.
 fn run() -> Result<bool, Box<dyn Error>> {
     let check = std::env::args().any(|arg| arg == "--check");
-    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("docs/schema");
+    let dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../docs/schema");
     if !check {
         std::fs::create_dir_all(&dir)?;
     }
@@ -101,7 +101,7 @@ fn run() -> Result<bool, Box<dyn Error>> {
             if up_to_date {
                 "schemas up to date"
             } else {
-                "schemas OUT OF DATE — run `cargo run --example dump-schema --features schema`"
+                "schemas OUT OF DATE — run `cargo run -p hdm-am --example dump-schema --features schema`"
             }
         );
     }

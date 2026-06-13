@@ -71,9 +71,9 @@ Status: package scaffold exists, but final store signing/submission is not prove
 
 Current positives:
 
-- `app/scripts/macos-bundle.bash` creates a macOS `.app` bundle.
+- `crates/hdm-am-app/scripts/macos-bundle.bash` creates a macOS `.app` bundle.
 - The bundle includes `PrivacyInfo.xcprivacy`.
-- `app/macos/HDMTester.entitlements` enables App Sandbox and outbound network client access.
+- `crates/hdm-am-app/macos/HDMTester.entitlements` enables App Sandbox and outbound network client access.
 
 Known blockers:
 
@@ -93,7 +93,7 @@ Current positives:
 - No sensitive Android permissions beyond network state and internet.
 - Demo mode prevents broken-functionality rejection when reviewers lack HDM hardware.
 - Privacy policy and in-app privacy text exist.
-- `app/scripts/android-aab.bash` builds a bundletool-validated `.aab` from the cargo-apk package.
+- `crates/hdm-am-app/scripts/android-aab.bash` builds a bundletool-validated `.aab` from the cargo-apk package.
 - Local AAB format validation was verified on 2026-06-08 with `bundletool validate`.
 - CI validates the AAB packaging path against the debug APK.
 
@@ -118,8 +118,8 @@ Status: package scaffold exists, but final Store packaging/submission is not pro
 
 Current positives:
 
-- `app/windows/Package.appxmanifest` defines a Store-oriented MSIX package template.
-- `app/scripts/windows-msix.ps1` builds a layout and can pack/sign MSIX when Windows SDK tools are
+- `crates/hdm-am-app/windows/Package.appxmanifest` defines a Store-oriented MSIX package template.
+- `crates/hdm-am-app/scripts/windows-msix.ps1` builds a layout and can pack/sign MSIX when Windows SDK tools are
   available.
 - The manifest declares only network capabilities plus `runFullTrust`, which is required for a
   packaged Win32 desktop app.

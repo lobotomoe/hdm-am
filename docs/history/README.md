@@ -75,7 +75,7 @@ rather than re-reading from scratch:
    `#[serde(skip_serializing_if = "Option::is_none")]`; new response fields → `#[serde(default)]`.
    Never add `#[serde(deny_unknown_fields)]`. Most minor-version changes need nothing more.
 4. **Bump the markers.** Update `SPEC_VERSION` in `src/lib.rs`, regenerate `docs/schema/`
-   (`cargo run --example dump-schema --features schema`), and refresh the English `docs/spec.md`.
+   (`cargo run -p hdm-am --example dump-schema --features schema`), and refresh the English `docs/spec.md`.
 5. **Bump the crate** by semver: additive/optional → minor; changed public types → major. Record the
    crate↔spec mapping in the changelog.
 6. **Only if a new version is genuinely incompatible** (framing change, or request shapes that an

@@ -9,9 +9,9 @@ clients/**/*.tsbuildinfo
 clients/demo/dist/
 clients/**/.vite/
 clients/**/coverage/
-app/android/build/
-app/ios/*.xcodeproj/
-app/ios/build/
-app/macos/AppIcon.iconset/
-app/macos/build/
-app/windows/build/
+crates/hdm-am-app/android/build/
+crates/hdm-am-app/ios/*.xcodeproj/
+crates/hdm-am-app/ios/build/
+crates/hdm-am-app/macos/AppIcon.iconset/
+crates/hdm-am-app/macos/build/
+crates/hdm-am-app/windows/build/

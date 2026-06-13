@@ -1,15 +1,15 @@
 [package]
 name = "hdm-am-cli"
-version = "0.3.0"
-edition = "2024"
-rust-version = "1.85"
-authors = ["Alex Kraiz <selfsurfer@gmail.com>"]
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
 description = "Command-line tool for talking to an Armenian fiscal cash register (HDM) over TCP"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/lobotomoe/hdm-am"
 # Not published to crates.io for now: it depends on the library by path. To publish the binary
-# later, give the dependency a version (`hdm-am = { path = "..", version = "x.y" }`) and release the
-# library first. Until then `publish = false` keeps `cargo publish` on the workspace from failing.
+# later, give the dependency a version (`hdm-am = { workspace = true, version = "x.y" }`) and
+# release the library first. Until then `publish = false` keeps `cargo publish` from failing.
 publish = false
 
 [package.metadata.dist]
@@ -22,15 +22,15 @@ name = "hdm"
 path = "src/main.rs"
 
 [dependencies]
-hdm-am = { path = ".." }
-clap = { version = "4", features = ["derive", "env", "wrap_help"] }
-anyhow = "1"
-log = "0.4"
-env_logger = "0.11"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-base64 = "0.22"
-rust_decimal = "1"
+hdm-am = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+log = { workspace = true }
+env_logger = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+base64 = { workspace = true }
+rust_decimal = { workspace = true }
 
 # Background bridge supervision (`hdm bridge start/stop/status`) sends signals and probes process
 # liveness. Unix-only; on other platforms `hdm bridge run` (foreground) is offered instead.

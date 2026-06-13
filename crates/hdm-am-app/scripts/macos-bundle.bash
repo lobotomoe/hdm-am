@@ -42,7 +42,7 @@ esac
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 app_dir="$(cd -- "$script_dir/.." && pwd)"
-repo_dir="$(cd -- "$app_dir/.." && pwd)"
+repo_dir="$(cd -- "$app_dir/../.." && pwd)"
 macos_dir="$app_dir/macos"
 
 app_name="${MACOS_APP_NAME:-HDM}"

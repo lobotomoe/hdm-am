@@ -8,7 +8,7 @@ $ErrorActionPreference = "Stop"
 
 $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $AppDir = Resolve-Path (Join-Path $ScriptDir "..")
-$RepoDir = Resolve-Path (Join-Path $AppDir "..")
+$RepoDir = Resolve-Path (Join-Path $AppDir "..\..")
 $BuildDir = Join-Path $AppDir "windows\build"
 $LayoutDir = Join-Path $BuildDir "HDMTester"
 $ManifestPath = Join-Path $AppDir "windows\Package.appxmanifest"

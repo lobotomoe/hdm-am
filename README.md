@@ -126,7 +126,7 @@ Irreversible operations (receipt, return, cash, Z-report) prompt for confirmatio
 
 ## GUI app
 
-The native GUI lives in [`app/`](app/) and uses Slint without a webview. It has buttons for all 16
+The native GUI lives in [`crates/hdm-am-app/`](crates/hdm-am-app/) and uses Slint without a webview. It has buttons for all 16
 protocol operations plus the unauthenticated `Probe`. HDM calls run on a worker thread so the UI
 event loop is not blocked by the protocol's long response timeout.
 
@@ -136,11 +136,11 @@ cargo run -p hdm-am-app
 
 The crate is both a desktop binary and a library:
 
-- `app/src/main.rs` — desktop entrypoint (`hdm-app`).
-- `app/src/lib.rs` — shared app runner plus Android `android_main` hook and iOS backend selection.
-- `app/ui/main.slint` — compiled Slint UI markup.
-- `app/src/bridge.rs` — UI callbacks, validation, TCP connection setup, and background HDM calls.
-- `app/ios/` — XcodeGen project template that delegates the iOS executable build to Cargo.
+- `crates/hdm-am-app/src/main.rs` — desktop entrypoint (`hdm-app`).
+- `crates/hdm-am-app/src/lib.rs` — shared app runner plus Android `android_main` hook and iOS backend selection.
+- `crates/hdm-am-app/ui/main.slint` — compiled Slint UI markup.
+- `crates/hdm-am-app/src/bridge.rs` — UI callbacks, validation, TCP connection setup, and background HDM calls.
+- `crates/hdm-am-app/ios/` — XcodeGen project template that delegates the iOS executable build to Cargo.
 
 Current platform status:
 
@@ -150,7 +150,7 @@ Current platform status:
 - iOS: scaffolded with an XcodeGen project, Cargo build script, Winit + Skia backend selection, and
   Local Network privacy text.
 
-See [`app/README.md`](app/README.md) for Android/iOS toolchain setup and build commands.
+See [`crates/hdm-am-app/README.md`](crates/hdm-am-app/README.md) for Android/iOS toolchain setup and build commands.
 
 The first GUI iteration deliberately keeps structured payload editing simple: receipt items,
 return-item lists, and header/footer config are loaded from JSON file paths using the same shapes as
@@ -178,7 +178,7 @@ terms.
 ## HTTP bridge
 
 A browser can speak HTTP/WebSocket but not raw TCP, while the HDM protocol is raw 3DES-over-TCP. The
-[`bridge/`](bridge/) crate closes that gap: `hdm-bridge` is a small localhost HTTP server that takes
+[`crates/hdm-am-bridge/`](crates/hdm-am-bridge/) crate closes that gap: `hdm-bridge` is a small localhost HTTP server that takes
 JSON on one side and runs the HDM TCP protocol (via `hdm_am::Client`) on the other — one
 `POST /v1/<op>` per operation. The server logic is exposed as `hdm_am_bridge::serve` so it can also be
 embedded in another process (e.g. the GUI app).
@@ -280,8 +280,8 @@ code. They cover the decrypted JSON bodies (not the binary framing / 3DES envelo
 JSON numbers and integer-coded enums are integers, matching the wire.
 
 ```sh
-cargo run --example dump-schema --features schema             # (re)generate docs/schema/*.json
-cargo run --example dump-schema --features schema -- --check  # CI guard: fail if stale
+cargo run -p hdm-am --example dump-schema --features schema             # (re)generate docs/schema/*.json
+cargo run -p hdm-am --example dump-schema --features schema -- --check  # CI guard: fail if stale
 ```
 
 ## Design
