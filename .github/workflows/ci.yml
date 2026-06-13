@@ -63,6 +63,9 @@ jobs:
       - name: Schema is up to date
         run: cargo run --example dump-schema --features schema -- --check
 
+      - name: OpenAPI document is up to date
+        run: cargo run -p hdm-am-bridge --example dump-openapi --features schema -- --check
+
   msrv:
     runs-on: ubuntu-latest
     steps:

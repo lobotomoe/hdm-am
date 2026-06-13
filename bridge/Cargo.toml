@@ -29,6 +29,13 @@ anyhow = "1"
 clap = { version = "4", features = ["derive", "env", "wrap_help"] }
 log = "0.4"
 env_logger = "0.11"
+schemars = { version = "1", optional = true }
+
+[features]
+# Generate the OpenAPI 3.1 document for the bridge's HTTP surface. Off by default — keeps
+# `schemars` out of the runtime dependency graph. Pulls the library's own `schema` feature so the
+# wire types' `JsonSchema` impls are available. Generate the document with `examples/dump-openapi.rs`.
+schema = ["dep:schemars", "hdm-am/schema"]
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
@@ -36,3 +43,7 @@ http-body-util = "0.1"
 
 [lints]
 workspace = true
+
+[[example]]
+name = "dump-openapi"
+required-features = ["schema"]

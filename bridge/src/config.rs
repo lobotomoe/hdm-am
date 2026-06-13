@@ -20,6 +20,7 @@ pub const MAX_TIMEOUT_SECS: u64 = 50;
 /// Connection parameters with every field optional, used both for the configured default and for a
 /// per-request override. Secrets are redacted in `Debug`.
 #[derive(Clone, Default, serde::Deserialize)]
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[serde(deny_unknown_fields)]
 pub struct PartialConn {
     /// HDM host (IP or name).

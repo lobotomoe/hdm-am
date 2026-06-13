@@ -337,3 +337,108 @@ async fn cors_preflight_allows_configured_origin_and_private_network() {
         Some("true")
     );
 }
+
+// ---------------- OpenAPI document ----------------
+
+#[cfg(feature = "schema")]
+mod openapi {
+    use super::{TOKEN, full_default, harness, post, send};
+    use axum::body::Body;
+    use axum::http::{Request, StatusCode};
+    use serde_json::Value;
+
+    /// Every operation the document describes must resolve to a real route (no 404), so the
+    /// document can't advertise an endpoint the bridge doesn't serve.
+    #[tokio::test]
+    async fn documents_every_route() {
+        for path in crate::openapi::operation_paths() {
+            let h = harness(full_default(), None);
+            let (status, _) = send(h.router, post(path, Some(TOKEN), "{}")).await;
+            assert_ne!(
+                status,
+                StatusCode::NOT_FOUND,
+                "documented operation {path} is not routed"
+            );
+        }
+        assert_eq!(
+            crate::openapi::operation_paths().len(),
+            16,
+            "operation count drifted from the 16 protocol operations"
+        );
+    }
+
+    /// The served document and the embedded copy must be byte-identical, so `/v1/openapi.json`
+    /// can't drift from what `dump-openapi` generates.
+    #[tokio::test]
+    async fn served_document_matches_generated() {
+        let h = harness(full_default(), None);
+        let req = Request::builder()
+            .uri("/v1/openapi.json")
+            .body(Body::empty())
+            .expect("req");
+        let (status, served) = send(h.router, req).await;
+        assert_eq!(status, StatusCode::OK);
+
+        let generated = crate::openapi::document(env!("CARGO_PKG_VERSION"));
+        assert_eq!(
+            served, generated,
+            "served /v1/openapi.json drifted from document()"
+        );
+    }
+
+    /// Structural sanity: correct version, every `$ref` resolves, and every operation carries a
+    /// request body, a `200`, and the error envelope.
+    #[test]
+    fn document_is_structurally_valid() {
+        let doc = crate::openapi::document(env!("CARGO_PKG_VERSION"));
+
+        assert_eq!(doc["openapi"], "3.1.0");
+
+        let schemas = doc["components"]["schemas"]
+            .as_object()
+            .expect("components.schemas object");
+        assert!(!schemas.is_empty());
+
+        // Every `$ref` must point at an existing component schema.
+        let mut refs = Vec::new();
+        collect_refs(&doc, &mut refs);
+        assert!(!refs.is_empty(), "expected the document to use $ref");
+        for r in &refs {
+            let name = r
+                .strip_prefix("#/components/schemas/")
+                .unwrap_or_else(|| panic!("unexpected $ref target: {r}"));
+            assert!(schemas.contains_key(name), "dangling $ref: {r}");
+        }
+
+        // Every protected operation has a request body, a 200, and the default error response.
+        for path in crate::openapi::operation_paths() {
+            let op = &doc["paths"][path]["post"];
+            assert!(op.is_object(), "missing POST item for {path}");
+            assert!(op["requestBody"].is_object(), "{path} missing requestBody");
+            assert!(op["responses"]["200"].is_object(), "{path} missing 200");
+            assert!(
+                op["responses"]["default"].is_object(),
+                "{path} missing error response"
+            );
+            assert!(op["security"].is_array(), "{path} missing security");
+        }
+    }
+
+    fn collect_refs(value: &Value, out: &mut Vec<String>) {
+        match value {
+            Value::Object(map) => {
+                for (key, child) in map {
+                    if key == "$ref" {
+                        if let Some(s) = child.as_str() {
+                            out.push(s.to_owned());
+                        }
+                    } else {
+                        collect_refs(child, out);
+                    }
+                }
+            }
+            Value::Array(items) => items.iter().for_each(|item| collect_refs(item, out)),
+            _ => {}
+        }
+    }
+}

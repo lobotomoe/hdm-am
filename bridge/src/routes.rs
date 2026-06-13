@@ -10,7 +10,7 @@ use axum::http::HeaderValue;
 use axum::http::Method;
 use axum::http::header::{AUTHORIZATION, CONTENT_TYPE};
 use axum::middleware::{self, Next};
-use axum::response::Response;
+use axum::response::{IntoResponse, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use serde::Deserialize;
@@ -189,29 +189,72 @@ pub fn app(state: AppState) -> Router {
 
     Router::new()
         .route("/v1/health", get(health))
+        .route("/v1/openapi.json", get(openapi_json))
+        .route("/docs", get(docs_ui))
         .merge(protected)
         .layer(cors)
         .with_state(state)
 }
 
+/// The committed `OpenAPI` 3.1 document, embedded at build time. Kept in sync with the route surface
+/// by `examples/dump-openapi.rs` and the CI `--check` gate, so the served bytes always match the
+/// types the handlers use. Served publicly so client generators can read it off a running bridge.
+const OPENAPI_JSON: &str =
+    include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/../docs/openapi.json"));
+
+/// Minimal Scalar-based API explorer that renders [`OPENAPI_JSON`] from `/v1/openapi.json`.
+const DOCS_HTML: &str = include_str!("docs.html");
+
+async fn openapi_json() -> Response {
+    (
+        [(CONTENT_TYPE, HeaderValue::from_static("application/json"))],
+        OPENAPI_JSON,
+    )
+        .into_response()
+}
+
+async fn docs_ui() -> Response {
+    (
+        [(
+            CONTENT_TYPE,
+            HeaderValue::from_static("text/html; charset=utf-8"),
+        )],
+        DOCS_HTML,
+    )
+        .into_response()
+}
+
 // ---------------- Meta ----------------
 
+/// Liveness response for `GET /v1/health`.
 #[derive(serde::Serialize)]
-struct HealthOk {
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct HealthOk {
+    /// Always `"ok"`.
     status: &'static str,
 }
 
+/// Boolean-outcome response (e.g. login confirmation).
 #[derive(serde::Serialize)]
-struct StatusOk {
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct StatusOk {
+    /// Whether the operation succeeded.
     ok: bool,
 }
 
+/// Bridge metadata for `GET /v1/info`.
 #[derive(serde::Serialize)]
-struct Info {
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct Info {
+    /// Server name (`hdm-bridge`).
     name: &'static str,
+    /// Bridge crate version.
     version: &'static str,
+    /// HDM specification version the underlying client targets.
     spec_version: &'static str,
+    /// Whether a default device connection is configured (so requests may omit `connection`).
     default_device_configured: bool,
+    /// The operation names the bridge exposes.
     operations: &'static [&'static str],
 }
 
