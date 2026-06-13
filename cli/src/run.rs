@@ -213,10 +213,17 @@ fn receipt(cli: &Cli, args: &ReceiptArgs) -> Result<()> {
         bail!("aborted");
     }
 
-    let response = with_session(cli, |c| {
-        c.print_receipt(request).context("printing receipt")
+    let printed = request.clone();
+    let response = with_session(cli, move |c| {
+        c.print_receipt(printed).context("printing receipt")
     })?;
-    emit(cli, &response, format::receipt)
+    // Render the faithful receipt summary from the request we sent + the response we got back.
+    emit(cli, &response, |resp| {
+        print!(
+            "{}",
+            hdm_am::format_receipt(&request, resp).to_plain_text(hdm_am::DEFAULT_WIDTH)
+        );
+    })
 }
 
 fn print_last(cli: &Cli) -> Result<()> {

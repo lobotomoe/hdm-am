@@ -68,6 +68,7 @@
 
 pub mod client;
 pub mod error;
+pub mod format;
 pub mod operations;
 pub mod probe;
 pub mod seq;
@@ -79,6 +80,7 @@ pub(crate) mod wire;
 
 pub use client::Client;
 pub use error::{CryptoError, Error, ServerErrorKind, VendorErrorKind};
+pub use format::{DEFAULT_WIDTH, ReceiptLayout, ReceiptLine, format_receipt};
 pub use operations::{
     CashInOutRequest, DateTimeRequest, DateTimeResponse, DepartmentInfo, DiscountKind,
     EmptyResponse, FiscalReportKind, FiscalReportRequest, GetReturnableReceiptRequest,
