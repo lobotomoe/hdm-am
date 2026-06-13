@@ -86,6 +86,10 @@ jobs:
           cache-dependency-path: clients/pnpm-lock.yaml
       - name: Install
         run: pnpm install --frozen-lockfile
+      # Packages consume each other via their built `dist/` (the `types`/`exports` entry points), so
+      # build first (topological order) — typecheck/lint/test of a dependent need its dependency built.
+      - name: Build
+        run: pnpm -r build
       - name: Generated types are up to date
         run: pnpm -r gen:check
       - name: Typecheck
@@ -94,8 +98,6 @@ jobs:
         run: pnpm -r lint
       - name: Test
         run: pnpm -r test
-      - name: Build
-        run: pnpm -r build
 
   msrv:
     runs-on: ubuntu-latest
