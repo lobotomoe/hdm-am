@@ -63,6 +63,42 @@ jobs:
       - name: Schema is up to date
         run: cargo run --example dump-schema --features schema -- --check
 
+      - name: OpenAPI document is up to date
+        run: cargo run -p hdm-am-bridge --example dump-openapi --features schema -- --check
+
+  # The TypeScript clients (clients/) are generated from docs/openapi.json, which the `check` job
+  # above keeps in sync with the Rust types. This job verifies the generated TS types are in sync
+  # with that document, then typechecks, lints, tests, and builds every JS package.
+  js:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clients
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.4.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: clients/pnpm-lock.yaml
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      # Packages consume each other via their built `dist/` (the `types`/`exports` entry points), so
+      # build first (topological order) — typecheck/lint/test of a dependent need its dependency built.
+      - name: Build
+        run: pnpm -r build
+      - name: Generated types are up to date
+        run: pnpm -r gen:check
+      - name: Typecheck
+        run: pnpm -r typecheck
+      - name: Lint
+        run: pnpm -r lint
+      - name: Test
+        run: pnpm -r test
+
   msrv:
     runs-on: ubuntu-latest
     steps:

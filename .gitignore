@@ -1,6 +1,14 @@
 /target
 /playground
 .claude/
+
+# JS workspace (clients/)
+node_modules/
+clients/**/dist/
+clients/**/*.tsbuildinfo
+clients/demo/dist/
+clients/**/.vite/
+clients/**/coverage/
 app/android/build/
 app/ios/*.xcodeproj/
 app/ios/build/

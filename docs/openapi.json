@@ -1,0 +1,2287 @@
+{
+  "components": {
+    "schemas": {
+      "CashInOutRequest": {
+        "description": "Op 11 request: record a cash-drawer adjustment.",
+        "properties": {
+          "amount": {
+            "description": "Amount; must be greater than zero. Sent as a JSON number on the wire.",
+            "format": "double",
+            "type": "number"
+          },
+          "cashierId": {
+            "description": "Cashier number.",
+            "format": "uint32",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "description": {
+            "default": "",
+            "description": "Free-text comment.",
+            "type": "string"
+          },
+          "isCashIn": {
+            "description": "`true` for cash-in (deposit), `false` for cash-out (withdrawal).",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "amount",
+          "isCashIn"
+        ],
+        "type": "object"
+      },
+      "DateTimeResponse": {
+        "description": "Op 12 response.",
+        "properties": {
+          "dt": {
+            "description": "Device date and time as a string. Spec does not pin the format; treat as opaque.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dt"
+        ],
+        "type": "object"
+      },
+      "DepartmentInfo": {
+        "description": "Single entry from the department list.",
+        "properties": {
+          "id": {
+            "description": "Department's unique numeric ID.",
+            "format": "uint32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "default": "",
+            "description": "Display name.",
+            "type": "string"
+          },
+          "type": {
+            "default": 0,
+            "description": "Taxation kind. Numeric on the wire; mapped to [`TaxationKind`].",
+            "format": "uint32",
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "EmptyResponse": {
+        "description": "Marker response for operations that do not return a meaningful payload.\n\nThe wire-level response framing is still parsed (header + zero-byte or `{}` payload), but the\ncaller gets no fields to consume.",
+        "type": "object"
+      },
+      "ErrorBody": {
+        "description": "The uniform error envelope every failure renders to. Public within the crate so the `OpenAPI`\ngenerator can derive its schema from the same type the handlers serialize.",
+        "properties": {
+          "error": {
+            "$ref": "#/components/schemas/ErrorDetail",
+            "description": "The single error detail object."
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "type": "object"
+      },
+      "ErrorDetail": {
+        "description": "The error detail carried inside [`ErrorBody`].",
+        "properties": {
+          "code": {
+            "description": "Spec/vendor response code when the device rejected the request; absent otherwise.",
+            "format": "uint16",
+            "maximum": 65535,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "kind": {
+            "description": "Stable machine-readable error tag (e.g. `device_error`, `transport_timeout`).",
+            "type": "string"
+          },
+          "message": {
+            "description": "Human-readable message. Not stable; do not branch on it.",
+            "type": "string"
+          },
+          "requires_reconnect": {
+            "description": "Whether the caller must re-establish the device connection before retrying.",
+            "type": "boolean"
+          },
+          "requires_relogin": {
+            "description": "Whether the caller must re-run the login operation before retrying.",
+            "type": "boolean"
+          },
+          "retryable": {
+            "description": "Whether retrying the same request may succeed.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "kind",
+          "message",
+          "retryable",
+          "requires_relogin",
+          "requires_reconnect"
+        ],
+        "type": "object"
+      },
+      "FiscalReportRequest": {
+        "anyOf": [
+          {
+            "oneOf": [
+              {
+                "description": "Restrict to a single department (`deptId`).",
+                "properties": {
+                  "deptId": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "deptId"
+                ],
+                "type": "object"
+              },
+              {
+                "description": "Restrict to a single cashier (`cashierId`).",
+                "properties": {
+                  "cashierId": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "cashierId"
+                ],
+                "type": "object"
+              },
+              {
+                "description": "Restrict to a transaction type — cash vs cashless (`transactionTypeId`).",
+                "properties": {
+                  "transactionTypeId": {
+                    "format": "uint32",
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "transactionTypeId"
+                ],
+                "type": "object"
+              }
+            ]
+          },
+          {}
+        ],
+        "description": "Op 9 request: print a fiscal report.",
+        "properties": {
+          "endDate": {
+            "description": "End of the report time range.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "reportType": {
+            "description": "X or Z report.",
+            "format": "uint8",
+            "maximum": 255,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "startDate": {
+            "description": "Start of the report time range (epoch-style integer, per spec example).",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "reportType",
+          "startDate",
+          "endDate"
+        ],
+        "type": "object"
+      },
+      "GetReturnableReceiptRequest": {
+        "description": "Op 6 request: fetch the fiscal contents of a previously-issued receipt you intend to return.\n\nThis is a **read-only lookup**, not a refund. The original spec §4.5.6 is\n\"ՀԴՄ վերադարձվող կտրոնի ստացում\" = *get the returnable receipt* (the English spec.md mistitles\nit \"print return receipt\"). It returns the receipt's items, amounts, eMarks and sale type so a\ncaller can construct the actual return via [`PrintReturnReceiptRequest`] (op 10). It registers\nnothing.",
+        "properties": {
+          "crn": {
+            "description": "HDM registration number of the device that printed the original receipt.",
+            "type": "string"
+          },
+          "receiptId": {
+            "description": "Number of the receipt to look up.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "receiptId",
+          "crn"
+        ],
+        "type": "object"
+      },
+      "HdmIdentity": {
+        "description": "Protocol identity reported by an endpoint that responded to [`identify`].",
+        "properties": {
+          "protocol_version": {
+            "description": "HDM protocol version reported in the response header (major, minor).",
+            "maxItems": 2,
+            "minItems": 2,
+            "prefixItems": [
+              {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          },
+          "response_code": {
+            "description": "Response code the device returned to the unauthenticated probe.\n\nCarried for diagnostics rather than as a success/failure signal — reaching this struct\nalready means the endpoint is an HDM. A `403` ([`crate::ServerErrorKind::UnauthorizedConnection`])\nis the expected value during first contact and tells the operator the caller's IP must be\nregistered on the device's integration screen.",
+            "format": "uint16",
+            "maximum": 65535,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "software_version": {
+            "description": "HDM firmware/software version (major, minor, patch).",
+            "maxItems": 3,
+            "minItems": 3,
+            "prefixItems": [
+              {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              },
+              {
+                "format": "uint8",
+                "maximum": 255,
+                "minimum": 0,
+                "type": "integer"
+              }
+            ],
+            "type": "array"
+          }
+        },
+        "required": [
+          "protocol_version",
+          "software_version",
+          "response_code"
+        ],
+        "type": "object"
+      },
+      "HealthOk": {
+        "description": "Liveness response for `GET /v1/health`.",
+        "properties": {
+          "status": {
+            "description": "Always `\"ok\"`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "Info": {
+        "description": "Bridge metadata for `GET /v1/info`.",
+        "properties": {
+          "default_device_configured": {
+            "description": "Whether a default device connection is configured (so requests may omit `connection`).",
+            "type": "boolean"
+          },
+          "name": {
+            "description": "Server name (`hdm-bridge`).",
+            "type": "string"
+          },
+          "operations": {
+            "description": "The operation names the bridge exposes.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "spec_version": {
+            "description": "HDM specification version the underlying client targets.",
+            "type": "string"
+          },
+          "version": {
+            "description": "Bridge crate version.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "version",
+          "spec_version",
+          "default_device_configured",
+          "operations"
+        ],
+        "type": "object"
+      },
+      "ListOpsAndDepsResponse": {
+        "description": "Op 1 response: operators and departments registered on the HDM device.\n\nThe wire keys are the cryptic `c` / `d` from the spec example; the Rust fields are named for\nwhat they hold.",
+        "properties": {
+          "c": {
+            "default": [],
+            "description": "Operators registered on the device (wire key `c`).",
+            "items": {
+              "$ref": "#/components/schemas/OperatorInfo"
+            },
+            "type": "array"
+          },
+          "d": {
+            "default": [],
+            "description": "Departments registered on the device (wire key `d`).",
+            "items": {
+              "$ref": "#/components/schemas/DepartmentInfo"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "OperatorInfo": {
+        "description": "Single entry from the operator list.",
+        "properties": {
+          "deps": {
+            "default": [],
+            "description": "Unique IDs of departments assigned to this operator.",
+            "items": {
+              "format": "uint32",
+              "minimum": 0,
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "id": {
+            "description": "Operator's unique numeric ID, used as the cashier code in [`super::session::OperatorLoginRequest`].",
+            "format": "uint32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "default": "",
+            "description": "Display name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "type": "object"
+      },
+      "PartialConn": {
+        "additionalProperties": false,
+        "description": "Connection parameters with every field optional, used both for the configured default and for a\nper-request override. Secrets are redacted in `Debug`.",
+        "properties": {
+          "cashier": {
+            "description": "Operator (cashier) numeric id for login.",
+            "format": "uint32",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "host": {
+            "description": "HDM host (IP or name).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "password": {
+            "description": "HDM access password (used to derive the password key).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "pin": {
+            "description": "Operator PIN for login.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "port": {
+            "description": "HDM TCP port; defaults to [`DEFAULT_PORT`].",
+            "format": "uint16",
+            "maximum": 65535,
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "timeout_secs": {
+            "description": "Socket timeout in seconds; defaults to [`DEFAULT_TIMEOUT_SECS`], clamped to [`MAX_TIMEOUT_SECS`].",
+            "format": "uint64",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "PaymentSystemEntry": {
+        "description": "A single payment-system entry from op 15. Codes are documented in spec §4.8 (1 = card,\n10-18 = various Armenian mobile wallets).",
+        "properties": {
+          "code": {
+            "description": "Payment-system code (used in [`super::receipt::PrintReceiptRequest::payment_system`]).",
+            "format": "uint32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "name": {
+            "default": "",
+            "description": "Display name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "type": "object"
+      },
+      "PaymentSystemsListResponse": {
+        "description": "Op 15 response: list of payment systems configured on the device.",
+        "properties": {
+          "PaymentSystems": {
+            "default": [],
+            "description": "One entry per configured payment system.",
+            "items": {
+              "$ref": "#/components/schemas/PaymentSystemEntry"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "PrintReceiptRequest": {
+        "description": "Op 4 request: print a fiscal receipt. Encrypted with the session key.",
+        "properties": {
+          "PaymentSystem": {
+            "description": "Payment system code from spec §4.8 (1 = card, 10-18 = various Armenian wallets). Used\nonly when `use_ext_pos = false` and the HDM has multiple payment systems configured.",
+            "format": "uint32",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "dep": {
+            "description": "Department for simple/prepayment receipts (when `items` is empty).",
+            "format": "uint32",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "eMarks": {
+            "default": [],
+            "description": "eMark traceability codes for marked goods (29-110 chars each, ASCII printable, escaping\nrules in spec §4.5.4). Used only in product-mode receipts.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "items": {
+            "default": [],
+            "description": "Items (required when `mode = Products`). Use an empty `Vec` for simple/prepayment modes.",
+            "items": {
+              "$ref": "#/components/schemas/ReceiptItem"
+            },
+            "type": "array"
+          },
+          "mode": {
+            "description": "Mode (simple / products / prepayment).",
+            "format": "uint8",
+            "maximum": 255,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "paidAmount": {
+            "description": "Cash portion of the payment.",
+            "format": "double",
+            "type": "number"
+          },
+          "paidAmountCard": {
+            "description": "Card (cashless) portion of the payment.",
+            "format": "double",
+            "type": "number"
+          },
+          "partialAmount": {
+            "description": "Partial-payment portion.",
+            "format": "double",
+            "type": "number"
+          },
+          "partnerTin": {
+            "description": "Partner TIN (8 digits) for B2B receipts. Sent as `null` if absent — the spec requires\nthis field to appear even when null.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "prePaymentAmount": {
+            "description": "Prepayment-used portion.",
+            "format": "double",
+            "type": "number"
+          },
+          "rrn": {
+            "description": "Acquirer transaction RRN (12 chars). Used when `use_ext_pos = true`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "terminalId": {
+            "description": "Payment terminal unique ID (8 chars). Used when `use_ext_pos = true`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "useExtPOS": {
+            "description": "If `true`, supply `rrn` + `terminal_id` from an external POS terminal. If `false`, the\nHDM uses its own configured payment system (set `payment_system`).",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "mode",
+          "paidAmount",
+          "paidAmountCard",
+          "partialAmount",
+          "prePaymentAmount",
+          "useExtPOS"
+        ],
+        "type": "object"
+      },
+      "PrintReturnReceiptRequest": {
+        "description": "Op 10 request: print a return/refund receipt — the operation that actually registers a return.\n\nWith no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or\n`return_item_list` for a partial return. The original spec §4.5.7 is\n\"ՀԴՄ վերադարձի կտրոնի տպում\" = *print return receipt* (the English spec.md mistitled it \"get\nreceipt info\"). The read-only lookup of the receipt being returned is op 6,\n[`GetReturnableReceiptRequest`].",
+        "properties": {
+          "cardAmountForReturn": {
+            "description": "Card amount to return (only set if returning partial payments).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cashAmountForReturn": {
+            "description": "Cash amount to return (only set if returning partial payments).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "crn": {
+            "description": "HDM registration number of the device that printed the receipt.",
+            "type": "string"
+          },
+          "eMarks": {
+            "description": "eMark codes for marked goods.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "prePaymentAmountForReturn": {
+            "description": "Prepayment amount to return (only set if returning partial payments).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "returnItemList": {
+            "description": "Per-item return list (only set if returning specific items partially).",
+            "items": {
+              "$ref": "#/components/schemas/ReturnItem"
+            },
+            "type": "array"
+          },
+          "returnTicketId": {
+            "description": "Number of the receipt to be returned.",
+            "format": "uint64",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "rrn": {
+            "description": "Acquirer RRN (12 chars).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "terminalId": {
+            "description": "Payment terminal ID (8 chars).",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "crn",
+          "returnTicketId"
+        ],
+        "type": "object"
+      },
+      "ReceiptItem": {
+        "description": "A single item in a printed receipt.",
+        "properties": {
+          "additionalDiscount": {
+            "description": "Stacked secondary discount amount (skip when no discount applies).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "additionalDiscountType": {
+            "description": "Stacked secondary discount kind (skip when no discount applies).",
+            "format": "uint32",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "adgCode": {
+            "description": "ATG/ADG tax classification code. Lookup at `taxservice.am`. Mandatory unless waived by\nitem-level discount logic per spec §4.5.4.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "dep": {
+            "description": "Department this item belongs to.",
+            "format": "uint32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "discount": {
+            "description": "Primary discount amount (skip when no discount applies).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "discountType": {
+            "description": "Primary discount kind (skip when no discount applies).",
+            "format": "uint32",
+            "minimum": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "price": {
+            "description": "Unit price, max 2 decimal places.",
+            "format": "double",
+            "type": "number"
+          },
+          "productCode": {
+            "description": "Vendor SKU (≤50 chars, must be non-empty).",
+            "type": "string"
+          },
+          "productName": {
+            "description": "Display name (≤50 chars, must be non-empty).",
+            "type": "string"
+          },
+          "qty": {
+            "description": "Quantity, max 3 decimal places.",
+            "format": "double",
+            "type": "number"
+          },
+          "unit": {
+            "description": "Unit of measure (≤50 chars, must be non-empty).",
+            "type": "string"
+          }
+        },
+        "required": [
+          "dep",
+          "qty",
+          "price",
+          "productCode",
+          "productName",
+          "unit"
+        ],
+        "type": "object"
+      },
+      "ReceiptResponse": {
+        "description": "Op 4 response: fiscal data for a successfully-printed receipt.\n\nThree fields (`qr`, `verification_number`, `emarks_count`) were added in spec revisions past\nv0.5; they are marked `Option` with `serde(default)` so older HDM firmware still deserialises\nwithout errors.",
+        "properties": {
+          "address": {
+            "default": "",
+            "description": "Taxpayer registered address.",
+            "type": "string"
+          },
+          "change": {
+            "default": 0.0,
+            "description": "Change due to the customer.",
+            "format": "double",
+            "type": "number"
+          },
+          "crn": {
+            "default": "",
+            "description": "HDM registration number (unique per device).",
+            "type": "string"
+          },
+          "emarksCount": {
+            "default": null,
+            "description": "Number of eMark codes processed. Added post-v0.5. Documented as `string` in spec.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fiscal": {
+            "default": "",
+            "description": "Fiscal receipt number — the legally-binding identifier.",
+            "type": "string"
+          },
+          "lottery": {
+            "default": "",
+            "description": "Lottery ticket number associated with the receipt.",
+            "type": "string"
+          },
+          "prize": {
+            "default": 0,
+            "description": "`0` = no prize, `1` = prize won. (Currently no longer used by the lottery system.)",
+            "format": "uint32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "qr": {
+            "default": null,
+            "description": "QR-code payload to render on the printed receipt. Added post-v0.5.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rseq": {
+            "description": "HDM-assigned receipt sequence number.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sn": {
+            "default": "",
+            "description": "HDM hardware serial number.",
+            "type": "string"
+          },
+          "taxpayer": {
+            "default": "",
+            "description": "Taxpayer legal name.",
+            "type": "string"
+          },
+          "time": {
+            "default": 0,
+            "description": "Receipt timestamp (milliseconds since Unix epoch, Greenwich time).",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tin": {
+            "default": "",
+            "description": "Taxpayer TIN.",
+            "type": "string"
+          },
+          "total": {
+            "default": 0.0,
+            "description": "Total amount on the receipt.",
+            "format": "double",
+            "type": "number"
+          },
+          "verificationNumber": {
+            "default": null,
+            "description": "Short alphanumeric verification number (≤13 chars) printed on the receipt. Added post-v0.5.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "rseq"
+        ],
+        "type": "object"
+      },
+      "ReturnItem": {
+        "description": "Per-item entry in a partial-return request.",
+        "properties": {
+          "quantity": {
+            "description": "Quantity of this row's items to return.",
+            "format": "double",
+            "type": "number"
+          },
+          "rpid": {
+            "description": "Row sequence number of the item being returned.",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "rpid",
+          "quantity"
+        ],
+        "type": "object"
+      },
+      "ReturnReceiptResponse": {
+        "description": "Op 10 response: full receipt details + return-specific timestamps.",
+        "properties": {
+          "address": {
+            "default": "",
+            "description": "Taxpayer address.",
+            "type": "string"
+          },
+          "change": {
+            "default": 0.0,
+            "description": "Change.",
+            "format": "double",
+            "type": "number"
+          },
+          "crn": {
+            "default": "",
+            "description": "HDM registration number.",
+            "type": "string"
+          },
+          "emarksCount": {
+            "default": null,
+            "description": "Number of registered marks.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "fiscal": {
+            "default": "",
+            "description": "Fiscal number.",
+            "type": "string"
+          },
+          "lottery": {
+            "default": "",
+            "description": "Lottery number.",
+            "type": "string"
+          },
+          "prize": {
+            "default": 0,
+            "description": "Prize indicator (currently always 0).",
+            "format": "uint32",
+            "minimum": 0,
+            "type": "integer"
+          },
+          "rseq": {
+            "description": "Receipt sequence number.",
+            "format": "int64",
+            "type": "integer"
+          },
+          "rtime": {
+            "default": 0,
+            "description": "Return-receipt timestamp (ms since epoch, Greenwich).",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sn": {
+            "default": "",
+            "description": "HDM hardware serial number.",
+            "type": "string"
+          },
+          "taxpayer": {
+            "default": "",
+            "description": "Taxpayer name.",
+            "type": "string"
+          },
+          "time": {
+            "default": 0,
+            "description": "Original receipt timestamp (ms since epoch, Greenwich).",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tin": {
+            "default": "",
+            "description": "Taxpayer TIN.",
+            "type": "string"
+          },
+          "total": {
+            "default": 0.0,
+            "description": "Total amount.",
+            "format": "double",
+            "type": "number"
+          },
+          "verificationNumber": {
+            "default": null,
+            "description": "Short verification number printed on the receipt.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "rseq"
+        ],
+        "type": "object"
+      },
+      "ReturnableReceiptItem": {
+        "description": "A single line item in a [`ReturnableReceiptResponse`] (`totals[]`). All fields optional/lenient\nfor the same reason as the parent — modelled from spec §4.5.6 Code Block 7, unverified.",
+        "properties": {
+          "adsc": {
+            "default": null,
+            "description": "Proportional secondary discount (`adsc`).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "did": {
+            "default": null,
+            "description": "Department (`did`).",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "dsc": {
+            "default": null,
+            "description": "Primary discount (`dsc`).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "dsct": {
+            "default": null,
+            "description": "Discount type (`dsct`).",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "dt": {
+            "default": null,
+            "description": "Department VAT amount (`dt`).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "dtm": {
+            "default": null,
+            "description": "Department tax regime (`dtm`).",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "gc": {
+            "default": null,
+            "description": "Product code (`gc`).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "gn": {
+            "default": null,
+            "description": "Product name (`gn`).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "mu": {
+            "default": null,
+            "description": "Unit of measure (`mu`).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "p": {
+            "default": null,
+            "description": "Unit price (`p`).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "qty": {
+            "default": null,
+            "description": "Quantity (`qty`).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "rpid": {
+            "default": null,
+            "description": "Row sequence number (`rpid`) — the handle used for per-item partial returns in op 10.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "t": {
+            "default": null,
+            "description": "Line total excluding VAT (`t`).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "tt": {
+            "default": null,
+            "description": "Line total including VAT (`tt`).",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "ReturnableReceiptResponse": {
+        "description": "Op 6 response: the looked-up receipt's full fiscal contents.\n\n**Unverified against hardware.** On the available N950 test stand op 6 always returns vendor\ncode 503 with an empty body — the firmware never exposes the server-side `Receipt_ID` this\nlookup keys on (op 4 omits the `qr` field entirely), so the request can't be satisfied. This\nstruct is therefore modelled purely from spec §4.5.6, which is internally inconsistent: its\nfield table and the Code Block 7 example disagree (the example adds `type`, omits\n`rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). Fields follow the\nCode Block 7 example — whose numeric types match what real firmware sends for op 4 — and are all\noptional/lenient. The raw decrypted payload is logged at TRACE so the true shape can be\nconfirmed once a device ever returns one.",
+        "properties": {
+          "card": {
+            "default": null,
+            "description": "Card (cashless) paid.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cash": {
+            "default": null,
+            "description": "Cash paid.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "cid": {
+            "default": null,
+            "description": "Cashier ID (`Գանձապահի ID`). The English spec.md mislabels this \"Customer ID\".",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "did": {
+            "default": null,
+            "description": "Department of a simple receipt.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "eMarks": {
+            "default": [],
+            "description": "eMark codes of marked goods on the receipt.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "pTin": {
+            "default": null,
+            "description": "Buyer TIN (8 digits) for a B2B receipt, or `null`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ppa": {
+            "default": null,
+            "description": "Partial-payment amount.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "ppu": {
+            "default": null,
+            "description": "Used prepayment amount.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "ref": {
+            "default": null,
+            "description": "When this receipt is itself a return, the number of the receipt it returned (`ref`).",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "refcrn": {
+            "default": null,
+            "description": "crn of the HDM that printed the returned receipt (set only for return-type receipts).",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "rseq": {
+            "default": null,
+            "description": "Receipt sequence number.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "saleType": {
+            "default": null,
+            "description": "Sale type: `0` sale, `2` return, `3` prepayment.",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "subType": {
+            "default": null,
+            "description": "Receipt sub-type: `1` simple, `2` itemised. (In the field table only; absent from the example.)",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "ta": {
+            "default": null,
+            "description": "Total amount.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "time": {
+            "default": null,
+            "description": "Receipt registration/print time (ms since epoch, Greenwich).",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "totals": {
+            "default": [],
+            "description": "Line items (empty for simple/prepayment receipts, where the spec sends `null`).",
+            "items": {
+              "$ref": "#/components/schemas/ReturnableReceiptItem"
+            },
+            "type": "array"
+          },
+          "type": {
+            "default": null,
+            "description": "Transaction type as the Code Block 7 example's `type` field (mirrors `sale_type`).",
+            "format": "int64",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "type": "object"
+      },
+      "SetupHeaderFooterRequest": {
+        "description": "Op 7 request: configure receipt header and footer lines.",
+        "properties": {
+          "footers": {
+            "default": [],
+            "description": "Footer lines, in print order (top to bottom).",
+            "items": {
+              "$ref": "#/components/schemas/TextLine"
+            },
+            "type": "array"
+          },
+          "headers": {
+            "default": [],
+            "description": "Header lines, in print order (top to bottom).",
+            "items": {
+              "$ref": "#/components/schemas/TextLine"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "SetupHeaderLogoRequest": {
+        "description": "Op 8 request: upload a header logo image (Base64-encoded BMP, colour depth ≤4 bits).",
+        "properties": {
+          "headerLogo": {
+            "description": "Logo image bytes encoded as a Base64 string. Per spec §4.6.4 the image must be in **BMP**\nformat with a colour depth of **no more than 4 bits** (≤16 colours; 1-bit monochrome is\nfine). Note: the English translation's \"must not exceed 4 pixels in height\" is a\nmistranslation of the original \"must not contain more than 4 bits of colour\".",
+            "type": "string"
+          }
+        },
+        "required": [
+          "headerLogo"
+        ],
+        "type": "object"
+      },
+      "SingleEmarkRequest": {
+        "description": "Op 16 request: submit a single eMark traceability code.",
+        "properties": {
+          "eMark": {
+            "description": "eMark code. Per spec §4.9: 29-110 chars, ASCII-printable only (33-126 plus 29 as\ndelimiter); `\"` escaped as `\\\"`, `\\` as `\\\\`, and ASCII 29 used as the group separator.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "eMark"
+        ],
+        "type": "object"
+      },
+      "StatusOk": {
+        "description": "Boolean-outcome response (e.g. login confirmation).",
+        "properties": {
+          "ok": {
+            "description": "Whether the operation succeeded.",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "type": "object"
+      },
+      "TextLine": {
+        "description": "A single line of header or footer text.",
+        "properties": {
+          "align": {
+            "description": "Alignment.",
+            "format": "uint8",
+            "maximum": 255,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "bold": {
+            "description": "Bold flag, serialised as a JSON boolean (`true`/`false`) per the spec's field-type column\n(\"Boolean\"). The spec's §4.6.3 JSON example loosely writes it as the integer `1`, but a\nNewland N950 was verified to accept the boolean form (op 7 returned success).",
+            "type": "boolean"
+          },
+          "fsize": {
+            "description": "Font size (1 through 5).",
+            "format": "uint8",
+            "maximum": 255,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "text": {
+            "description": "Text content.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "align",
+          "bold",
+          "fsize",
+          "text"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearerAuth": {
+        "description": "The shared bridge token (HDM_BRIDGE_TOKEN).",
+        "scheme": "bearer",
+        "type": "http"
+      }
+    }
+  },
+  "info": {
+    "description": "Local HTTP bridge for the Armenian fiscal cash register (HDM) protocol. Every operation is a `POST /v1/<op>` carrying a uniform JSON envelope `{ connection?, params? }`: `connection` overrides the bridge's configured default device field-by-field, and `params` carries the operation input. On failure every route returns the same error envelope (see `ErrorBody`): `kind` is a stable machine tag and `code` carries the device/spec response code when the device rejected the request. All routes except `/v1/health`, `/v1/info`, and `/v1/openapi.json` require `Authorization: Bearer <token>`.",
+    "license": {
+      "name": "MIT OR Apache-2.0"
+    },
+    "title": "HDM Bridge API",
+    "version": "0.2.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/v1/cash": {
+      "post": {
+        "description": "Register a cash-drawer in or out. Requires connection: host + password + cashier + pin.",
+        "operationId": "cashInOut",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/CashInOutRequest"
+                  }
+                },
+                "required": [
+                  "params"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Register a cash-drawer in or out."
+      }
+    },
+    "/v1/datetime": {
+      "post": {
+        "description": "Get the device date and time. Requires connection: host + password + cashier + pin.",
+        "operationId": "dateTime",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "description": "Ignored for this operation."
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DateTimeResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Get the device date and time."
+      }
+    },
+    "/v1/emark": {
+      "post": {
+        "description": "Validate a single eMark code. Requires connection: host + password + cashier + pin.",
+        "operationId": "emark",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/SingleEmarkRequest"
+                  }
+                },
+                "required": [
+                  "params"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Validate a single eMark code."
+      }
+    },
+    "/v1/header-footer": {
+      "post": {
+        "description": "Configure receipt header and footer lines. Requires connection: host + password + cashier + pin.",
+        "operationId": "headerFooter",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/SetupHeaderFooterRequest"
+                  }
+                },
+                "required": [
+                  "params"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Configure receipt header and footer lines."
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthOk"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          }
+        },
+        "summary": "Liveness probe (public, no auth)."
+      }
+    },
+    "/v1/info": {
+      "get": {
+        "operationId": "info",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Info"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          }
+        },
+        "summary": "Bridge metadata and the operation list (public, no auth)."
+      }
+    },
+    "/v1/login": {
+      "post": {
+        "description": "Verify operator login credentials. Requires connection: host + password + cashier + pin.",
+        "operationId": "login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "description": "Ignored for this operation."
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusOk"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Verify operator login credentials."
+      }
+    },
+    "/v1/logo": {
+      "post": {
+        "description": "Configure the receipt header logo. Requires connection: host + password + cashier + pin.",
+        "operationId": "headerLogo",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/SetupHeaderLogoRequest"
+                  }
+                },
+                "required": [
+                  "params"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Configure the receipt header logo."
+      }
+    },
+    "/v1/openapi.json": {
+      "get": {
+        "operationId": "openapiDocument",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            },
+            "description": "The OpenAPI document."
+          }
+        },
+        "summary": "This OpenAPI 3.1 document (public, no auth)."
+      }
+    },
+    "/v1/operators": {
+      "post": {
+        "description": "List the HDM's operators and departments. Requires connection: host + password.",
+        "operationId": "operators",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "description": "Ignored for this operation."
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListOpsAndDepsResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List the HDM's operators and departments."
+      }
+    },
+    "/v1/payment-systems": {
+      "post": {
+        "description": "List payment systems configured on the device. Requires connection: host + password + cashier + pin.",
+        "operationId": "paymentSystems",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "description": "Ignored for this operation."
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentSystemsListResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "List payment systems configured on the device."
+      }
+    },
+    "/v1/probe": {
+      "post": {
+        "description": "Probe an endpoint and identify it as an HDM. Requires connection: host (port/timeout optional).",
+        "operationId": "probe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "description": "Ignored for this operation."
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HdmIdentity"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Probe an endpoint and identify it as an HDM."
+      }
+    },
+    "/v1/receipt": {
+      "post": {
+        "description": "Print a fiscal receipt. Requires connection: host + password + cashier + pin.",
+        "operationId": "printReceipt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/PrintReceiptRequest"
+                  }
+                },
+                "required": [
+                  "params"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceiptResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Print a fiscal receipt."
+      }
+    },
+    "/v1/receipt/last": {
+      "post": {
+        "description": "Print a copy of the last receipt. Requires connection: host + password + cashier + pin.",
+        "operationId": "printLastReceipt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "description": "Ignored for this operation."
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Print a copy of the last receipt."
+      }
+    },
+    "/v1/receipt/lookup": {
+      "post": {
+        "description": "Look up a returnable receipt's contents (read-only). Requires connection: host + password + cashier + pin.",
+        "operationId": "lookupReceipt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/GetReturnableReceiptRequest"
+                  }
+                },
+                "required": [
+                  "params"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnableReceiptResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Look up a returnable receipt's contents (read-only)."
+      }
+    },
+    "/v1/report": {
+      "post": {
+        "description": "Print an X or Z fiscal report. Requires connection: host + password + cashier + pin.",
+        "operationId": "report",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/FiscalReportRequest"
+                  }
+                },
+                "required": [
+                  "params"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Print an X or Z fiscal report."
+      }
+    },
+    "/v1/return": {
+      "post": {
+        "description": "Print a return receipt. Requires connection: host + password + cashier + pin.",
+        "operationId": "printReturn",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "$ref": "#/components/schemas/PrintReturnReceiptRequest"
+                  }
+                },
+                "required": [
+                  "params"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReturnReceiptResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Print a return receipt."
+      }
+    },
+    "/v1/sample": {
+      "post": {
+        "description": "Print a sample receipt. Requires connection: host + password + cashier + pin.",
+        "operationId": "receiptSample",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "description": "Ignored for this operation."
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Print a sample receipt."
+      }
+    },
+    "/v1/time-sync": {
+      "post": {
+        "description": "Synchronize the device clock. Requires connection: host + password + cashier + pin.",
+        "operationId": "timeSync",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": false,
+                "properties": {
+                  "connection": {
+                    "$ref": "#/components/schemas/PartialConn"
+                  },
+                  "params": {
+                    "description": "Ignored for this operation."
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": false
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmptyResponse"
+                }
+              }
+            },
+            "description": "Operation succeeded."
+          },
+          "default": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            },
+            "description": "Error envelope (4xx/5xx)."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "summary": "Synchronize the device clock."
+      }
+    }
+  },
+  "servers": [
+    {
+      "description": "Default local bridge bind address",
+      "url": "http://127.0.0.1:8077"
+    }
+  ]
+}

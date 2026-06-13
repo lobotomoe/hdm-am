@@ -1,0 +1,38 @@
+{
+  "name": "@hdm-am/client",
+  "version": "0.1.0",
+  "description": "Isomorphic TypeScript client for the HDM bridge, typed from its OpenAPI document.",
+  "license": "MIT OR Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lobotomoe/hdm-am.git",
+    "directory": "clients/typescript"
+  },
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist"],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "gen": "openapi-typescript ../../docs/openapi.json --default-non-nullable false -o src/generated/openapi.ts",
+    "gen:check": "node scripts/gen-check.mjs",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@scalar/openapi-parser": "^0.10.0",
+    "openapi-typescript": "^7.13.0",
+    "tsup": "^8.3.5",
+    "vitest": "^2.1.8"
+  }
+}

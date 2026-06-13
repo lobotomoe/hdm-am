@@ -2009,6 +2009,7 @@ dependencies = [
  "hdm-am",
  "http-body-util",
  "log",
+ "schemars",
  "serde",
  "serde_json",
  "tokio",

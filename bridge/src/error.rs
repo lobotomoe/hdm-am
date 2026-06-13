@@ -70,19 +70,31 @@ fn device_status_kind_code(err: &hdm_am::Error) -> (StatusCode, &'static str, Op
     }
 }
 
+/// The uniform error envelope every failure renders to. Public within the crate so the `OpenAPI`
+/// generator can derive its schema from the same type the handlers serialize.
 #[derive(serde::Serialize)]
-struct ErrorBody {
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct ErrorBody {
+    /// The single error detail object.
     error: ErrorDetail,
 }
 
+/// The error detail carried inside [`ErrorBody`].
 #[derive(serde::Serialize)]
-struct ErrorDetail {
+#[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
+pub struct ErrorDetail {
+    /// Stable machine-readable error tag (e.g. `device_error`, `transport_timeout`).
     kind: &'static str,
+    /// Spec/vendor response code when the device rejected the request; absent otherwise.
     #[serde(skip_serializing_if = "Option::is_none")]
     code: Option<u16>,
+    /// Human-readable message. Not stable; do not branch on it.
     message: String,
+    /// Whether retrying the same request may succeed.
     retryable: bool,
+    /// Whether the caller must re-run the login operation before retrying.
     requires_relogin: bool,
+    /// Whether the caller must re-establish the device connection before retrying.
     requires_reconnect: bool,
 }
 

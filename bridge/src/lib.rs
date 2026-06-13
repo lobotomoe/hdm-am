@@ -12,6 +12,8 @@
 pub mod config;
 mod device;
 mod error;
+#[cfg(feature = "schema")]
+pub mod openapi;
 mod routes;
 
 #[cfg(test)]
