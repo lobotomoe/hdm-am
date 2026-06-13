@@ -9,6 +9,10 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-06-13
+
+Still targets HDM integration spec **v0.7.3**.
+
 ### Added
 - **`format_receipt` — render a fiscal receipt as human-friendly text.** The device prints the legal
   receipt itself and returns only structured identifiers, so this reconstructs a faithful *summary*
@@ -65,6 +69,7 @@ Initial release. Targets HDM integration spec **v0.7.3** (April 2025).
 - `hdm-am-cli` (binary `hdm`): one subcommand per operation, text or `--json` output.
 - Offline spec archive under `docs/history/` (v0.3–v0.7.3) with a wire-protocol changelog.
 
-[Unreleased]: https://github.com/lobotomoe/hdm-am/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/lobotomoe/hdm-am/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/lobotomoe/hdm-am/releases/tag/v0.3.0
 [0.2.0]: https://github.com/lobotomoe/hdm-am/releases/tag/v0.2.0
 [0.1.0]: https://github.com/lobotomoe/hdm-am/releases/tag/v0.1.0
