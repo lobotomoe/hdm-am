@@ -1,0 +1,148 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+body {
+  margin: 0;
+  background: Canvas;
+  color: CanvasText;
+}
+
+main {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px 16px 64px;
+}
+
+header h1 {
+  margin-bottom: 4px;
+}
+
+.card {
+  border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 16px;
+}
+
+.card h2 {
+  margin-top: 0;
+}
+
+h3 {
+  margin: 12px 0 6px;
+  font-size: 0.95rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.85rem;
+  margin: 4px 0;
+}
+
+.field input {
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, CanvasText 25%, transparent);
+  border-radius: 6px;
+  background: Field;
+  color: FieldText;
+  font: inherit;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.subform {
+  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.btn {
+  padding: 6px 14px;
+  border: 1px solid color-mix(in srgb, CanvasText 30%, transparent);
+  border-radius: 6px;
+  background: color-mix(in srgb, CanvasText 6%, Canvas);
+  color: CanvasText;
+  font: inherit;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.result {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ok {
+  color: #1a7f37;
+  font-weight: 600;
+}
+
+.muted {
+  color: color-mix(in srgb, CanvasText 55%, transparent);
+  font-size: 0.85rem;
+}
+
+.note {
+  font-size: 0.8rem;
+  color: color-mix(in srgb, CanvasText 55%, transparent);
+}
+
+.error {
+  color: #c1121f;
+  font-size: 0.85rem;
+}
+
+.error .hints {
+  font-style: italic;
+  opacity: 0.8;
+}
+
+.json {
+  background: color-mix(in srgb, CanvasText 6%, Canvas);
+  border-radius: 6px;
+  padding: 10px;
+  overflow-x: auto;
+  font-size: 0.78rem;
+}
+
+code {
+  background: color-mix(in srgb, CanvasText 10%, Canvas);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+}
+
+ul {
+  margin: 4px 0;
+  padding-left: 18px;
+  font-size: 0.85rem;
+}
