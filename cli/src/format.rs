@@ -49,7 +49,6 @@ pub fn payment_systems(response: &PaymentSystemsListResponse) {
     }
 }
 
-
 /// Render the result of a returnable-receipt lookup (op 6, read-only).
 pub fn returnable_receipt(response: &ReturnableReceiptResponse) {
     println!("Receipt lookup:");
