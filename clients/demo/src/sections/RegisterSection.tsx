@@ -1,11 +1,15 @@
 import { useState, type ReactNode } from 'react';
+import { Banknote, Printer, ReceiptText } from 'lucide-react';
 import {
   useCashInOut,
   usePrintLastReceipt,
   usePrintReceipt,
   useReceiptSample,
 } from '@hdm-am/react';
-import { Button, Field, JsonBlock, Result, Section } from '../ui.js';
+import { Field, JsonBlock, OkBadge, Outcome } from '../ui.js';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 const SIMPLE_MODE = 1;
 
@@ -27,86 +31,116 @@ export function RegisterSection(): ReactNode {
   const receipt = printReceipt.data;
 
   return (
-    <Section title="Cash register">
-      <div className="subform">
-        <h3>Simple receipt</h3>
-        <Field label="Cash amount (AMD)" value={cashAmount} onChange={setCashAmount} type="number" />
-        <Field label="Department" value={dept} onChange={setDept} type="number" />
-        <Button
-          onClick={() => {
-            void printReceipt.mutate({
-              mode: SIMPLE_MODE,
-              paidAmount: toAmount(cashAmount),
-              paidAmountCard: 0,
-              partialAmount: 0,
-              prePaymentAmount: 0,
-              useExtPOS: false,
-              dep: Number.parseInt(dept, 10),
-            });
-          }}
-          disabled={printReceipt.loading}
-        >
-          Print receipt
-        </Button>
-        <Result loading={printReceipt.loading} error={printReceipt.error}>
-          {receipt ? (
-            <div className="ok">
-              fiscal {receipt.fiscal ?? '?'} · total {receipt.total ?? 0}
-              {receipt.change ? ` · change ${String(receipt.change)}` : ''}
-            </div>
-          ) : null}
-        </Result>
-        {receipt ? <JsonBlock value={receipt} /> : null}
-      </div>
-
-      <div className="subform">
-        <h3>Cash drawer</h3>
-        <Field label="Amount (AMD)" value={drawerAmount} onChange={setDrawerAmount} type="number" />
-        <div className="row">
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ReceiptText className="size-5" />
+          Cash register
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-5">
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium">Simple receipt</h3>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field id="cashAmount" label="Cash amount (AMD)" type="number" value={cashAmount} onChange={setCashAmount} />
+            <Field id="dept" label="Department" type="number" value={dept} onChange={setDept} />
+          </div>
           <Button
+            data-testid="print-receipt"
+            disabled={printReceipt.loading}
             onClick={() => {
-              void cash.mutate({ amount: toAmount(drawerAmount), isCashIn: true });
+              void printReceipt.mutate({
+                mode: SIMPLE_MODE,
+                paidAmount: toAmount(cashAmount),
+                paidAmountCard: 0,
+                partialAmount: 0,
+                prePaymentAmount: 0,
+                useExtPOS: false,
+                dep: Number.parseInt(dept, 10),
+              });
             }}
-            disabled={cash.loading}
           >
-            Cash in
+            <Printer className="size-4" />
+            Print receipt
           </Button>
-          <Button
-            onClick={() => {
-              void cash.mutate({ amount: toAmount(drawerAmount), isCashIn: false });
-            }}
-            disabled={cash.loading}
-          >
-            Cash out
-          </Button>
+          <Outcome loading={printReceipt.loading} error={printReceipt.error} testId="receipt-outcome">
+            {receipt ? (
+              <OkBadge>
+                fiscal {receipt.fiscal ?? '?'} · total {receipt.total ?? 0}
+                {receipt.change ? ` · change ${String(receipt.change)}` : ''}
+              </OkBadge>
+            ) : null}
+          </Outcome>
+          {receipt ? <JsonBlock value={receipt} /> : null}
         </div>
-        <Result loading={cash.loading} error={cash.error}>
-          {cash.data ? <span className="ok">recorded</span> : null}
-        </Result>
-      </div>
 
-      <div className="subform">
-        <h3>Other</h3>
-        <div className="row">
-          <Button
-            onClick={() => {
-              void last.mutate();
-            }}
-            disabled={last.loading}
-          >
-            Reprint last
-          </Button>
-          <Button
-            onClick={() => {
-              void sample.mutate();
-            }}
-            disabled={sample.loading}
-          >
-            Print sample
-          </Button>
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium">Cash drawer</h3>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <Field id="drawerAmount" label="Amount (AMD)" type="number" value={drawerAmount} onChange={setDrawerAmount} />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              data-testid="cash-in"
+              variant="outline"
+              disabled={cash.loading}
+              onClick={() => {
+                void cash.mutate({ amount: toAmount(drawerAmount), isCashIn: true });
+              }}
+            >
+              <Banknote className="size-4" />
+              Cash in
+            </Button>
+            <Button
+              data-testid="cash-out"
+              variant="outline"
+              disabled={cash.loading}
+              onClick={() => {
+                void cash.mutate({ amount: toAmount(drawerAmount), isCashIn: false });
+              }}
+            >
+              <Banknote className="size-4" />
+              Cash out
+            </Button>
+          </div>
+          <Outcome loading={cash.loading} error={cash.error}>
+            {cash.data ? <OkBadge>recorded</OkBadge> : null}
+          </Outcome>
         </div>
-        <Result loading={last.loading || sample.loading} error={last.error ?? sample.error} />
-      </div>
-    </Section>
+
+        <Separator />
+
+        <div className="space-y-3">
+          <h3 className="text-sm font-medium">Other</h3>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              data-testid="reprint-last"
+              variant="outline"
+              disabled={last.loading}
+              onClick={() => {
+                void last.mutate();
+              }}
+            >
+              Reprint last
+            </Button>
+            <Button
+              data-testid="print-sample"
+              variant="outline"
+              disabled={sample.loading}
+              onClick={() => {
+                void sample.mutate();
+              }}
+            >
+              Print sample
+            </Button>
+          </div>
+          <Outcome loading={last.loading || sample.loading} error={last.error ?? sample.error}>
+            {last.data || sample.data ? <OkBadge>done</OkBadge> : null}
+          </Outcome>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

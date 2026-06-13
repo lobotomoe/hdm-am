@@ -11,6 +11,9 @@ export default tseslint.config(
       '**/scripts/**/*.mjs',
       // Machine-generated from the OpenAPI document — linting it is noise.
       'typescript/src/generated/**',
+      // Vendored shadcn/ui primitives — owned but follow shadcn's conventions, not ours.
+      'demo/src/components/ui/**',
+      'demo/src/lib/**',
     ],
   },
   js.configs.recommended,
