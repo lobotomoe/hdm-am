@@ -1,0 +1,72 @@
+{
+  "name": "@hdm-am/react",
+  "version": "0.1.0",
+  "description": "React bindings for the HDM bridge — provider and typed hooks over @hdm-am/client.",
+  "license": "MIT OR Apache-2.0",
+  "homepage": "https://github.com/lobotomoe/hdm-am#readme",
+  "bugs": {
+    "url": "https://github.com/lobotomoe/hdm-am/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lobotomoe/hdm-am.git",
+    "directory": "packages/react"
+  },
+  "keywords": [
+    "armenia",
+    "fiscal",
+    "hdm",
+    "cash-register",
+    "react",
+    "typescript"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "README.md"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsup",
+    "pack:check": "pnpm --filter @hdm-am/client build && pnpm run build && node ../../scripts/pack-check.mjs",
+    "prepack": "pnpm run build",
+    "prepublishOnly": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run pack:check",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hdm-am/client": "workspace:^"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "^10.0.0",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^19.0.1",
+    "jsdom": "^25.0.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "^8.3.5",
+    "vitest": "^2.1.8"
+  }
+}

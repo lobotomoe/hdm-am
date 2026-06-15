@@ -253,7 +253,7 @@ can consume it off a running bridge:
 npx openapi-typescript http://127.0.0.1:8077/v1/openapi.json -o client.ts
 ```
 
-## TypeScript clients & web demo
+## TypeScript packages & web demo
 
 A browser cannot open a raw TCP socket, so the demo never talks to the device directly — it goes
 through the bridge. One operation is a single round trip: the React UI calls a typed hook, which
@@ -290,14 +290,15 @@ The bridge is the only component that holds the device password and decrypts the
 browser only ever sees the typed JSON envelope. Solid arrows are the request path, dashed arrows the
 response.
 
-The [`clients/`](clients/) pnpm workspace builds three packages on top of that document:
+The pnpm workspace builds two publishable packages and one demo app on top of that document:
 
 - **`@hdm-am/client`** — an isomorphic, zero-dependency TS client (one typed method per operation,
   typed errors), with types generated from `docs/openapi.json`.
 - **`@hdm-am/react`** — a provider and typed hooks over the client (`react` is the only peer dep).
-- **`demo`** — a Vite + React + shadcn/ui app that drives a real device from the browser.
+- **`demo`** — a Vite + React + shadcn/ui app in [`apps/demo`](apps/demo/) that drives a real
+  device from the browser.
 
-See [`clients/README.md`](clients/README.md) for the full pipeline and how to run the demo.
+See [`PACKAGES.md`](PACKAGES.md) for the full pipeline and how to run the demo.
 
 ## Source spec
 

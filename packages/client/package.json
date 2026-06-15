@@ -1,0 +1,81 @@
+{
+  "name": "@hdm-am/client",
+  "version": "0.1.0",
+  "description": "Isomorphic TypeScript client for the HDM bridge, typed from its OpenAPI document.",
+  "license": "MIT OR Apache-2.0",
+  "homepage": "https://github.com/lobotomoe/hdm-am#readme",
+  "bugs": {
+    "url": "https://github.com/lobotomoe/hdm-am/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lobotomoe/hdm-am.git",
+    "directory": "packages/client"
+  },
+  "keywords": [
+    "armenia",
+    "fiscal",
+    "hdm",
+    "cash-register",
+    "openapi",
+    "typescript"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "LICENSE-APACHE",
+    "LICENSE-MIT",
+    "README.md"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./zod": {
+      "types": "./dist/zod.d.ts",
+      "import": "./dist/zod.js",
+      "require": "./dist/zod.cjs"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "gen": "pnpm run gen:types && pnpm run gen:zod",
+    "gen:types": "openapi-typescript ../../docs/openapi.json --default-non-nullable false -o src/generated/openapi.ts",
+    "gen:zod": "orval --config orval.config.ts && node scripts/patch-zod.mjs src/generated/zod.ts",
+    "gen:check": "node scripts/gen-check.mjs",
+    "build": "tsup",
+    "pack:check": "pnpm run build && node ../../scripts/pack-check.mjs",
+    "prepack": "pnpm run build",
+    "prepublishOnly": "pnpm run typecheck && pnpm run lint && pnpm run test && pnpm run pack:check",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "zod": "^4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@scalar/openapi-parser": "^0.10.0",
+    "openapi-typescript": "^7.13.0",
+    "orval": "8.17.0",
+    "tsup": "^8.3.5",
+    "vitest": "^2.1.8",
+    "zod": "^4.0.0"
+  }
+}

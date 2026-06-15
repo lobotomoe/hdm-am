@@ -2,13 +2,16 @@
 /playground
 .claude/
 
-# JS workspace (clients/)
+# JS workspace
 node_modules/
-clients/**/dist/
-clients/**/*.tsbuildinfo
-clients/demo/dist/
-clients/**/.vite/
-clients/**/coverage/
+packages/**/dist/
+packages/**/*.tsbuildinfo
+packages/**/.vite/
+packages/**/coverage/
+apps/**/dist/
+apps/**/*.tsbuildinfo
+apps/**/.vite/
+apps/**/coverage/
 crates/hdm-am-app/android/build/
 crates/hdm-am-app/ios/*.xcodeproj/
 crates/hdm-am-app/ios/build/
