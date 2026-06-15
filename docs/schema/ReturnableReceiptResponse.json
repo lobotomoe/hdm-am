@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ReturnableReceiptResponse",
-  "description": "Op 6 response: the looked-up receipt's full fiscal contents.\n\n**Unverified against hardware.** On the available N950 test stand op 6 always returns vendor\ncode 503 with an empty body — the firmware never exposes the server-side `Receipt_ID` this\nlookup keys on (op 4 omits the `qr` field entirely), so the request can't be satisfied. This\nstruct is therefore modelled purely from spec §4.5.6, which is internally inconsistent: its\nfield table and the Code Block 7 example disagree (the example adds `type`, omits\n`rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). Fields follow the\nCode Block 7 example — whose numeric types match what real firmware sends for op 4 — and are all\noptional/lenient. The raw decrypted payload is logged at TRACE so the true shape can be\nconfirmed once a device ever returns one.",
+  "description": "Op 10 response: the looked-up receipt's full fiscal contents.\n\n**Unverified against hardware.** An earlier integration test sent this lookup to op 6 and got\nvendor code 503 with an empty body, but op 6 is in fact the print-return code (this crate\npreviously had the two codes swapped), so that result does not characterise this lookup. The\nlookup also keys on a server-side `Receipt_ID` the firmware never exposes (op 4 omits the `qr`\nfield entirely), so it may still be hard to satisfy in practice. This\nstruct is therefore modelled purely from spec §4.5.6, which is internally inconsistent: its\nfield table and the Code Block 7 example disagree (the example adds `type`, omits\n`rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). Fields follow the\nCode Block 7 example — whose numeric types match what real firmware sends for op 4 — and are all\noptional/lenient. The raw decrypted payload is logged at TRACE so the true shape can be\nconfirmed once a device ever returns one.",
   "type": "object",
   "properties": {
     "rseq": {
@@ -202,7 +202,7 @@
           "default": null
         },
         "rpid": {
-          "description": "Row sequence number (`rpid`) — the handle used for per-item partial returns in op 10.",
+          "description": "Row sequence number (`rpid`) — the handle used for per-item partial returns in op 6.",
           "type": [
             "integer",
             "null"

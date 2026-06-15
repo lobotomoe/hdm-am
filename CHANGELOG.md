@@ -9,6 +9,26 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+Still targets HDM integration spec **v0.7.3**.
+
+### Fixed
+- **Operation codes 6 and 10 were swapped.** Per the spec's operation-codes table (§4.4.1), wire
+  code **6** is *print return receipt* and code **10** is *get returnable receipt* (the read-only
+  lookup). The crate had them reversed because the spec describes them in section order (§4.5.6 get,
+  §4.5.7 print), which is the reverse of the code assignment. `PrintReturnReceiptRequest` now sends
+  op 6 and `GetReturnableReceiptRequest` op 10; a regression test pins both. The hardware-test matrix
+  rows for these two operations in `README.md` were captured with the codes swapped and are now
+  flagged as needing re-test.
+- **Spec translation (`docs/spec.md`) corrections.** The operation-codes table had codes 6/10 and
+  12/13 swapped, and rendered the recurring qualifier *"(պահանջվում է ընթացիկ սեսիա)"* ("requires an
+  active session") as the invented phrase *"(kept for backward compatibility)"* / *"(requires the
+  updated version)"* on ~39 lines. Response code **196** (*"Այլ երկրի ծածկագիր"*, an eMark from
+  another country) was mistranslated as "other unknown error".
+
+### Changed
+- **`ServerErrorKind::OtherUnknownError` renamed to `ForeignCountryEmark`** (code 196) to match its
+  real meaning. Breaking for any consumer matching on that variant.
+
 ## [0.3.0] — 2026-06-13
 
 Still targets HDM integration spec **v0.7.3**.

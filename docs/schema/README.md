@@ -25,6 +25,6 @@ drift from the implementation as long as `--check` is run (e.g. in CI).
 
 ## Caveat
 
-[`ReturnableReceiptResponse.json`](ReturnableReceiptResponse.json) (op 6) is modelled from the spec
+[`ReturnableReceiptResponse.json`](ReturnableReceiptResponse.json) (op 10) is modelled from the spec
 alone and is **unverified against hardware** — see the note in [`../spec.md`](../spec.md) §4.5.6.
 The spec section is internally inconsistent; treat that one schema's field types as approximate.

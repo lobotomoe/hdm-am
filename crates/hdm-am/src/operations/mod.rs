@@ -298,6 +298,16 @@ mod tests {
         );
     }
 
+    /// Pins the two return-flow operations to their exact wire codes from the spec's
+    /// operation-codes table (§4.4.1): print return = 6, get returnable (read-only lookup) = 10.
+    /// These were historically swapped because the spec describes them in section order
+    /// (§4.5.6 get, §4.5.7 print) which is the reverse of the code assignment.
+    #[test]
+    fn return_flow_codes_match_spec_table() {
+        assert_eq!(PrintReturnReceiptRequest::CODE as u8, 6);
+        assert_eq!(GetReturnableReceiptRequest::CODE as u8, 10);
+    }
+
     /// Empty response deserialises from both `{}` and arbitrary objects (ignores unknown).
     #[test]
     fn empty_response_accepts_empty_and_unknown_fields() {
@@ -321,7 +331,7 @@ mod tests {
         assert_eq!(parsed.payment_systems[1].name, "IDRAM");
     }
 
-    /// Op 6 `ReturnableReceiptResponse` deserialises the spec's §4.5.6 Code Block 7 example.
+    /// Op 10 `ReturnableReceiptResponse` deserialises the spec's §4.5.6 Code Block 7 example.
     /// This is the only coverage of that struct's `#[serde(default, with = "dec_opt")]` fields,
     /// because the operation is unverifiable on the available test stand (always returns 503).
     #[test]

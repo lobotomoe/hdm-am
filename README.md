@@ -45,11 +45,11 @@ Each row is keyed by the protocol operation code (the byte sent on the wire, 1�
 | 3 | Operator logout | OK |
 | 4 | Print receipt | OK — registered a real fiscal sale |
 | 5 | Reprint last receipt | OK |
-| 6 | Get returnable receipt (lookup) | Blocked — returns `503` for any input [1] |
+| 6 | Print return | Needs re-test — previously exercised with codes 6/10 swapped [1] |
 | 7 | Header / footer config | OK |
 | 8 | Header logo | Accepted (`200`) but not rendered [2] |
 | 9 | Fiscal report (X / Z) | OK — both; a Z-report does not lock the device [3] |
-| 10 | Print return | Blocked — returns `174` for any input [1] |
+| 10 | Get returnable receipt (lookup) | Needs re-test — previously exercised with codes 6/10 swapped [1] |
 | 11 | Cash in / out | OK — both directions |
 | 12 | Date / time | OK |
 | 13 | Receipt sample | OK |
@@ -59,7 +59,7 @@ Each row is keyed by the protocol operation code (the byte sent on the wire, 1�
 
 **Notes:**
 
-1. **Returns** (*get returnable receipt* and *print return*). Both are wire-correct but rejected server-side on this firmware. They key on a `Receipt_ID` that lives only in the receipt-print response's `qr` field — and this firmware omits `qr` entirely (confirmed on the raw decrypted payload, not just `null`). So the lookup returns vendor code `503` and the return returns `174` ("receipt to return does not exist") for every identifier tried (`rseq`, fiscal number, zero-padded). `crn` is correct (a wrong `crn` gives `175`). A real `Receipt_ID` must come out-of-band. The lookup response shape (`ReturnableReceiptResponse`) is therefore modelled from the spec alone and is **unverified** — see its doc comment.
+1. **Returns** (*print return*, op 6, and *get returnable receipt*, op 10). These tests were captured while the crate had operation codes 6 and 10 **swapped** relative to the spec's operation-codes table (§4.4.1) — so the recorded responses (`503` for the lookup, `174` for the return) were obtained by sending each request to the *wrong* op code and **do not characterise the corrected operations**; both rows need re-testing on hardware. What still holds independently of the code mix-up: returns key on a `Receipt_ID` that lives only in the receipt-print response's `qr` field, and this firmware omits `qr` entirely (confirmed on the raw decrypted payload, not just `null`), so a real `Receipt_ID` likely has to come out-of-band. The lookup response shape (`ReturnableReceiptResponse`) is modelled from the spec alone and remains **unverified** — see its doc comment.
 2. **Header logo.** The protocol accepts a Base64 BMP and returns success, but no custom logo prints (tried 1-bit BMP/PNG at 384×4 and 384×64). The firmware appears to ignore custom header logos.
 3. **Z-report.** Verified that a Z-report closes the fiscal shift without locking the device — the next receipt opens a new fiscal day.
 4. **Single eMark.** Only the error path is verified: malformed codes return `195`. The success path needs a real, registered GS1 Data Matrix code from a marked product.

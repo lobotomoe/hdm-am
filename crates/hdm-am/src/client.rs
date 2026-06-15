@@ -140,10 +140,10 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
         self.execute_with_session(PrintLastReceiptRequest {})
     }
 
-    /// Op 6 (§4.5.6): look up the contents of a receipt you intend to return.
+    /// Op 10 (§4.5.6): look up the contents of a receipt you intend to return.
     ///
     /// Read-only — returns the receipt's items, amounts and eMarks so you can build the actual
-    /// return ([`Self::print_return_receipt`], op 10). It registers nothing.
+    /// return ([`Self::print_return_receipt`], op 6). It registers nothing.
     ///
     /// # Errors
     /// See [`Error`].
@@ -190,9 +190,9 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
         self.execute_with_session(request)
     }
 
-    /// Op 10 (§4.5.7): print a return/refund receipt — the operation that actually registers a
+    /// Op 6 (§4.5.7): print a return/refund receipt — the operation that actually registers a
     /// return. Full, by-amount or per-item returns are driven via the request's optional fields.
-    /// The read-only lookup of the receipt being returned is op 6 ([`Self::get_returnable_receipt`]).
+    /// The read-only lookup of the receipt being returned is op 10 ([`Self::get_returnable_receipt`]).
     ///
     /// # Errors
     /// See [`Error`].

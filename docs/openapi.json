@@ -212,7 +212,7 @@
         "type": "object"
       },
       "GetReturnableReceiptRequest": {
-        "description": "Op 6 request: fetch the fiscal contents of a previously-issued receipt you intend to return.\n\nThis is a **read-only lookup**, not a refund. The original spec §4.5.6 is\n\"ՀԴՄ վերադարձվող կտրոնի ստացում\" = *get the returnable receipt* (the English spec.md mistitles\nit \"print return receipt\"). It returns the receipt's items, amounts, eMarks and sale type so a\ncaller can construct the actual return via [`PrintReturnReceiptRequest`] (op 10). It registers\nnothing.",
+        "description": "Op 10 request: fetch the fiscal contents of a previously-issued receipt you intend to return.\n\nThis is a **read-only lookup**, not a refund. The original spec §4.5.6 is\n\"ՀԴՄ վերադարձվող կտրոնի ստացում\" = *get the returnable receipt*. The spec describes it in section\n§4.5.6, but its wire operation code is **10** per the operation-codes table (§4.3) — the section\nnumber is not the operation code. It returns the receipt's items, amounts, eMarks and sale type\nso a caller can construct the actual return via [`PrintReturnReceiptRequest`] (op 6). It registers\nnothing.",
         "properties": {
           "crn": {
             "description": "HDM registration number of the device that printed the original receipt.",
@@ -585,7 +585,7 @@
         "type": "object"
       },
       "PrintReturnReceiptRequest": {
-        "description": "Op 10 request: print a return/refund receipt — the operation that actually registers a return.\n\nWith no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or\n`return_item_list` for a partial return. The original spec §4.5.7 is\n\"ՀԴՄ վերադարձի կտրոնի տպում\" = *print return receipt* (the English spec.md mistitled it \"get\nreceipt info\"). The read-only lookup of the receipt being returned is op 6,\n[`GetReturnableReceiptRequest`].",
+        "description": "Op 6 request: print a return/refund receipt — the operation that actually registers a return.\n\nWith no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or\n`return_item_list` for a partial return. The original spec §4.5.7 is\n\"ՀԴՄ վերադարձի կտրոնի տպում\" = *print return receipt*. The spec describes it in section §4.5.7,\nbut its wire operation code is **6** per the operation-codes table (§4.3). The read-only lookup\nof the receipt being returned is op 10, [`GetReturnableReceiptRequest`].",
         "properties": {
           "cardAmountForReturn": {
             "description": "Card amount to return (only set if returning partial payments).",
@@ -858,7 +858,7 @@
         "type": "object"
       },
       "ReturnReceiptResponse": {
-        "description": "Op 10 response: full receipt details + return-specific timestamps.",
+        "description": "Op 6 response: full receipt details + return-specific timestamps.",
         "properties": {
           "address": {
             "default": "",
@@ -1054,7 +1054,7 @@
           },
           "rpid": {
             "default": null,
-            "description": "Row sequence number (`rpid`) — the handle used for per-item partial returns in op 10.",
+            "description": "Row sequence number (`rpid`) — the handle used for per-item partial returns in op 6.",
             "format": "int64",
             "type": [
               "integer",
@@ -1083,7 +1083,7 @@
         "type": "object"
       },
       "ReturnableReceiptResponse": {
-        "description": "Op 6 response: the looked-up receipt's full fiscal contents.\n\n**Unverified against hardware.** On the available N950 test stand op 6 always returns vendor\ncode 503 with an empty body — the firmware never exposes the server-side `Receipt_ID` this\nlookup keys on (op 4 omits the `qr` field entirely), so the request can't be satisfied. This\nstruct is therefore modelled purely from spec §4.5.6, which is internally inconsistent: its\nfield table and the Code Block 7 example disagree (the example adds `type`, omits\n`rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). Fields follow the\nCode Block 7 example — whose numeric types match what real firmware sends for op 4 — and are all\noptional/lenient. The raw decrypted payload is logged at TRACE so the true shape can be\nconfirmed once a device ever returns one.",
+        "description": "Op 10 response: the looked-up receipt's full fiscal contents.\n\n**Unverified against hardware.** An earlier integration test sent this lookup to op 6 and got\nvendor code 503 with an empty body, but op 6 is in fact the print-return code (this crate\npreviously had the two codes swapped), so that result does not characterise this lookup. The\nlookup also keys on a server-side `Receipt_ID` the firmware never exposes (op 4 omits the `qr`\nfield entirely), so it may still be hard to satisfy in practice. This\nstruct is therefore modelled purely from spec §4.5.6, which is internally inconsistent: its\nfield table and the Code Block 7 example disagree (the example adds `type`, omits\n`rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). Fields follow the\nCode Block 7 example — whose numeric types match what real firmware sends for op 4 — and are all\noptional/lenient. The raw decrypted payload is logged at TRACE so the true shape can be\nconfirmed once a device ever returns one.",
         "properties": {
           "card": {
             "default": null,

@@ -273,12 +273,13 @@ impl Operation for PrintLastReceiptRequest {
     type Response = EmptyResponse;
 }
 
-/// Op 6 request: fetch the fiscal contents of a previously-issued receipt you intend to return.
+/// Op 10 request: fetch the fiscal contents of a previously-issued receipt you intend to return.
 ///
 /// This is a **read-only lookup**, not a refund. The original spec §4.5.6 is
-/// "ՀԴՄ վերադարձվող կտրոնի ստացում" = *get the returnable receipt* (the English spec.md mistitles
-/// it "print return receipt"). It returns the receipt's items, amounts, eMarks and sale type so a
-/// caller can construct the actual return via [`PrintReturnReceiptRequest`] (op 10). It registers
+/// "ՀԴՄ վերադարձվող կտրոնի ստացում" = *get the returnable receipt*. The spec describes it in section
+/// §4.5.6, but its wire operation code is **10** per the operation-codes table (§4.3) — the section
+/// number is not the operation code. It returns the receipt's items, amounts, eMarks and sale type
+/// so a caller can construct the actual return via [`PrintReturnReceiptRequest`] (op 6). It registers
 /// nothing.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -295,11 +296,13 @@ impl Operation for GetReturnableReceiptRequest {
     type Response = ReturnableReceiptResponse;
 }
 
-/// Op 6 response: the looked-up receipt's full fiscal contents.
+/// Op 10 response: the looked-up receipt's full fiscal contents.
 ///
-/// **Unverified against hardware.** On the available N950 test stand op 6 always returns vendor
-/// code 503 with an empty body — the firmware never exposes the server-side `Receipt_ID` this
-/// lookup keys on (op 4 omits the `qr` field entirely), so the request can't be satisfied. This
+/// **Unverified against hardware.** An earlier integration test sent this lookup to op 6 and got
+/// vendor code 503 with an empty body, but op 6 is in fact the print-return code (this crate
+/// previously had the two codes swapped), so that result does not characterise this lookup. The
+/// lookup also keys on a server-side `Receipt_ID` the firmware never exposes (op 4 omits the `qr`
+/// field entirely), so it may still be hard to satisfy in practice. This
 /// struct is therefore modelled purely from spec §4.5.6, which is internally inconsistent: its
 /// field table and the Code Block 7 example disagree (the example adds `type`, omits
 /// `rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). Fields follow the
@@ -391,7 +394,7 @@ pub struct ReturnableReceiptItem {
     /// Unit of measure (`mu`).
     #[serde(rename = "mu", default)]
     pub unit: Option<String>,
-    /// Row sequence number (`rpid`) — the handle used for per-item partial returns in op 10.
+    /// Row sequence number (`rpid`) — the handle used for per-item partial returns in op 6.
     #[serde(default)]
     pub rpid: Option<i64>,
     /// Primary discount (`dsc`).
@@ -425,13 +428,13 @@ pub struct ReturnableReceiptItem {
     pub total_with_vat: Option<Decimal>,
 }
 
-/// Op 10 request: print a return/refund receipt — the operation that actually registers a return.
+/// Op 6 request: print a return/refund receipt — the operation that actually registers a return.
 ///
 /// With no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or
 /// `return_item_list` for a partial return. The original spec §4.5.7 is
-/// "ՀԴՄ վերադարձի կտրոնի տպում" = *print return receipt* (the English spec.md mistitled it "get
-/// receipt info"). The read-only lookup of the receipt being returned is op 6,
-/// [`GetReturnableReceiptRequest`].
+/// "ՀԴՄ վերադարձի կտրոնի տպում" = *print return receipt*. The spec describes it in section §4.5.7,
+/// but its wire operation code is **6** per the operation-codes table (§4.3). The read-only lookup
+/// of the receipt being returned is op 10, [`GetReturnableReceiptRequest`].
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PrintReturnReceiptRequest {
@@ -502,7 +505,7 @@ pub struct ReturnItem {
     pub quantity: Decimal,
 }
 
-/// Op 10 response: full receipt details + return-specific timestamps.
+/// Op 6 response: full receipt details + return-specific timestamps.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[non_exhaustive]

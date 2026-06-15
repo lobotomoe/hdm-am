@@ -37,16 +37,16 @@ pub enum OperationCode {
     PrintReceipt = 4,
     /// Reprint a copy of the last receipt.
     PrintLastReceipt = 5,
-    /// Get (look up) the contents of a receipt you intend to return. Read-only.
-    GetReturnableReceipt = 6,
+    /// Print a return / refund receipt (full, by-amount, or per-item). Registers the return.
+    PrintReturnReceipt = 6,
     /// Configure receipt header and footer text lines.
     SetupHeaderFooter = 7,
     /// Upload the receipt header logo image (Base64 BMP, colour depth ≤4 bits).
     SetupHeaderLogo = 8,
     /// Print a fiscal report (1 = X-report, 2 = Z-report).
     PrintFiscalReport = 9,
-    /// Print a return / refund receipt (full, by-amount, or per-item). Registers the return.
-    PrintReturnReceipt = 10,
+    /// Get (look up) the contents of a receipt you intend to return. Read-only.
+    GetReturnableReceipt = 10,
     /// Cash drawer in/out adjustment.
     CashInOut = 11,
     /// Query device date and time.

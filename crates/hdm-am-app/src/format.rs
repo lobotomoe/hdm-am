@@ -292,7 +292,7 @@ const fn server_error_meaning(kind: ServerErrorKind) -> &'static str {
         ServerErrorKind::BadPartnerTinFormat => "Partner TIN format is invalid.",
         ServerErrorKind::EmarksNotAllowedInPrepayment => "eMarks are not allowed for prepayment.",
         ServerErrorKind::BadEmarkFormat => "eMark format is invalid.",
-        ServerErrorKind::OtherUnknownError => "The HDM reported an unspecified error.",
+        ServerErrorKind::ForeignCountryEmark => "The eMark code belongs to another country.",
         ServerErrorKind::Vendor(VendorErrorKind::ExternalProgramBlocked) => {
             "The HDM screen is being used; external access is blocked."
         }

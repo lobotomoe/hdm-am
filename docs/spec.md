@@ -124,19 +124,19 @@ In integration mode, the data exchange operations possible with the HDM are as f
 - Get list of HDM operators and departments.
 - Operator login (sign in).
 - Operator logout (sign out).
-- Receipt print (kept for backward compatibility).
-- Print copy of the last receipt (kept for backward compatibility).
-- Get returnable receipt — read-only lookup (kept for backward compatibility).
-- Receipt header and footer configuration (kept for backward compatibility).
-- Receipt header Logo configuration (kept for backward compatibility).
-- Print HDM reports (kept for backward compatibility).
-- Print return receipt (kept for backward compatibility).
-- Cash drawer in/out (kept for backward compatibility).
-- Receipt sample (kept for backward compatibility).
-- Receipt date and time (kept for backward compatibility).
-- HDM device synchronization (kept for backward compatibility).
-- Get list of payment systems installed on the HDM (requires the updated version).
-- eMark code request (kept for backward compatibility).
+- Receipt print (requires an active session).
+- Print copy of the last receipt (requires an active session).
+- Get returnable receipt — read-only lookup (requires an active session).
+- Receipt header and footer configuration (requires an active session).
+- Receipt header Logo configuration (requires an active session).
+- Print HDM reports (requires an active session).
+- Print return receipt (requires an active session).
+- Cash drawer in/out (requires an active session).
+- Receipt sample (requires an active session).
+- Receipt date and time (requires an active session).
+- HDM device synchronization (requires an active session).
+- Get list of payment systems installed on the HDM (requires an active session).
+- eMark code request (requires an active session).
 
 ### 4.4 Request/response format
 
@@ -154,19 +154,19 @@ The operation codes for bytes 9 (Operation code) are:
 | 1 | Get list of HDM operators and departments |
 | 2 | Operator login (sign in) |
 | 3 | Operator logout (sign out) |
-| 4 | Receipt print (kept for backward compatibility) |
-| 5 | Print copy of the last receipt (kept for backward compatibility) |
-| 6 | Get returnable receipt — read-only lookup (kept for backward compatibility) |
-| 7 | Receipt header and footer configuration (kept for backward compatibility) |
-| 8 | Receipt header Logo configuration (kept for backward compatibility) |
-| 9 | Print HDM reports (kept for backward compatibility) |
-| 10 | Print return receipt — full / by-amount / per-item (kept for backward compatibility) |
-| 11 | Cash drawer in/out (kept for backward compatibility) |
-| 12 | Receipt sample (kept for backward compatibility) |
-| 13 | Receipt date and time (kept for backward compatibility) |
-| 14 | HDM device synchronization (kept for backward compatibility) |
-| 15 | Get list of payment systems installed on the HDM (requires the updated version) |
-| 16 | eMark code request (kept for backward compatibility) |
+| 4 | Receipt print (requires an active session) |
+| 5 | Print copy of the last receipt (requires an active session) |
+| 6 | Print return receipt — full / by-amount / per-item (requires an active session) |
+| 7 | Receipt header and footer configuration (requires an active session) |
+| 8 | Receipt header Logo configuration (requires an active session) |
+| 9 | Print HDM reports (requires an active session) |
+| 10 | Get returnable receipt — read-only lookup (requires an active session) |
+| 11 | Cash drawer in/out (requires an active session) |
+| 12 | Receipt date and time (requires an active session) |
+| 13 | Receipt sample (requires an active session) |
+| 14 | HDM device synchronization (requires an active session) |
+| 15 | Get list of payment systems installed on the HDM (requires an active session) |
+| 16 | eMark code request (requires an active session) |
 
 #### 4.4.2 Response header byte layout
 
@@ -189,19 +189,19 @@ To encrypt requests, the **3DES** standard with **ECB mode** and **PKCS7 padding
 **Operations encrypted by the second key:**
 
 - Operator logout (sign out)
-- Receipt print (kept for backward compatibility)
-- Print copy of the last receipt (kept for backward compatibility)
-- Get returnable receipt — read-only lookup (kept for backward compatibility)
-- Print HDM reports (kept for backward compatibility)
-- Print return receipt (kept for backward compatibility)
-- Receipt header and footer configuration (kept for backward compatibility)
-- Receipt header Logo configuration (kept for backward compatibility)
-- Cash drawer in/out (kept for backward compatibility)
-- Receipt date and time (kept for backward compatibility)
-- Receipt sample (kept for backward compatibility)
-- HDM device synchronization (kept for backward compatibility)
-- Get list of payment systems installed on the HDM (requires the updated version)
-- eMark code request (kept for backward compatibility)
+- Receipt print (requires an active session)
+- Print copy of the last receipt (requires an active session)
+- Get returnable receipt — read-only lookup (requires an active session)
+- Print HDM reports (requires an active session)
+- Print return receipt (requires an active session)
+- Receipt header and footer configuration (requires an active session)
+- Receipt header Logo configuration (requires an active session)
+- Cash drawer in/out (requires an active session)
+- Receipt date and time (requires an active session)
+- Receipt sample (requires an active session)
+- HDM device synchronization (requires an active session)
+- Get list of payment systems installed on the HDM (requires an active session)
+- eMark code request (requires an active session)
 
 #### 4.4.4 Request and response body
 
@@ -558,7 +558,7 @@ This operation makes it possible to obtain a copy of the last receipt via the Ca
 
 #### 4.5.6 Get returnable receipt
 
-> **Translator's note.** The original Armenian title is *"ՀԴՄ վերադարձվող կտրոնի ստացում"* — **get the returnable receipt**, not "print return receipt". This is a **read-only lookup**: given a receipt number it returns that receipt's full fiscal contents (items, amounts, eMarks, sale type) so the integrator can build the actual return via op 10 (§4.5.7). It registers nothing. (The receipt looked up is the *վերադարձվող* one — "the one to be returned", i.e. the original sale; op 10 by contrast prints the *վերադարձի* receipt — the new refund document.)
+> **Translator's note.** The original Armenian title is *"ՀԴՄ վերադարձվող կտրոնի ստացում"* — **get the returnable receipt**, not "print return receipt". The spec describes this in section §4.5.6, but its **wire operation code is 10** per the operation-codes table (§4.4.1) — the section number is not the operation code. This is a **read-only lookup**: given a receipt number it returns that receipt's full fiscal contents (items, amounts, eMarks, sale type) so the integrator can build the actual return via op 6 (§4.5.7). It registers nothing. (The receipt looked up is the *վերադարձվող* one — "the one to be returned", i.e. the original sale; op 6 by contrast prints the *վերադարձի* receipt — the new refund document.)
 
 **Encryption:** by session key.
 
@@ -582,7 +582,7 @@ This operation makes it possible to obtain a copy of the last receipt via the Ca
 
 **Response:**
 
-> **Spec caveat.** §4.5.6's response is internally inconsistent: the field table below and the Code Block 7 example disagree (the example adds a `type` field, omits `rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). It is also **unverified against hardware** — the available N950 test stand returns vendor code 503 with an empty body for every op-6 call, because the firmware never exposes the server-side `Receipt_ID` this lookup keys on (op 4 omits the `qr` field entirely). The table below is reproduced faithfully from the original; treat field types as approximate.
+> **Spec caveat.** §4.5.6's response is internally inconsistent: the field table below and the Code Block 7 example disagree (the example adds a `type` field, omits `rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). It is also **unverified against hardware** — an earlier integration test sent this lookup to op 6 and got vendor code 503 with an empty body, but op 6 is in fact the print-return code, so that result does not characterise this lookup (which uses op 10). The lookup also keys on a server-side `Receipt_ID` the firmware never exposes (op 4 omits the `qr` field entirely), so it may still be hard to satisfy in practice. The table below is reproduced faithfully from the original; treat field types as approximate.
 
 | Field | Type | Description |
 |---|---|---|
@@ -607,7 +607,7 @@ This operation makes it possible to obtain a copy of the last receipt via the Ca
 | `>qty` | String | Quantity |
 | `>p` | String | Unit price |
 | `>mu` | String | Unit of measure |
-| `>rpid` | String | Item row ID (the handle for per-item partial returns in op 10) |
+| `>rpid` | String | Item row ID (the handle for per-item partial returns in op 6) |
 | `>dsc` | String | Discount |
 | `>adsc` | String | Proportional secondary discount |
 | `>dsct` | String | Discount type |
@@ -645,7 +645,7 @@ This operation makes it possible to obtain a copy of the last receipt via the Ca
 
 #### 4.5.7 Print return receipt
 
-> **Translator's note.** The original Armenian title is *"ՀԴՄ վերադարձի կտրոնի տպում"* — **print return receipt**, not "get receipt info". This is the operation that actually **registers** a return (optionally partial: by amount, or by item via `returnItemList`). The read-only lookup of the receipt being returned is op 6 (§4.5.6).
+> **Translator's note.** The original Armenian title is *"ՀԴՄ վերադարձի կտրոնի տպում"* — **print return receipt**, not "get receipt info". The spec describes this in section §4.5.7, but its **wire operation code is 6** per the operation-codes table (§4.4.1). This is the operation that actually **registers** a return (optionally partial: by amount, or by item via `returnItemList`). The read-only lookup of the receipt being returned is op 10 (§4.5.6).
 
 **Encryption:** by session key.
 
@@ -1054,7 +1054,7 @@ The report is printed via the HDM device; response information is not returned.
 | 193 | Partner TIN format is wrong | | |
 | 194 | In prepayment case, eMark codes are not allowed | | |
 | 195 | Bad eMark code format | | |
-| 196 | Other unknown error | | |
+| 196 | Code of another country (eMark code belongs to a foreign country) | | |
 
 ---
 

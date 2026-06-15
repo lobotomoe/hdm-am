@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PrintReturnReceiptRequest",
-  "description": "Op 10 request: print a return/refund receipt — the operation that actually registers a return.\n\nWith no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or\n`return_item_list` for a partial return. The original spec §4.5.7 is\n\"ՀԴՄ վերադարձի կտրոնի տպում\" = *print return receipt* (the English spec.md mistitled it \"get\nreceipt info\"). The read-only lookup of the receipt being returned is op 6,\n[`GetReturnableReceiptRequest`].",
+  "description": "Op 6 request: print a return/refund receipt — the operation that actually registers a return.\n\nWith no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or\n`return_item_list` for a partial return. The original spec §4.5.7 is\n\"ՀԴՄ վերադարձի կտրոնի տպում\" = *print return receipt*. The spec describes it in section §4.5.7,\nbut its wire operation code is **6** per the operation-codes table (§4.3). The read-only lookup\nof the receipt being returned is op 10, [`GetReturnableReceiptRequest`].",
   "type": "object",
   "properties": {
     "crn": {

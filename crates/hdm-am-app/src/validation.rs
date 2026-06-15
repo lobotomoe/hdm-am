@@ -257,7 +257,7 @@ pub fn build_report_request(inputs: &OperationInputs) -> Result<FiscalReportRequ
     })
 }
 
-/// Build op 10 request from GUI input.
+/// Build op 6 request from GUI input.
 pub fn build_return_request(inputs: &OperationInputs) -> Result<PrintReturnReceiptRequest, String> {
     let return_item_list = match optional_string(&inputs.json_path) {
         Some(path) => {
@@ -341,7 +341,7 @@ pub fn read_logo_base64(inputs: &OperationInputs) -> Result<String, String> {
     Ok(BASE64.encode(bytes))
 }
 
-/// Validate and return lookup arguments for op 6.
+/// Validate and return lookup arguments for op 10.
 pub fn lookup_args(inputs: &OperationInputs) -> Result<(String, String), String> {
     let receipt_id = required(&inputs.receipt_id, "Receipt ID")?;
     let crn = required(&inputs.crn, "CRN")?;

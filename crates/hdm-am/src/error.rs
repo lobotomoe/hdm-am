@@ -289,8 +289,8 @@ pub enum ServerErrorKind {
     EmarksNotAllowedInPrepayment,
     /// `195` — Bad eMark code format.
     BadEmarkFormat,
-    /// `196` — Other unknown error documented by the spec.
-    OtherUnknownError,
+    /// `196` — eMark code belongs to another country ("Այլ երկրի ծածկագիր").
+    ForeignCountryEmark,
 
     /// A vendor/firmware-specific code that is not part of the SRC spec §4.10. Kept in its own
     /// [`VendorErrorKind`] enum so spec codes and vendor extensions never blur together; the two
@@ -419,7 +419,7 @@ impl ServerErrorKind {
             193 => Self::BadPartnerTinFormat,
             194 => Self::EmarksNotAllowedInPrepayment,
             195 => Self::BadEmarkFormat,
-            196 => Self::OtherUnknownError,
+            196 => Self::ForeignCountryEmark,
             other => match VendorErrorKind::from_code(other) {
                 Some(vendor) => Self::Vendor(vendor),
                 None => Self::Unknown(other),
@@ -495,7 +495,7 @@ impl ServerErrorKind {
             Self::BadPartnerTinFormat => 193,
             Self::EmarksNotAllowedInPrepayment => 194,
             Self::BadEmarkFormat => 195,
-            Self::OtherUnknownError => 196,
+            Self::ForeignCountryEmark => 196,
             Self::Vendor(vendor) => vendor.code(),
             Self::Unknown(c) => c,
         }

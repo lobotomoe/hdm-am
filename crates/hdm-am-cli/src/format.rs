@@ -49,7 +49,7 @@ pub fn payment_systems(response: &PaymentSystemsListResponse) {
     }
 }
 
-/// Render the result of a returnable-receipt lookup (op 6, read-only).
+/// Render the result of a returnable-receipt lookup (op 10, read-only).
 pub fn returnable_receipt(response: &ReturnableReceiptResponse) {
     println!("Receipt lookup:");
     if let Some(rseq) = response.rseq {

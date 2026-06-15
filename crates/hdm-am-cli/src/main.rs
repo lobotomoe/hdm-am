@@ -178,7 +178,7 @@ pub struct BridgeRunArgs {
     pub allow_origins: Vec<String>,
 }
 
-/// Arguments for the `lookup-receipt` command (op 6).
+/// Arguments for the `lookup-receipt` command (op 10).
 #[derive(Debug, clap::Args)]
 pub struct LookupReceiptArgs {
     /// Number of the receipt to look up (the `receiptId` field).
@@ -189,7 +189,7 @@ pub struct LookupReceiptArgs {
     pub crn: String,
 }
 
-/// Arguments for the `return` command (op 10).
+/// Arguments for the `return` command (op 6).
 #[derive(Debug, clap::Args)]
 pub struct ReturnArgs {
     /// HDM registration number (`crn`).
