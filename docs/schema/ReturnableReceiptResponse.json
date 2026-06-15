@@ -5,7 +5,7 @@
   "type": "object",
   "properties": {
     "rseq": {
-      "description": "Receipt sequence number.",
+      "description": "Receipt sequence number. The PDF field table calls this the return-receipt sequence number,\nbut Code Block 7 omits it.",
       "type": [
         "integer",
         "null"
@@ -14,7 +14,7 @@
       "default": null
     },
     "cid": {
-      "description": "Cashier ID (`Գանձապահի ID`). The English spec.md mislabels this \"Customer ID\".",
+      "description": "Cashier ID (`Գանձապահի ID`).",
       "type": [
         "integer",
         "null"

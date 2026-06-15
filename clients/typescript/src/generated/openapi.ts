@@ -488,7 +488,7 @@ export interface components {
          *
          *     This is a **read-only lookup**, not a refund. The original spec §4.5.6 is
          *     "ՀԴՄ վերադարձվող կտրոնի ստացում" = *get the returnable receipt*. The spec describes it in section
-         *     §4.5.6, but its wire operation code is **10** per the operation-codes table (§4.3) — the section
+         *     §4.5.6, but its wire operation code is **10** per the operation-codes table (§4.4.1) — the section
          *     number is not the operation code. It returns the receipt's items, amounts, eMarks and sale type
          *     so a caller can construct the actual return via [`PrintReturnReceiptRequest`] (op 6). It registers
          *     nothing.
@@ -698,18 +698,18 @@ export interface components {
          *     With no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or
          *     `return_item_list` for a partial return. The original spec §4.5.7 is
          *     "ՀԴՄ վերադարձի կտրոնի տպում" = *print return receipt*. The spec describes it in section §4.5.7,
-         *     but its wire operation code is **6** per the operation-codes table (§4.3). The read-only lookup
+         *     but its wire operation code is **6** per the operation-codes table (§4.4.1). The read-only lookup
          *     of the receipt being returned is op 10, [`GetReturnableReceiptRequest`].
          */
         PrintReturnReceiptRequest: {
             /**
              * Format: double
-             * @description Card amount to return (only set if returning partial payments).
+             * @description Card amount to return (only set for a partial return).
              */
             cardAmountForReturn?: number | null;
             /**
              * Format: double
-             * @description Cash amount to return (only set if returning partial payments).
+             * @description Cash amount to return (only set for a partial return).
              */
             cashAmountForReturn?: number | null;
             /** @description HDM registration number of the device that printed the receipt. */
@@ -718,10 +718,10 @@ export interface components {
             eMarks?: string[];
             /**
              * Format: double
-             * @description Prepayment amount to return (only set if returning partial payments).
+             * @description Prepayment amount to return (only set for a partial return).
              */
             prePaymentAmountForReturn?: number | null;
-            /** @description Per-item return list (only set if returning specific items partially). */
+            /** @description Per-item return list (only set when partially returning an itemised receipt). */
             returnItemList?: components["schemas"]["ReturnItem"][];
             /**
              * Format: uint64
@@ -1083,7 +1083,7 @@ export interface components {
             cash?: number | null;
             /**
              * Format: int64
-             * @description Cashier ID (`Գանձապահի ID`). The English spec.md mislabels this "Customer ID".
+             * @description Cashier ID (`Գանձապահի ID`).
              * @default null
              */
             cid?: number | null;
@@ -1128,7 +1128,8 @@ export interface components {
             refcrn?: string | null;
             /**
              * Format: int64
-             * @description Receipt sequence number.
+             * @description Receipt sequence number. The PDF field table calls this the return-receipt sequence number,
+             *     but Code Block 7 omits it.
              * @default null
              */
             rseq?: number | null;
