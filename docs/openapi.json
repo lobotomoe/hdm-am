@@ -212,7 +212,7 @@
         "type": "object"
       },
       "GetReturnableReceiptRequest": {
-        "description": "Op 10 request: fetch the fiscal contents of a previously-issued receipt you intend to return.\n\nThis is a **read-only lookup**, not a refund. The original spec §4.5.6 is\n\"ՀԴՄ վերադարձվող կտրոնի ստացում\" = *get the returnable receipt*. The spec describes it in section\n§4.5.6, but its wire operation code is **10** per the operation-codes table (§4.3) — the section\nnumber is not the operation code. It returns the receipt's items, amounts, eMarks and sale type\nso a caller can construct the actual return via [`PrintReturnReceiptRequest`] (op 6). It registers\nnothing.",
+        "description": "Op 10 request: fetch the fiscal contents of a previously-issued receipt you intend to return.\n\nThis is a **read-only lookup**, not a refund. The original spec §4.5.6 is\n\"ՀԴՄ վերադարձվող կտրոնի ստացում\" = *get the returnable receipt*. The spec describes it in section\n§4.5.6, but its wire operation code is **10** per the operation-codes table (§4.4.1) — the section\nnumber is not the operation code. It returns the receipt's items, amounts, eMarks and sale type\nso a caller can construct the actual return via [`PrintReturnReceiptRequest`] (op 6). It registers\nnothing.",
         "properties": {
           "crn": {
             "description": "HDM registration number of the device that printed the original receipt.",
@@ -585,10 +585,10 @@
         "type": "object"
       },
       "PrintReturnReceiptRequest": {
-        "description": "Op 6 request: print a return/refund receipt — the operation that actually registers a return.\n\nWith no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or\n`return_item_list` for a partial return. The original spec §4.5.7 is\n\"ՀԴՄ վերադարձի կտրոնի տպում\" = *print return receipt*. The spec describes it in section §4.5.7,\nbut its wire operation code is **6** per the operation-codes table (§4.3). The read-only lookup\nof the receipt being returned is op 10, [`GetReturnableReceiptRequest`].",
+        "description": "Op 6 request: print a return/refund receipt — the operation that actually registers a return.\n\nWith no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or\n`return_item_list` for a partial return. The original spec §4.5.7 is\n\"ՀԴՄ վերադարձի կտրոնի տպում\" = *print return receipt*. The spec describes it in section §4.5.7,\nbut its wire operation code is **6** per the operation-codes table (§4.4.1). The read-only lookup\nof the receipt being returned is op 10, [`GetReturnableReceiptRequest`].",
         "properties": {
           "cardAmountForReturn": {
-            "description": "Card amount to return (only set if returning partial payments).",
+            "description": "Card amount to return (only set for a partial return).",
             "format": "double",
             "type": [
               "number",
@@ -596,7 +596,7 @@
             ]
           },
           "cashAmountForReturn": {
-            "description": "Cash amount to return (only set if returning partial payments).",
+            "description": "Cash amount to return (only set for a partial return).",
             "format": "double",
             "type": [
               "number",
@@ -615,7 +615,7 @@
             "type": "array"
           },
           "prePaymentAmountForReturn": {
-            "description": "Prepayment amount to return (only set if returning partial payments).",
+            "description": "Prepayment amount to return (only set for a partial return).",
             "format": "double",
             "type": [
               "number",
@@ -623,7 +623,7 @@
             ]
           },
           "returnItemList": {
-            "description": "Per-item return list (only set if returning specific items partially).",
+            "description": "Per-item return list (only set when partially returning an itemised receipt).",
             "items": {
               "$ref": "#/components/schemas/ReturnItem"
             },
@@ -1105,7 +1105,7 @@
           },
           "cid": {
             "default": null,
-            "description": "Cashier ID (`Գանձապահի ID`). The English spec.md mislabels this \"Customer ID\".",
+            "description": "Cashier ID (`Գանձապահի ID`).",
             "format": "int64",
             "type": [
               "integer",
@@ -1174,7 +1174,7 @@
           },
           "rseq": {
             "default": null,
-            "description": "Receipt sequence number.",
+            "description": "Receipt sequence number. The PDF field table calls this the return-receipt sequence number,\nbut Code Block 7 omits it.",
             "format": "int64",
             "type": [
               "integer",

@@ -277,7 +277,7 @@ impl Operation for PrintLastReceiptRequest {
 ///
 /// This is a **read-only lookup**, not a refund. The original spec §4.5.6 is
 /// "ՀԴՄ վերադարձվող կտրոնի ստացում" = *get the returnable receipt*. The spec describes it in section
-/// §4.5.6, but its wire operation code is **10** per the operation-codes table (§4.3) — the section
+/// §4.5.6, but its wire operation code is **10** per the operation-codes table (§4.4.1) — the section
 /// number is not the operation code. It returns the receipt's items, amounts, eMarks and sale type
 /// so a caller can construct the actual return via [`PrintReturnReceiptRequest`] (op 6). It registers
 /// nothing.
@@ -313,10 +313,11 @@ impl Operation for GetReturnableReceiptRequest {
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[non_exhaustive]
 pub struct ReturnableReceiptResponse {
-    /// Receipt sequence number.
+    /// Receipt sequence number. The PDF field table calls this the return-receipt sequence number,
+    /// but Code Block 7 omits it.
     #[serde(default)]
     pub rseq: Option<i64>,
-    /// Cashier ID (`Գանձապահի ID`). The English spec.md mislabels this "Customer ID".
+    /// Cashier ID (`Գանձապահի ID`).
     #[serde(default)]
     pub cid: Option<i64>,
     /// Receipt registration/print time (ms since epoch, Greenwich).
@@ -433,7 +434,7 @@ pub struct ReturnableReceiptItem {
 /// With no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or
 /// `return_item_list` for a partial return. The original spec §4.5.7 is
 /// "ՀԴՄ վերադարձի կտրոնի տպում" = *print return receipt*. The spec describes it in section §4.5.7,
-/// but its wire operation code is **6** per the operation-codes table (§4.3). The read-only lookup
+/// but its wire operation code is **6** per the operation-codes table (§4.4.1). The read-only lookup
 /// of the receipt being returned is op 10, [`GetReturnableReceiptRequest`].
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
@@ -443,7 +444,7 @@ pub struct PrintReturnReceiptRequest {
     /// Number of the receipt to be returned.
     #[serde(rename = "returnTicketId")]
     pub return_ticket_id: u64,
-    /// Cash amount to return (only set if returning partial payments).
+    /// Cash amount to return (only set for a partial return).
     #[serde(
         rename = "cashAmountForReturn",
         with = "dec_opt",
@@ -452,7 +453,7 @@ pub struct PrintReturnReceiptRequest {
     )]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub cash_amount_for_return: Option<Decimal>,
-    /// Card amount to return (only set if returning partial payments).
+    /// Card amount to return (only set for a partial return).
     #[serde(
         rename = "cardAmountForReturn",
         with = "dec_opt",
@@ -461,7 +462,7 @@ pub struct PrintReturnReceiptRequest {
     )]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub card_amount_for_return: Option<Decimal>,
-    /// Prepayment amount to return (only set if returning partial payments).
+    /// Prepayment amount to return (only set for a partial return).
     #[serde(
         rename = "prePaymentAmountForReturn",
         with = "dec_opt",
@@ -479,7 +480,7 @@ pub struct PrintReturnReceiptRequest {
     /// eMark codes for marked goods.
     #[serde(rename = "eMarks", skip_serializing_if = "Vec::is_empty", default)]
     pub e_marks: Vec<String>,
-    /// Per-item return list (only set if returning specific items partially).
+    /// Per-item return list (only set when partially returning an itemised receipt).
     #[serde(
         rename = "returnItemList",
         skip_serializing_if = "Vec::is_empty",

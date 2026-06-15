@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "PrintReturnReceiptRequest",
-  "description": "Op 6 request: print a return/refund receipt — the operation that actually registers a return.\n\nWith no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or\n`return_item_list` for a partial return. The original spec §4.5.7 is\n\"ՀԴՄ վերադարձի կտրոնի տպում\" = *print return receipt*. The spec describes it in section §4.5.7,\nbut its wire operation code is **6** per the operation-codes table (§4.3). The read-only lookup\nof the receipt being returned is op 10, [`GetReturnableReceiptRequest`].",
+  "description": "Op 6 request: print a return/refund receipt — the operation that actually registers a return.\n\nWith no amounts/items it returns the whole receipt; set the `*_for_return` amounts and/or\n`return_item_list` for a partial return. The original spec §4.5.7 is\n\"ՀԴՄ վերադարձի կտրոնի տպում\" = *print return receipt*. The spec describes it in section §4.5.7,\nbut its wire operation code is **6** per the operation-codes table (§4.4.1). The read-only lookup\nof the receipt being returned is op 10, [`GetReturnableReceiptRequest`].",
   "type": "object",
   "properties": {
     "crn": {
@@ -15,7 +15,7 @@
       "minimum": 0
     },
     "cashAmountForReturn": {
-      "description": "Cash amount to return (only set if returning partial payments).",
+      "description": "Cash amount to return (only set for a partial return).",
       "type": [
         "number",
         "null"
@@ -23,7 +23,7 @@
       "format": "double"
     },
     "cardAmountForReturn": {
-      "description": "Card amount to return (only set if returning partial payments).",
+      "description": "Card amount to return (only set for a partial return).",
       "type": [
         "number",
         "null"
@@ -31,7 +31,7 @@
       "format": "double"
     },
     "prePaymentAmountForReturn": {
-      "description": "Prepayment amount to return (only set if returning partial payments).",
+      "description": "Prepayment amount to return (only set for a partial return).",
       "type": [
         "number",
         "null"
@@ -60,7 +60,7 @@
       }
     },
     "returnItemList": {
-      "description": "Per-item return list (only set if returning specific items partially).",
+      "description": "Per-item return list (only set when partially returning an itemised receipt).",
       "type": "array",
       "items": {
         "$ref": "#/$defs/ReturnItem"

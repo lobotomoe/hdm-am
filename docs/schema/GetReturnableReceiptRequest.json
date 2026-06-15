@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "GetReturnableReceiptRequest",
-  "description": "Op 10 request: fetch the fiscal contents of a previously-issued receipt you intend to return.\n\nThis is a **read-only lookup**, not a refund. The original spec §4.5.6 is\n\"ՀԴՄ վերադարձվող կտրոնի ստացում\" = *get the returnable receipt*. The spec describes it in section\n§4.5.6, but its wire operation code is **10** per the operation-codes table (§4.3) — the section\nnumber is not the operation code. It returns the receipt's items, amounts, eMarks and sale type\nso a caller can construct the actual return via [`PrintReturnReceiptRequest`] (op 6). It registers\nnothing.",
+  "description": "Op 10 request: fetch the fiscal contents of a previously-issued receipt you intend to return.\n\nThis is a **read-only lookup**, not a refund. The original spec §4.5.6 is\n\"ՀԴՄ վերադարձվող կտրոնի ստացում\" = *get the returnable receipt*. The spec describes it in section\n§4.5.6, but its wire operation code is **10** per the operation-codes table (§4.4.1) — the section\nnumber is not the operation code. It returns the receipt's items, amounts, eMarks and sale type\nso a caller can construct the actual return via [`PrintReturnReceiptRequest`] (op 6). It registers\nnothing.",
   "type": "object",
   "properties": {
     "receiptId": {
