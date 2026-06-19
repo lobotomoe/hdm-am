@@ -9,6 +9,8 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-06-19
+
 Still targets HDM integration spec **v0.7.3**.
 
 ### Fixed
@@ -28,6 +30,9 @@ Still targets HDM integration spec **v0.7.3**.
 ### Changed
 - **`ServerErrorKind::OtherUnknownError` renamed to `ForeignCountryEmark`** (code 196) to match its
   real meaning. Breaking for any consumer matching on that variant.
+- Human-facing operator listings now resolve assigned department IDs to department names and tax
+  regimes in the CLI, native app, and web demo. Missing operator/department names are rendered
+  explicitly as `[operator name not provided]` / `[department name not provided]`.
 
 ## [0.3.0] — 2026-06-13
 
@@ -90,7 +95,8 @@ Initial release. Targets HDM integration spec **v0.7.3** (April 2025).
 - `hdm-am-cli` (binary `hdm`): one subcommand per operation, text or `--json` output.
 - Offline spec archive under `docs/history/` (v0.3–v0.7.3) with a wire-protocol changelog.
 
-[Unreleased]: https://github.com/lobotomoe/hdm-am/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/lobotomoe/hdm-am/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/lobotomoe/hdm-am/releases/tag/v0.4.0
 [0.3.0]: https://github.com/lobotomoe/hdm-am/releases/tag/v0.3.0
 [0.2.0]: https://github.com/lobotomoe/hdm-am/releases/tag/v0.2.0
 [0.1.0]: https://github.com/lobotomoe/hdm-am/releases/tag/v0.1.0
