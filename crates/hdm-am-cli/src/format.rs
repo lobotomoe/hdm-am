@@ -1,24 +1,35 @@
 //! Human-readable rendering of HDM responses. Kept deliberately plain — no colour, no unicode
 //! decoration — so output is easy to pipe and grep.
 
+use std::collections::HashMap;
+
 use hdm_am::{
-    ListOpsAndDepsResponse, PaymentSystemsListResponse, ReturnableReceiptResponse, TaxationKind,
+    DepartmentInfo, ListOpsAndDepsResponse, PaymentSystemsListResponse, ReturnableReceiptResponse,
+    TaxationKind,
 };
 
 /// Render the operators-and-departments listing (op 1).
 pub fn operators(response: &ListOpsAndDepsResponse) {
+    let departments = response
+        .departments
+        .iter()
+        .map(|department| (department.id, department))
+        .collect::<HashMap<_, _>>();
+
     if response.operators.is_empty() {
         println!("Operators: none registered");
     } else {
         println!("Operators:");
         for op in &response.operators {
-            let deps = op
-                .deps
-                .iter()
-                .map(u32::to_string)
-                .collect::<Vec<_>>()
-                .join(", ");
-            println!("  [{}] {:<24} departments: [{}]", op.id, op.name, deps);
+            println!(
+                "  [{}] {}",
+                op.id,
+                display_name(&op.name, "[operator name not provided]")
+            );
+            println!(
+                "      departments: {}",
+                department_list(&op.deps, &departments)
+            );
         }
     }
 
@@ -30,11 +41,40 @@ pub fn operators(response: &ListOpsAndDepsResponse) {
             println!(
                 "  [{}] {:<24} taxation: {}",
                 dep.id,
-                dep.name,
+                display_name(&dep.name, "[department name not provided]"),
                 taxation(dep.kind)
             );
         }
     }
+}
+
+fn department_list(deps: &[u32], departments: &HashMap<u32, &DepartmentInfo>) -> String {
+    if deps.is_empty() {
+        return "none".to_owned();
+    }
+
+    deps.iter()
+        .map(|id| {
+            departments.get(id).map_or_else(
+                || format!("[{id}] unknown department"),
+                |department| department_summary(department),
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("; ")
+}
+
+fn department_summary(department: &DepartmentInfo) -> String {
+    format!(
+        "[{}] {} / {}",
+        department.id,
+        display_name(&department.name, "[department name not provided]"),
+        taxation(department.kind)
+    )
+}
+
+const fn display_name<'a>(name: &'a str, fallback: &'static str) -> &'a str {
+    if name.is_empty() { fallback } else { name }
 }
 
 /// Render the payment-systems listing (op 15).

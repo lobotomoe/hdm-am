@@ -497,7 +497,7 @@ fn demo_result(action: Action) -> String {
             "10.0.0.5:1025 is an HDM\nTCP connect: 4 ms\nProtocol: 0.7\nSoftware: 1.1.0\nProbe response code: 200"
         }
         Action::Operators => {
-            "Operators: 2\nDepartments: 2\n\nOperators\n  [1] Administrator  departments: [1, 2]\n  [3] Cashier  departments: [1]\n\nDepartments\n  [1] Sales\n  [2] Service"
+            "Operators: 2\nDepartments: 2\n\nOperators\n  [1] Administrator\n      departments: [1] Sales / VAT-taxable; [2] Service / turnover tax\n  [3] Cashier\n      departments: [1] Sales / VAT-taxable\n\nDepartments\n  [1] Sales  taxation: VAT-taxable\n  [2] Service  taxation: turnover tax"
         }
         Action::VerifyLogin => "Credentials accepted.",
         Action::Receipt => {
@@ -589,7 +589,7 @@ fn operators(settings: &ConnectionSettings) -> Result<String, String> {
     let response = client
         .list_operators_and_departments()
         .map_err(|err| ui_format::hdm_error("listing operators and departments", &err))?;
-    Ok(ui_format::operators(response))
+    Ok(ui_format::operators(&response))
 }
 
 fn verify_login(settings: &ConnectionSettings) -> Result<String, String> {

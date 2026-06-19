@@ -1,13 +1,21 @@
 //! Human-facing formatting for GUI results and HDM errors.
 
+use std::collections::HashMap;
+
 use hdm_am::{
-    Error as HdmError, ListOpsAndDepsResponse, PaymentSystemsListResponse, ReceiptResponse,
-    ReturnReceiptResponse, ReturnableReceiptResponse, ServerErrorKind, VendorErrorKind,
+    DepartmentInfo, Error as HdmError, ListOpsAndDepsResponse, PaymentSystemsListResponse,
+    ReceiptResponse, ReturnReceiptResponse, ReturnableReceiptResponse, ServerErrorKind,
+    TaxationKind, VendorErrorKind,
 };
 
 /// Format operators/departments response.
 #[must_use]
-pub fn operators(response: ListOpsAndDepsResponse) -> String {
+pub fn operators(response: &ListOpsAndDepsResponse) -> String {
+    let departments = response
+        .departments
+        .iter()
+        .map(|department| (department.id, department))
+        .collect::<HashMap<_, _>>();
     let mut lines = vec![format!(
         "Operators: {}\nDepartments: {}",
         response.operators.len(),
@@ -17,16 +25,15 @@ pub fn operators(response: ListOpsAndDepsResponse) -> String {
     if !response.operators.is_empty() {
         lines.push(String::new());
         lines.push("Operators".to_owned());
-        for operator in response.operators {
-            let deps = operator
-                .deps
-                .iter()
-                .map(u32::to_string)
-                .collect::<Vec<_>>()
-                .join(", ");
+        for operator in &response.operators {
             lines.push(format!(
-                "  [{}] {}  departments: [{}]",
-                operator.id, operator.name, deps
+                "  [{}] {}",
+                operator.id,
+                display_name(&operator.name, "[operator name not provided]")
+            ));
+            lines.push(format!(
+                "      departments: {}",
+                department_list(&operator.deps, &departments)
             ));
         }
     }
@@ -34,12 +41,42 @@ pub fn operators(response: ListOpsAndDepsResponse) -> String {
     if !response.departments.is_empty() {
         lines.push(String::new());
         lines.push("Departments".to_owned());
-        for department in response.departments {
-            lines.push(format!("  [{}] {}", department.id, department.name));
+        for department in &response.departments {
+            lines.push(format!(
+                "  [{}] {}  taxation: {}",
+                department.id,
+                display_name(&department.name, "[department name not provided]"),
+                taxation_label(department.kind)
+            ));
         }
     }
 
     lines.join("\n")
+}
+
+fn department_list(deps: &[u32], departments: &HashMap<u32, &DepartmentInfo>) -> String {
+    if deps.is_empty() {
+        return "none".to_owned();
+    }
+
+    deps.iter()
+        .map(|id| {
+            departments.get(id).map_or_else(
+                || format!("[{id}] unknown department"),
+                |department| department_summary(department),
+            )
+        })
+        .collect::<Vec<_>>()
+        .join("; ")
+}
+
+fn department_summary(department: &DepartmentInfo) -> String {
+    format!(
+        "[{}] {} / {}",
+        department.id,
+        display_name(&department.name, "[department name not provided]"),
+        taxation_label(department.kind)
+    )
 }
 
 /// Format payment systems response.
@@ -199,6 +236,24 @@ fn sale_type_label(code: i64) -> String {
         3 => "prepayment".to_owned(),
         other => format!("unknown ({other})"),
     }
+}
+
+fn taxation_label(kind: TaxationKind) -> String {
+    match kind {
+        TaxationKind::VatTaxable => "VAT-taxable".to_owned(),
+        TaxationKind::NotVatTaxable => "not VAT-taxable".to_owned(),
+        TaxationKind::TurnoverTax => "turnover tax".to_owned(),
+        TaxationKind::ProductionLicensee => "production licensee".to_owned(),
+        TaxationKind::Patented => "patented".to_owned(),
+        TaxationKind::FamilyBusiness => "family business".to_owned(),
+        TaxationKind::MicroBusiness => "micro-business".to_owned(),
+        TaxationKind::Unknown(code) => format!("unknown (code {code})"),
+        _ => "unrecognised".to_owned(),
+    }
+}
+
+const fn display_name<'a>(name: &'a str, fallback: &'static str) -> &'a str {
+    if name.is_empty() { fallback } else { name }
 }
 
 const fn error_title(err: &HdmError) -> &'static str {
