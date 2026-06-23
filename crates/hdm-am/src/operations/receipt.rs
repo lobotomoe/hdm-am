@@ -298,17 +298,23 @@ impl Operation for GetReturnableReceiptRequest {
 
 /// Op 10 response: the looked-up receipt's full fiscal contents.
 ///
-/// **Unverified against hardware.** An earlier integration test sent this lookup to op 6 and got
-/// vendor code 503 with an empty body, but op 6 is in fact the print-return code (this crate
-/// previously had the two codes swapped), so that result does not characterise this lookup. The
-/// lookup also keys on a server-side `Receipt_ID` the firmware never exposes (op 4 omits the `qr`
-/// field entirely), so it may still be hard to satisfy in practice. This
-/// struct is therefore modelled purely from spec §4.5.6, which is internally inconsistent: its
-/// field table and the Code Block 7 example disagree (the example adds `type`, omits
-/// `rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). Fields follow the
-/// Code Block 7 example — whose numeric types match what real firmware sends for op 4 — and are all
-/// optional/lenient. The raw decrypted payload is logged at TRACE so the true shape can be
-/// confirmed once a device ever returns one.
+/// **Verified against a live Newland N950 (fw 1.1.3, 2026-06-23).** The lookup keys on the original
+/// sale's `rseq` (the op-4 `rseq`, passed as `receiptId`); the fiscal number does not resolve. A
+/// valid lookup returns code 200 with the receipt body.
+///
+/// **KNOWN BUG — this struct mis-decodes the real response.** The firmware sends almost every field
+/// as a JSON **string**, not the numbers modelled here. An observed body:
+/// ```json
+/// {"card":"40.00","cash":"0.00","cid":"3","eMarks":[],"pTin":"","ppa":"0.00","ppu":"0.00",
+///  "ref":"232","refcrn":"51815332","rseq":232,"saleType":"0","subType":"2","ta":"40.00",
+///  "time":"4109851456","totals":[{"adg":"56.10","p":"20.00","qty":"1.000","rpid":"0",
+///  "t":"16.67","tt":"20.00",...}]}
+/// ```
+/// Only `rseq` is a JSON number; `cid`/`saleType`/`subType`/`time`/`rpid`/all amounts are strings.
+/// Fields below typed as integers (e.g. `cid`, `time`, `rpid`) therefore fail `Deserialize`. Fixing
+/// this means retyping those as `String` (or a string-or-number helper). Not yet done because no
+/// caller needs op 10 — the agent builds returns straight from op 6, which works standalone. The raw
+/// decrypted payload is logged at TRACE if you need to re-confirm the shape.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[non_exhaustive]
@@ -436,12 +442,24 @@ pub struct ReturnableReceiptItem {
 /// "ՀԴՄ վերադարձի կտրոնի տպում" = *print return receipt*. The spec describes it in section §4.5.7,
 /// but its wire operation code is **6** per the operation-codes table (§4.4.1). The read-only lookup
 /// of the receipt being returned is op 10, [`GetReturnableReceiptRequest`].
+///
+/// **Verified against a live Newland N950 (fw 1.1.3, 2026-06-23).** A full return (only `crn` +
+/// `return_ticket_id`) registers and returns code 200. Empirical, overriding the spec where it
+/// disagrees: `return_ticket_id` is the original sale's `rseq` (not the fiscal number); the device
+/// accepts it as either a JSON number or a string (spec §4.5.7 types it "Integer" but its own
+/// example sends `"205"`), so this crate's `u64` is fine. `rrn`/`terminal_id` are optional in
+/// practice — returns succeeded with them absent, empty, over-length, and malformed. NOTE: vendor
+/// code **174** ("return receipt not found") is **transient**, not a permanent identifier error — it
+/// fires when the HDM is in a busy/modal state (on-device payment picker, or error 190
+/// "payment not available"); the same receipt returns fine moments later. Callers should retry 174
+/// on a fresh session, but only because a 174 means nothing was registered — never blind-retry an
+/// unknown-outcome (transport) failure on this write.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 pub struct PrintReturnReceiptRequest {
     /// HDM registration number of the device that printed the receipt.
     pub crn: String,
-    /// Number of the receipt to be returned.
+    /// Number of the receipt to be returned (the original sale's `rseq`).
     #[serde(rename = "returnTicketId")]
     pub return_ticket_id: u64,
     /// Cash amount to return (only set for a partial return).
