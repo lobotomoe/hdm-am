@@ -9,6 +9,21 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-06-23
+
+Still targets HDM integration spec **v0.7.3**.
+
+### Fixed
+- **`GetReturnableReceiptRequest` (op 10) response now decodes against real hardware.** A live Newland
+  N950 (fw 1.1.3) returns almost every numeric field as a JSON **string** (`"40.00"`, `"3"`, `"232"`)
+  rather than a number, and sends `"totals":null` (not `[]`) for simple/prepayment receipts. The
+  previous strict typing failed to deserialize a valid 200 body (it errored on the first string-typed
+  integer, `cid`). `ReturnableReceiptResponse` / `ReturnableReceiptItem` now use string-or-number
+  tolerant deserializers for every integer/decimal field and a null-tolerant decoder for `totals` /
+  `eMarks`; output still serializes as numbers. Verified end-to-end against the live device. This
+  makes op 10 usable as a pre-refund returnability check (a 200 means returnable; server code
+  185/174/155/156 means not yet — post-sale sync pending).
+
 ## [0.4.0] — 2026-06-19
 
 Still targets HDM integration spec **v0.7.3**.

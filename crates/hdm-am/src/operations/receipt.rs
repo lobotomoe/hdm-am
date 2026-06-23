@@ -9,6 +9,105 @@ use super::{EmptyResponse, Operation};
 use rust_decimal::serde::float as dec;
 use rust_decimal::serde::float_option as dec_opt;
 
+/// Deserializers tolerant of an HDM firmware quirk: the op-10 (`GetReturnableReceipt`) response sends
+/// numeric fields as JSON **strings** (`"40.00"`, `"3"`, `"232"`) rather than numbers — verified on a
+/// live Newland N950 (fw 1.1.3, 2026-06-23). They accept a string *or* a number on the wire (an empty
+/// string decodes to `None`) and serialize back as a number so downstream JSON stays well-typed. Only
+/// the op-10 response structs use these; request types keep the strict `dec`/`dec_opt`.
+mod lenient {
+    use rust_decimal::Decimal;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use std::str::FromStr;
+
+    /// `Option<i64>` field that also accepts a JSON string.
+    pub mod opt_i64 {
+        use super::{Deserialize, Deserializer, FromStr, Serialize, Serializer};
+
+        // serde's `with` serialize signature is fixed as `&T`; `Option<&T>` would not compile here.
+        #[allow(clippy::ref_option)]
+        pub fn serialize<S: Serializer>(value: &Option<i64>, ser: S) -> Result<S::Ok, S::Error> {
+            value.serialize(ser)
+        }
+
+        pub fn deserialize<'de, D: Deserializer<'de>>(de: D) -> Result<Option<i64>, D::Error> {
+            #[derive(Deserialize)]
+            #[serde(untagged)]
+            enum Raw {
+                Int(i64),
+                Str(String),
+            }
+            match Option::<Raw>::deserialize(de)? {
+                None => Ok(None),
+                Some(Raw::Int(n)) => Ok(Some(n)),
+                Some(Raw::Str(s)) => {
+                    let trimmed = s.trim();
+                    if trimmed.is_empty() {
+                        Ok(None)
+                    } else {
+                        i64::from_str(trimmed)
+                            .map(Some)
+                            .map_err(serde::de::Error::custom)
+                    }
+                }
+            }
+        }
+    }
+
+    /// `Option<Decimal>` field that also accepts a JSON string.
+    pub mod opt_dec {
+        use super::{Decimal, Deserialize, Deserializer, FromStr, Serializer};
+
+        // serde's `with` serialize signature is fixed as `&T`; `Option<&T>` would not compile here.
+        #[allow(clippy::ref_option)]
+        pub fn serialize<S: Serializer>(value: &Option<Decimal>, ser: S) -> Result<S::Ok, S::Error> {
+            match value {
+                Some(_) => rust_decimal::serde::float_option::serialize(value, ser),
+                None => ser.serialize_none(),
+            }
+        }
+
+        pub fn deserialize<'de, D: Deserializer<'de>>(de: D) -> Result<Option<Decimal>, D::Error> {
+            #[derive(Deserialize)]
+            #[serde(untagged)]
+            enum Raw {
+                Num(f64),
+                Str(String),
+            }
+            match Option::<Raw>::deserialize(de)? {
+                None => Ok(None),
+                Some(Raw::Num(f)) => Decimal::try_from(f)
+                    .map(Some)
+                    .map_err(serde::de::Error::custom),
+                Some(Raw::Str(s)) => {
+                    let trimmed = s.trim();
+                    if trimmed.is_empty() {
+                        Ok(None)
+                    } else {
+                        Decimal::from_str(trimmed)
+                            .map(Some)
+                            .map_err(serde::de::Error::custom)
+                    }
+                }
+            }
+        }
+    }
+
+    /// `Vec<T>` field where the firmware sends JSON `null` (not `[]`) for "no items" — simple and
+    /// prepayment receipts send `"totals":null`. `#[serde(default)]` only covers an *absent* key, not
+    /// an explicit null, so without this a simple receipt fails to decode ("expected a sequence").
+    pub mod vec_or_null {
+        use serde::{Deserialize, Deserializer};
+
+        pub fn deserialize<'de, D, T>(de: D) -> Result<Vec<T>, D::Error>
+        where
+            D: Deserializer<'de>,
+            T: Deserialize<'de>,
+        {
+            Ok(Option::<Vec<T>>::deserialize(de)?.unwrap_or_default())
+        }
+    }
+}
+
 /// Receipt print mode (spec §4.5.4).
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u8)]
@@ -302,8 +401,8 @@ impl Operation for GetReturnableReceiptRequest {
 /// sale's `rseq` (the op-4 `rseq`, passed as `receiptId`); the fiscal number does not resolve. A
 /// valid lookup returns code 200 with the receipt body.
 ///
-/// **KNOWN BUG — this struct mis-decodes the real response.** The firmware sends almost every field
-/// as a JSON **string**, not the numbers modelled here. An observed body:
+/// **Firmware quirk handled.** The firmware sends almost every numeric field as a JSON **string**,
+/// not a number. An observed body:
 /// ```json
 /// {"card":"40.00","cash":"0.00","cid":"3","eMarks":[],"pTin":"","ppa":"0.00","ppu":"0.00",
 ///  "ref":"232","refcrn":"51815332","rseq":232,"saleType":"0","subType":"2","ta":"40.00",
@@ -311,75 +410,75 @@ impl Operation for GetReturnableReceiptRequest {
 ///  "t":"16.67","tt":"20.00",...}]}
 /// ```
 /// Only `rseq` is a JSON number; `cid`/`saleType`/`subType`/`time`/`rpid`/all amounts are strings.
-/// Fields below typed as integers (e.g. `cid`, `time`, `rpid`) therefore fail `Deserialize`. Fixing
-/// this means retyping those as `String` (or a string-or-number helper). Not yet done because no
-/// caller needs op 10 — the agent builds returns straight from op 6, which works standalone. The raw
-/// decrypted payload is logged at TRACE if you need to re-confirm the shape.
+/// The integer/decimal fields use the [`lenient`] string-or-number deserializers so a real 200 body
+/// decodes (it used to fail on `cid`). Callers use op 10 as a returnability **pre-check** before a
+/// refund: a 200 here means the receipt can be returned; server code 185/174/155/156 means it is not
+/// yet returnable (post-sale sync pending). The raw decrypted payload is logged at TRACE.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[non_exhaustive]
 pub struct ReturnableReceiptResponse {
     /// Receipt sequence number. The PDF field table calls this the return-receipt sequence number,
     /// but Code Block 7 omits it.
-    #[serde(default)]
+    #[serde(default, with = "lenient::opt_i64")]
     pub rseq: Option<i64>,
     /// Cashier ID (`Գանձապահի ID`).
-    #[serde(default)]
+    #[serde(default, with = "lenient::opt_i64")]
     pub cid: Option<i64>,
     /// Receipt registration/print time (ms since epoch, Greenwich).
-    #[serde(default)]
+    #[serde(default, with = "lenient::opt_i64")]
     pub time: Option<i64>,
     /// Transaction type as the Code Block 7 example's `type` field (mirrors `sale_type`).
-    #[serde(rename = "type", default)]
+    #[serde(rename = "type", default, with = "lenient::opt_i64")]
     pub kind: Option<i64>,
     /// Sale type: `0` sale, `2` return, `3` prepayment.
-    #[serde(rename = "saleType", default)]
+    #[serde(rename = "saleType", default, with = "lenient::opt_i64")]
     pub sale_type: Option<i64>,
     /// Receipt sub-type: `1` simple, `2` itemised. (In the field table only; absent from the example.)
-    #[serde(rename = "subType", default)]
+    #[serde(rename = "subType", default, with = "lenient::opt_i64")]
     pub sub_type: Option<i64>,
     /// Department of a simple receipt.
-    #[serde(default)]
+    #[serde(default, with = "lenient::opt_i64")]
     pub did: Option<i64>,
     /// Total amount.
-    #[serde(default, with = "dec_opt")]
+    #[serde(default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub ta: Option<Decimal>,
     /// Cash paid.
-    #[serde(default, with = "dec_opt")]
+    #[serde(default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub cash: Option<Decimal>,
     /// Card (cashless) paid.
-    #[serde(default, with = "dec_opt")]
+    #[serde(default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub card: Option<Decimal>,
     /// Partial-payment amount.
-    #[serde(default, with = "dec_opt")]
+    #[serde(default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub ppa: Option<Decimal>,
     /// Used prepayment amount.
-    #[serde(default, with = "dec_opt")]
+    #[serde(default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub ppu: Option<Decimal>,
     /// Buyer TIN (8 digits) for a B2B receipt, or `null`.
     #[serde(rename = "pTin", default)]
     pub partner_tin: Option<String>,
     /// When this receipt is itself a return, the number of the receipt it returned (`ref`).
-    #[serde(rename = "ref", default)]
+    #[serde(rename = "ref", default, with = "lenient::opt_i64")]
     pub returned_receipt: Option<i64>,
     /// crn of the HDM that printed the returned receipt (set only for return-type receipts).
     #[serde(rename = "refcrn", default)]
     pub returned_crn: Option<String>,
     /// eMark codes of marked goods on the receipt.
-    #[serde(rename = "eMarks", default)]
+    #[serde(rename = "eMarks", default, deserialize_with = "lenient::vec_or_null::deserialize")]
     pub e_marks: Vec<String>,
     /// Line items (empty for simple/prepayment receipts, where the spec sends `null`).
-    #[serde(default)]
+    #[serde(default, deserialize_with = "lenient::vec_or_null::deserialize")]
     pub totals: Vec<ReturnableReceiptItem>,
 }
 
-/// A single line item in a [`ReturnableReceiptResponse`] (`totals[]`). All fields optional/lenient
-/// for the same reason as the parent — modelled from spec §4.5.6 Code Block 7, unverified.
+/// A single line item in a [`ReturnableReceiptResponse`] (`totals[]`). Numeric fields use the same
+/// [`lenient`] string-or-number deserializers as the parent — the firmware sends them as strings.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[cfg_attr(feature = "schema", derive(schemars::JsonSchema))]
 #[non_exhaustive]
@@ -391,46 +490,46 @@ pub struct ReturnableReceiptItem {
     #[serde(rename = "gn", default)]
     pub product_name: Option<String>,
     /// Quantity (`qty`).
-    #[serde(default, with = "dec_opt")]
+    #[serde(default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub qty: Option<Decimal>,
     /// Unit price (`p`).
-    #[serde(rename = "p", default, with = "dec_opt")]
+    #[serde(rename = "p", default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub price: Option<Decimal>,
     /// Unit of measure (`mu`).
     #[serde(rename = "mu", default)]
     pub unit: Option<String>,
     /// Row sequence number (`rpid`) — the handle used for per-item partial returns in op 6.
-    #[serde(default)]
+    #[serde(default, with = "lenient::opt_i64")]
     pub rpid: Option<i64>,
     /// Primary discount (`dsc`).
-    #[serde(rename = "dsc", default, with = "dec_opt")]
+    #[serde(rename = "dsc", default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub discount: Option<Decimal>,
     /// Proportional secondary discount (`adsc`).
-    #[serde(rename = "adsc", default, with = "dec_opt")]
+    #[serde(rename = "adsc", default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub additional_discount: Option<Decimal>,
     /// Discount type (`dsct`).
-    #[serde(rename = "dsct", default)]
+    #[serde(rename = "dsct", default, with = "lenient::opt_i64")]
     pub discount_kind: Option<i64>,
     /// Department (`did`).
-    #[serde(default)]
+    #[serde(default, with = "lenient::opt_i64")]
     pub did: Option<i64>,
     /// Department VAT amount (`dt`).
-    #[serde(rename = "dt", default, with = "dec_opt")]
+    #[serde(rename = "dt", default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub vat_amount: Option<Decimal>,
     /// Department tax regime (`dtm`).
-    #[serde(rename = "dtm", default)]
+    #[serde(rename = "dtm", default, with = "lenient::opt_i64")]
     pub tax_regime: Option<i64>,
     /// Line total excluding VAT (`t`).
-    #[serde(rename = "t", default, with = "dec_opt")]
+    #[serde(rename = "t", default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub total_without_vat: Option<Decimal>,
     /// Line total including VAT (`tt`).
-    #[serde(rename = "tt", default, with = "dec_opt")]
+    #[serde(rename = "tt", default, with = "lenient::opt_dec")]
     #[cfg_attr(feature = "schema", schemars(with = "Option<f64>"))]
     pub total_with_vat: Option<Decimal>,
 }
@@ -575,4 +674,152 @@ pub struct ReturnReceiptResponse {
     /// Short verification number printed on the receipt.
     #[serde(rename = "verificationNumber", default)]
     pub verification_number: Option<String>,
+}
+
+#[cfg(test)]
+mod returnable_receipt_tests {
+    use super::{ReturnableReceiptResponse, lenient};
+    use rust_decimal::Decimal;
+    use serde::Deserialize;
+    use std::str::FromStr;
+
+    /// The exact body a live Newland N950 (fw 1.1.3) returned for op-10 on receipt 232 — almost
+    /// every numeric field is a JSON string. This is the regression: it used to fail decoding on the
+    /// first string-typed integer (`cid`).
+    const N950_BODY: &str = r#"{
+        "card":"40.00","cash":"0.00","cid":"3","eMarks":[],"pTin":"","ppa":"0.00","ppu":"0.00",
+        "ref":"232","refcrn":"51815332","rseq":232,"saleType":"0","subType":"2","ta":"40.00",
+        "time":"4109851456",
+        "totals":[{"adg":"56.10","p":"20.00","qty":"1.000","rpid":"0","t":"16.67","tt":"20.00",
+                   "gc":"56.0001","gn":"Tea","mu":"hat","did":"3","dtm":"3"}]
+    }"#;
+
+    fn dec(s: &str) -> Decimal {
+        Decimal::from_str(s).unwrap()
+    }
+
+    #[test]
+    fn decodes_the_real_n950_string_typed_body() {
+        let parsed: ReturnableReceiptResponse =
+            serde_json::from_str(N950_BODY).expect("real N950 body must decode");
+
+        assert_eq!(parsed.rseq, Some(232));
+        assert_eq!(parsed.cid, Some(3));
+        assert_eq!(parsed.time, Some(4_109_851_456));
+        assert_eq!(parsed.sale_type, Some(0));
+        assert_eq!(parsed.sub_type, Some(2));
+        assert_eq!(parsed.returned_receipt, Some(232));
+        assert_eq!(parsed.returned_crn.as_deref(), Some("51815332"));
+        assert_eq!(parsed.ta, Some(dec("40.00")));
+        assert_eq!(parsed.card, Some(dec("40.00")));
+        assert_eq!(parsed.cash, Some(dec("0.00")));
+
+        assert_eq!(parsed.totals.len(), 1);
+        let item = &parsed.totals[0];
+        assert_eq!(item.price, Some(dec("20.00")));
+        assert_eq!(item.qty, Some(dec("1.000")));
+        assert_eq!(item.rpid, Some(0));
+        assert_eq!(item.total_without_vat, Some(dec("16.67")));
+        assert_eq!(item.total_with_vat, Some(dec("20.00")));
+        assert_eq!(item.did, Some(3));
+        assert_eq!(item.tax_regime, Some(3));
+        assert_eq!(item.product_name.as_deref(), Some("Tea"));
+    }
+
+    #[test]
+    fn decodes_simple_receipt_with_null_totals() {
+        // Simple/prepayment receipts send `"totals":null` (and may null `eMarks`), not `[]`.
+        // `#[serde(default)]` alone fails on an explicit null with "expected a sequence".
+        let body = r#"{"rseq":245,"cid":"3","saleType":"0","subType":"1","ta":"10.00",
+                       "card":"10.00","cash":"0.00","eMarks":null,"totals":null}"#;
+        let parsed: ReturnableReceiptResponse =
+            serde_json::from_str(body).expect("null totals must decode to empty");
+        assert_eq!(parsed.rseq, Some(245));
+        assert_eq!(parsed.sub_type, Some(1));
+        assert_eq!(parsed.ta, Some(dec("10.00")));
+        assert!(parsed.totals.is_empty());
+        assert!(parsed.e_marks.is_empty());
+    }
+
+    #[test]
+    fn decodes_spec_compliant_numeric_body_too() {
+        // The spec types these as numbers; a firmware that obeys the spec must also decode.
+        let body = r#"{"rseq":7,"cid":3,"time":1700000000000,"saleType":0,"ta":40.0,
+                       "totals":[{"p":20.0,"qty":1.0,"rpid":0,"tt":20.0}]}"#;
+        let parsed: ReturnableReceiptResponse = serde_json::from_str(body).expect("numeric decodes");
+        assert_eq!(parsed.rseq, Some(7));
+        assert_eq!(parsed.cid, Some(3));
+        assert_eq!(parsed.ta, Some(dec("40")));
+        assert_eq!(parsed.totals[0].price, Some(dec("20")));
+        assert_eq!(parsed.totals[0].rpid, Some(0));
+    }
+
+    #[test]
+    fn empty_strings_and_absent_fields_decode_to_none() {
+        // The firmware sends "" for an absent partner TIN and may omit fields entirely.
+        let body = r#"{"rseq":9,"pTin":"","cid":"","ta":"","totals":[]}"#;
+        let parsed: ReturnableReceiptResponse = serde_json::from_str(body).expect("empties decode");
+        assert_eq!(parsed.rseq, Some(9));
+        assert_eq!(parsed.cid, None, "empty numeric string is None, not 0");
+        assert_eq!(parsed.ta, None);
+        assert_eq!(parsed.partner_tin.as_deref(), Some(""));
+        assert_eq!(parsed.time, None, "absent field defaults to None");
+    }
+
+    #[test]
+    fn whitespace_padded_numeric_strings_are_trimmed() {
+        let body = r#"{"rseq":1,"cid":" 12 ","ta":" 5.50 "}"#;
+        let parsed: ReturnableReceiptResponse = serde_json::from_str(body).expect("padded decodes");
+        assert_eq!(parsed.cid, Some(12));
+        assert_eq!(parsed.ta, Some(dec("5.50")));
+    }
+
+    #[test]
+    fn non_numeric_string_fails_loud() {
+        // A genuinely malformed value must surface, not silently become None/0.
+        let body = r#"{"rseq":1,"cid":"not-a-number"}"#;
+        let err = serde_json::from_str::<ReturnableReceiptResponse>(body)
+            .expect_err("garbage integer must error");
+        assert!(err.to_string().contains("invalid") || err.to_string().contains("digit"));
+    }
+
+    #[test]
+    fn serialize_round_trips_back_to_decodable_json() {
+        let parsed: ReturnableReceiptResponse = serde_json::from_str(N950_BODY).unwrap();
+        let json = serde_json::to_string(&parsed).expect("serialize");
+        let reparsed: ReturnableReceiptResponse =
+            serde_json::from_str(&json).expect("re-decode our own output");
+        assert_eq!(reparsed.rseq, parsed.rseq);
+        assert_eq!(reparsed.ta, parsed.ta);
+        assert_eq!(reparsed.totals[0].price, parsed.totals[0].price);
+    }
+
+    #[derive(Deserialize)]
+    struct OptI64 {
+        #[serde(default, with = "lenient::opt_i64")]
+        v: Option<i64>,
+    }
+
+    #[derive(Deserialize)]
+    struct OptDec {
+        #[serde(default, with = "lenient::opt_dec")]
+        v: Option<Decimal>,
+    }
+
+    #[test]
+    fn lenient_opt_i64_accepts_string_number_and_empty() {
+        assert_eq!(serde_json::from_str::<OptI64>(r#"{"v":"42"}"#).unwrap().v, Some(42));
+        assert_eq!(serde_json::from_str::<OptI64>(r#"{"v":42}"#).unwrap().v, Some(42));
+        assert_eq!(serde_json::from_str::<OptI64>(r#"{"v":""}"#).unwrap().v, None);
+        assert_eq!(serde_json::from_str::<OptI64>(r#"{"v":null}"#).unwrap().v, None);
+        assert_eq!(serde_json::from_str::<OptI64>(r"{}").unwrap().v, None);
+    }
+
+    #[test]
+    fn lenient_opt_dec_accepts_string_number_and_empty() {
+        assert_eq!(serde_json::from_str::<OptDec>(r#"{"v":"1.25"}"#).unwrap().v, Some(dec("1.25")));
+        assert_eq!(serde_json::from_str::<OptDec>(r#"{"v":1.25}"#).unwrap().v, Some(dec("1.25")));
+        assert_eq!(serde_json::from_str::<OptDec>(r#"{"v":""}"#).unwrap().v, None);
+        assert_eq!(serde_json::from_str::<OptDec>(r#"{"v":null}"#).unwrap().v, None);
+    }
 }
