@@ -12,6 +12,8 @@
   "scripts": {
     "gen": "pnpm -r --if-present run gen",
     "gen:check": "pnpm -r --if-present run gen:check",
+    "regen": "node scripts/regen.mjs",
+    "release": "node scripts/release.mjs",
     "typecheck": "pnpm -r --if-present run typecheck",
     "lint": "pnpm -r --if-present run lint",
     "test": "pnpm -r --if-present run test",
