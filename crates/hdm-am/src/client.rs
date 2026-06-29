@@ -798,4 +798,126 @@ mod tests {
         client.login(1, "0000").expect("second call should align");
         assert!(client.is_logged_in());
     }
+
+    /// A recording observer that flattens every callback into a string log for assertions.
+    #[derive(Clone, Default)]
+    struct Recorder {
+        events: std::sync::Arc<std::sync::Mutex<Vec<String>>>,
+    }
+
+    impl WireObserver for Recorder {
+        fn on_request(&self, request: &WireRequest<'_>) {
+            self.events.lock().expect("lock").push(format!(
+                "req op={} seq={:?} plaintext={}",
+                request.op as u8,
+                request.seq,
+                String::from_utf8_lossy(request.plaintext)
+            ));
+        }
+
+        fn on_response(&self, response: &WireResponse<'_>) {
+            let line = match response {
+                WireResponse::Received {
+                    op,
+                    code,
+                    plaintext,
+                    ..
+                } => format!(
+                    "resp op={} code={} plaintext={}",
+                    *op as u8,
+                    code,
+                    plaintext.map_or_else(
+                        || "<none>".to_owned(),
+                        |p| String::from_utf8_lossy(p).into_owned()
+                    )
+                ),
+                WireResponse::Failed { op, detail, .. } => {
+                    format!("fail op={} detail={detail}", *op as u8)
+                }
+            };
+            self.events.lock().expect("lock").push(line);
+        }
+    }
+
+    /// The observer sees the real, UNMASKED bytes both ways: the login request carries the
+    /// plaintext password, and the login response plaintext carries the session key.
+    #[test]
+    fn observer_captures_request_and_response_unmasked() {
+        let password = "test-password";
+        let password_codec = Codec::from_password(password);
+        let session_key = [0xAB_u8; 24];
+        let key_b64 = BASE64.encode(session_key);
+        let login_resp = format!(r#"{{"key":"{key_b64}"}}"#);
+        let mut incoming = make_response(200, &password_codec, login_resp.as_bytes());
+
+        let session_codec = Codec::from_key(session_key);
+        incoming.extend_from_slice(&make_response(
+            200,
+            &session_codec,
+            br#"{"dt":"2026-06-29 14:00:00"}"#,
+        ));
+
+        let recorder = Recorder::default();
+        let mut client = Client::new(Loopback::new(incoming), password, InMemorySeq::default())
+            .with_observer(Box::new(recorder.clone()));
+        client.login(7, "1234").expect("login");
+        client.date_time().expect("date_time");
+
+        let events = recorder.events.lock().expect("lock").clone();
+        // login request — op 2, no seq, password present in cleartext.
+        assert!(
+            events.iter().any(|e| e.contains("req op=2")
+                && e.contains("seq=None")
+                && e.contains(r#""password":"test-password""#)),
+            "unmasked login request not captured: {events:?}"
+        );
+        // login response — op 2, 200, decrypted plaintext carries the session key (unmasked).
+        assert!(
+            events
+                .iter()
+                .any(|e| e.contains("resp op=2") && e.contains("code=200") && e.contains(&key_b64)),
+            "unmasked login response not captured: {events:?}"
+        );
+        // session op — op 12 with the injected sequence number, then its decrypted reply.
+        assert!(
+            events
+                .iter()
+                .any(|e| e.contains("req op=12") && e.contains("seq=Some(1)")),
+            "session-op request/seq not captured: {events:?}"
+        );
+        assert!(
+            events
+                .iter()
+                .any(|e| e.contains("resp op=12") && e.contains("dt")),
+            "session-op response not captured: {events:?}"
+        );
+    }
+
+    /// The wedge signature: a request goes out, the device never answers. The observer must record
+    /// the request AND a `Failed` outcome — the whole reason `on_request` fires before the read.
+    #[test]
+    fn observer_records_silent_device_as_failed() {
+        let password = "pw";
+        let password_codec = Codec::from_password(password);
+        let key_b64 = BASE64.encode([0u8; 24]);
+        let login_resp = format!(r#"{{"key":"{key_b64}"}}"#);
+        // Only a login response — nothing for the date_time read, so the device "goes silent".
+        let incoming = make_response(200, &password_codec, login_resp.as_bytes());
+
+        let recorder = Recorder::default();
+        let mut client = Client::new(Loopback::new(incoming), password, InMemorySeq::default())
+            .with_observer(Box::new(recorder.clone()));
+        client.login(1, "0").expect("login");
+        client.date_time().expect_err("device went silent");
+
+        let events = recorder.events.lock().expect("lock").clone();
+        assert!(
+            events.iter().any(|e| e.contains("req op=12")),
+            "the unanswered request must still be recorded: {events:?}"
+        );
+        assert!(
+            events.iter().any(|e| e.starts_with("fail op=12")),
+            "a silent device must surface as Failed: {events:?}"
+        );
+    }
 }
