@@ -3,6 +3,7 @@
 
 use crate::crypto::{Codec, decode_session_key};
 use crate::error::{Error, ServerErrorKind};
+use crate::observer::{WireObserver, WireRequest, WireResponse};
 use crate::operations::{
     CashInOutRequest, DateTimeRequest, DateTimeResponse, EmptyResponse, FiscalReportRequest,
     GetReturnableReceiptRequest, HdmTimeSyncRequest, ListOpsAndDepsRequest, ListOpsAndDepsResponse,
@@ -16,6 +17,7 @@ use crate::seq::SequenceProvider;
 use crate::wire::{RESPONSE_CODE_OK, Request, ResponseHeader};
 use serde::Serialize;
 use std::io::{Read, Write};
+use std::time::Instant;
 
 /// Wraps a session request with its per-call sequence number. The HDM expects `seq` as a top-level
 /// field next to the operation's own fields, so the request is flattened in. Keeping `seq` here
@@ -51,12 +53,29 @@ struct Sequenced<R> {
 /// **Timeouts:** `Client` does not enforce timeouts on its transport. Configure
 /// `set_read_timeout`/`set_write_timeout` on a `TcpStream` before passing it to [`Self::new`].
 /// The spec's §4.2 step 7 mandates a 50-second cap on response wait time.
+///
+/// **Connection lifecycle (TCP state hygiene):** `Client` is transport-agnostic and deliberately
+/// does not manage socket states — `TIME_WAIT` and `CLOSE_WAIT` belong to the OS kernel, not the
+/// application, and there is no per-state "time to hold". `TIME_WAIT` is timed by the kernel (≈60 s
+/// on Linux) after an *active* close; `CLOSE_WAIT` has no timer at all and is cleared only by closing
+/// the socket. Two rules keep the device's connection table clean:
+/// 1. **Always [`logout`](Self::logout) before dropping** (the typical login→op→logout flow does
+///    this) so *this* side performs the active close. `TIME_WAIT` then accrues on the integrator host,
+///    which has ample ephemeral ports, rather than on the single-session HDM, whose connection slots
+///    are scarce — a device drowning in `TIME_WAIT` can start refusing new connections.
+/// 2. **Drop the `Client` as soon as you are done, and unconditionally after any
+///    [`requires_reconnect`](Error::requires_reconnect) error.** The device closes the connection on
+///    the §4.10 fatal codes; a `Client` kept alive past that point leaves its socket in `CLOSE_WAIT` —
+///    a file-descriptor leak. Dropping closes the transport. To force an immediate FIN instead of
+///    relying on drop timing, recover the socket with [`Self::into_transport`] and call
+///    `shutdown(Shutdown::Both)` on the `TcpStream`.
 pub struct Client<T: Read + Write, S: SequenceProvider> {
     transport: T,
     password_codec: Codec,
     session_codec: Option<Codec>,
     seq: S,
     password: String,
+    observer: Option<Box<dyn WireObserver>>,
 }
 
 impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
@@ -70,7 +89,25 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
             session_codec: None,
             seq,
             password,
+            observer: None,
         }
+    }
+
+    /// Attach a [`WireObserver`] that receives every request/response exchange — the unmasked
+    /// plaintext, the framed bytes, and the decrypted response — for diagnostics or audit. Builder
+    /// form for the common `Client::new(..).with_observer(..)` construction.
+    ///
+    /// The observer sees real secrets (password, PIN, session key); persisting them is the
+    /// consumer's policy decision — see the [`observer`](crate::observer) module's security note.
+    #[must_use]
+    pub fn with_observer(mut self, observer: Box<dyn WireObserver>) -> Self {
+        self.observer = Some(observer);
+        self
+    }
+
+    /// Install or replace the wire observer on an existing client. See [`Self::with_observer`].
+    pub fn set_observer(&mut self, observer: Option<Box<dyn WireObserver>>) {
+        self.observer = observer;
     }
 
     /// Whether a session has been established via [`Self::login`] (and not invalidated).
@@ -82,6 +119,17 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
     /// Drop the in-memory session key. Does not notify the HDM — call [`Self::logout`] for that.
     pub const fn forget_session(&mut self) {
         self.session_codec = None;
+    }
+
+    /// Consume the client and hand back the underlying transport.
+    ///
+    /// Lets a consumer that knows the concrete transport type close it deterministically — for a
+    /// `TcpStream`, call `shutdown(std::net::Shutdown::Both)` on the returned value to send an
+    /// immediate FIN rather than relying on drop timing (see the "Connection lifecycle" note on
+    /// [`Client`]). The session key is dropped with `self`, so nothing sensitive outlives the call.
+    #[must_use]
+    pub fn into_transport(self) -> T {
+        self.transport
     }
 
     // ---------------- Per-operation entry points ----------------
@@ -272,7 +320,7 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
     fn execute_with_password<R: Operation>(&mut self, request: &R) -> Result<R::Response, Error> {
         const { assert!(R::USES_PASSWORD_KEY, "expected password-key op") };
         let codec = self.password_codec.clone();
-        self.round_trip_op::<R>(request, &codec)
+        self.round_trip_op::<R>(request, &codec, None)
     }
 
     /// Execute an operation that uses the session key (all ops except 1 and 2).
@@ -291,7 +339,7 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
             .clone();
         let seq = self.next_seq()?;
         let body = Sequenced { seq, body: request };
-        let result = self.round_trip_op::<R>(&body, &codec);
+        let result = self.round_trip_op::<R>(&body, &codec, Some(seq));
         if let Err(ref err) = result {
             if err.requires_relogin() || err.requires_reconnect() {
                 self.session_codec = None;
@@ -303,10 +351,14 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
 
     /// Perform a full request/response round-trip: JSON-encode → encrypt → write framing →
     /// read header → check server code → read payload → decrypt → JSON-decode.
+    ///
+    /// `seq` is the sequence number carried in `body` (session ops) or `None` (op 1 / op 2); it is
+    /// purely forwarded to the [`WireObserver`], not used for the exchange itself.
     fn round_trip_op<R: Operation>(
         &mut self,
         body: &impl Serialize,
         codec: &Codec,
+        seq: Option<i64>,
     ) -> Result<R::Response, Error> {
         let plaintext = serde_json::to_vec(body).map_err(Error::Encode)?;
         let ciphertext = codec.encrypt(&plaintext)?;
@@ -320,13 +372,41 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
             ciphertext.len()
         );
 
+        // Frame into a buffer rather than straight to the transport: the observer can then see the
+        // exact bytes that go on the wire, and the whole frame is written in a single call.
         let wire = Request {
             op: R::CODE,
             payload: ciphertext,
         };
-        wire.encode(&mut self.transport)?;
+        // 12-byte request prefix: magic(6) + version(2) + op + reserved(2) + length(2), then payload.
+        let mut frame = Vec::with_capacity(12 + wire.payload.len());
+        wire.encode(&mut frame)?;
 
-        let header = ResponseHeader::read(&mut self.transport)?;
+        let started = Instant::now();
+        let write_result = self.transport.write_all(&frame);
+
+        // Record exactly what was sent BEFORE surfacing any failure (even a partial write may have
+        // reached the device) — this is what captures a wedged device's last request.
+        if let Some(observer) = self.observer.as_deref() {
+            observer.on_request(&WireRequest {
+                op: R::CODE,
+                seq,
+                plaintext: &plaintext,
+                frame: &frame,
+            });
+        }
+        if let Err(err) = write_result {
+            self.observe_failure::<R>(started, &err);
+            return Err(Error::Transport(err));
+        }
+
+        let header = match ResponseHeader::read(&mut self.transport) {
+            Ok(header) => header,
+            Err(err) => {
+                self.observe_failure::<R>(started, &err);
+                return Err(err);
+            }
+        };
 
         log::debug!(
             "hdm-am: <- op {:?} response code {} ({} bytes payload)",
@@ -339,7 +419,10 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
         // connection stays in sync for the next request.
         let mut payload = vec![0u8; usize::from(header.payload_len)];
         if header.payload_len > 0 {
-            self.transport.read_exact(&mut payload)?;
+            if let Err(err) = self.transport.read_exact(&mut payload) {
+                self.observe_failure::<R>(started, &err);
+                return Err(Error::Transport(err));
+            }
         }
 
         if header.code != RESPONSE_CODE_OK {
@@ -350,6 +433,9 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
                 header.code,
                 kind
             );
+            // A non-200 body is not decrypted (the client surfaces the code, not the contents), so
+            // the observer gets the raw ciphertext with no plaintext.
+            self.observe_received::<R>(started, header, &payload, None);
             return Err(Error::Server {
                 code: header.code,
                 kind,
@@ -358,10 +444,19 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
 
         // Empty success payload — most "no-content" ops (logout, sample, etc.) come through here.
         if payload.is_empty() {
+            self.observe_received::<R>(started, header, &payload, None);
             return serde_json::from_slice(b"{}").map_err(Error::Decode);
         }
 
-        let plaintext_response = codec.decrypt(&payload)?;
+        let plaintext_response = match codec.decrypt(&payload) {
+            Ok(plaintext_response) => plaintext_response,
+            Err(err) => {
+                // Decryption failed — typically a stale session key. Record the ciphertext we could
+                // not read so the trace still shows the device answered, then surface the error.
+                self.observe_received::<R>(started, header, &payload, None);
+                return Err(Error::Crypto(err));
+            }
+        };
         if R::RESPONSE_IS_SECRET {
             // e.g. the login response carries the session key — never log it, even at TRACE.
             log::trace!(
@@ -375,7 +470,40 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
                 String::from_utf8_lossy(&plaintext_response)
             );
         }
+        self.observe_received::<R>(started, header, &payload, Some(&plaintext_response));
         serde_json::from_slice(&plaintext_response).map_err(Error::Decode)
+    }
+
+    /// Notify the observer (if any) that an exchange failed before a framed response was read.
+    fn observe_failure<R: Operation>(&self, started: Instant, detail: impl std::fmt::Display) {
+        if let Some(observer) = self.observer.as_deref() {
+            observer.on_response(&WireResponse::Failed {
+                op: R::CODE,
+                detail: detail.to_string(),
+                elapsed: started.elapsed(),
+            });
+        }
+    }
+
+    /// Notify the observer (if any) that a framed response was read (any code).
+    fn observe_received<R: Operation>(
+        &self,
+        started: Instant,
+        header: ResponseHeader,
+        ciphertext: &[u8],
+        plaintext: Option<&[u8]>,
+    ) {
+        if let Some(observer) = self.observer.as_deref() {
+            observer.on_response(&WireResponse::Received {
+                op: R::CODE,
+                protocol_version: header.protocol_version,
+                software_version: header.software_version,
+                code: header.code,
+                ciphertext,
+                plaintext,
+                elapsed: started.elapsed(),
+            });
+        }
     }
 
     fn next_seq(&mut self) -> Result<i64, Error> {

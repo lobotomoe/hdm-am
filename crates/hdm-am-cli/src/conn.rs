@@ -1,6 +1,6 @@
 //! Connection setup, the operator session lifecycle, and the output helper shared by handlers.
 
-use std::net::{TcpStream, ToSocketAddrs};
+use std::net::{Shutdown, TcpStream, ToSocketAddrs};
 use std::time::Duration;
 
 use anyhow::{Context, Result, anyhow};
@@ -55,6 +55,15 @@ pub fn with_session<T>(cli: &Cli, op: impl FnOnce(&mut TcpClient) -> Result<T>) 
     if let Err(err) = c.logout() {
         // Logout failure must not mask the operation's own outcome; surface it as a warning.
         log::warn!("logout failed: {err}");
+    }
+
+    // Close the socket explicitly so the FIN goes out now and it never lingers in CLOSE_WAIT. We
+    // (not the single-session device) become the active closer, so TIME_WAIT lands on this host
+    // rather than on the HDM. A shutdown error here just means the device already closed the
+    // connection — exactly the state we wanted — so it is logged at debug, not surfaced.
+    let stream = c.into_transport();
+    if let Err(err) = stream.shutdown(Shutdown::Both) {
+        log::debug!("tcp shutdown after session: {err}");
     }
     result
 }
