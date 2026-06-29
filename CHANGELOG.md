@@ -9,6 +9,8 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+## [0.5.1] — 2026-06-29
+
 Still targets HDM integration spec **v0.7.3**.
 
 ### Fixed
