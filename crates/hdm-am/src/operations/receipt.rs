@@ -59,7 +59,10 @@ mod lenient {
 
         // serde's `with` serialize signature is fixed as `&T`; `Option<&T>` would not compile here.
         #[allow(clippy::ref_option)]
-        pub fn serialize<S: Serializer>(value: &Option<Decimal>, ser: S) -> Result<S::Ok, S::Error> {
+        pub fn serialize<S: Serializer>(
+            value: &Option<Decimal>,
+            ser: S,
+        ) -> Result<S::Ok, S::Error> {
             match value {
                 Some(_) => rust_decimal::serde::float_option::serialize(value, ser),
                 None => ser.serialize_none(),
@@ -421,24 +424,31 @@ pub struct ReturnableReceiptResponse {
     /// Receipt sequence number. The PDF field table calls this the return-receipt sequence number,
     /// but Code Block 7 omits it.
     #[serde(default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub rseq: Option<i64>,
     /// Cashier ID (`Գանձապահի ID`).
     #[serde(default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub cid: Option<i64>,
     /// Receipt registration/print time (ms since epoch, Greenwich).
     #[serde(default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub time: Option<i64>,
     /// Transaction type as the Code Block 7 example's `type` field (mirrors `sale_type`).
     #[serde(rename = "type", default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub kind: Option<i64>,
     /// Sale type: `0` sale, `2` return, `3` prepayment.
     #[serde(rename = "saleType", default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub sale_type: Option<i64>,
     /// Receipt sub-type: `1` simple, `2` itemised. (In the field table only; absent from the example.)
     #[serde(rename = "subType", default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub sub_type: Option<i64>,
     /// Department of a simple receipt.
     #[serde(default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub did: Option<i64>,
     /// Total amount.
     #[serde(default, with = "lenient::opt_dec")]
@@ -465,12 +475,17 @@ pub struct ReturnableReceiptResponse {
     pub partner_tin: Option<String>,
     /// When this receipt is itself a return, the number of the receipt it returned (`ref`).
     #[serde(rename = "ref", default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub returned_receipt: Option<i64>,
     /// crn of the HDM that printed the returned receipt (set only for return-type receipts).
     #[serde(rename = "refcrn", default)]
     pub returned_crn: Option<String>,
     /// eMark codes of marked goods on the receipt.
-    #[serde(rename = "eMarks", default, deserialize_with = "lenient::vec_or_null::deserialize")]
+    #[serde(
+        rename = "eMarks",
+        default,
+        deserialize_with = "lenient::vec_or_null::deserialize"
+    )]
     pub e_marks: Vec<String>,
     /// Line items (empty for simple/prepayment receipts, where the spec sends `null`).
     #[serde(default, deserialize_with = "lenient::vec_or_null::deserialize")]
@@ -502,6 +517,7 @@ pub struct ReturnableReceiptItem {
     pub unit: Option<String>,
     /// Row sequence number (`rpid`) — the handle used for per-item partial returns in op 6.
     #[serde(default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub rpid: Option<i64>,
     /// Primary discount (`dsc`).
     #[serde(rename = "dsc", default, with = "lenient::opt_dec")]
@@ -513,9 +529,11 @@ pub struct ReturnableReceiptItem {
     pub additional_discount: Option<Decimal>,
     /// Discount type (`dsct`).
     #[serde(rename = "dsct", default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub discount_kind: Option<i64>,
     /// Department (`did`).
     #[serde(default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub did: Option<i64>,
     /// Department VAT amount (`dt`).
     #[serde(rename = "dt", default, with = "lenient::opt_dec")]
@@ -523,6 +541,7 @@ pub struct ReturnableReceiptItem {
     pub vat_amount: Option<Decimal>,
     /// Department tax regime (`dtm`).
     #[serde(rename = "dtm", default, with = "lenient::opt_i64")]
+    #[cfg_attr(feature = "schema", schemars(with = "Option<i64>"))]
     pub tax_regime: Option<i64>,
     /// Line total excluding VAT (`t`).
     #[serde(rename = "t", default, with = "lenient::opt_dec")]
@@ -746,7 +765,8 @@ mod returnable_receipt_tests {
         // The spec types these as numbers; a firmware that obeys the spec must also decode.
         let body = r#"{"rseq":7,"cid":3,"time":1700000000000,"saleType":0,"ta":40.0,
                        "totals":[{"p":20.0,"qty":1.0,"rpid":0,"tt":20.0}]}"#;
-        let parsed: ReturnableReceiptResponse = serde_json::from_str(body).expect("numeric decodes");
+        let parsed: ReturnableReceiptResponse =
+            serde_json::from_str(body).expect("numeric decodes");
         assert_eq!(parsed.rseq, Some(7));
         assert_eq!(parsed.cid, Some(3));
         assert_eq!(parsed.ta, Some(dec("40")));
@@ -808,18 +828,42 @@ mod returnable_receipt_tests {
 
     #[test]
     fn lenient_opt_i64_accepts_string_number_and_empty() {
-        assert_eq!(serde_json::from_str::<OptI64>(r#"{"v":"42"}"#).unwrap().v, Some(42));
-        assert_eq!(serde_json::from_str::<OptI64>(r#"{"v":42}"#).unwrap().v, Some(42));
-        assert_eq!(serde_json::from_str::<OptI64>(r#"{"v":""}"#).unwrap().v, None);
-        assert_eq!(serde_json::from_str::<OptI64>(r#"{"v":null}"#).unwrap().v, None);
+        assert_eq!(
+            serde_json::from_str::<OptI64>(r#"{"v":"42"}"#).unwrap().v,
+            Some(42)
+        );
+        assert_eq!(
+            serde_json::from_str::<OptI64>(r#"{"v":42}"#).unwrap().v,
+            Some(42)
+        );
+        assert_eq!(
+            serde_json::from_str::<OptI64>(r#"{"v":""}"#).unwrap().v,
+            None
+        );
+        assert_eq!(
+            serde_json::from_str::<OptI64>(r#"{"v":null}"#).unwrap().v,
+            None
+        );
         assert_eq!(serde_json::from_str::<OptI64>(r"{}").unwrap().v, None);
     }
 
     #[test]
     fn lenient_opt_dec_accepts_string_number_and_empty() {
-        assert_eq!(serde_json::from_str::<OptDec>(r#"{"v":"1.25"}"#).unwrap().v, Some(dec("1.25")));
-        assert_eq!(serde_json::from_str::<OptDec>(r#"{"v":1.25}"#).unwrap().v, Some(dec("1.25")));
-        assert_eq!(serde_json::from_str::<OptDec>(r#"{"v":""}"#).unwrap().v, None);
-        assert_eq!(serde_json::from_str::<OptDec>(r#"{"v":null}"#).unwrap().v, None);
+        assert_eq!(
+            serde_json::from_str::<OptDec>(r#"{"v":"1.25"}"#).unwrap().v,
+            Some(dec("1.25"))
+        );
+        assert_eq!(
+            serde_json::from_str::<OptDec>(r#"{"v":1.25}"#).unwrap().v,
+            Some(dec("1.25"))
+        );
+        assert_eq!(
+            serde_json::from_str::<OptDec>(r#"{"v":""}"#).unwrap().v,
+            None
+        );
+        assert_eq!(
+            serde_json::from_str::<OptDec>(r#"{"v":null}"#).unwrap().v,
+            None
+        );
     }
 }
