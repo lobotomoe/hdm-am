@@ -15,7 +15,7 @@
 1. [General notes](#1-general-notes)
 2. [Definitions](#2-definitions)
 3. [Activating integration mode](#3-activating-integration-mode)
-   - 3.1 [Description of integration password fields](#31-description-of-integration-password-fields)
+   - 3.1 [Description of integration window fields](#31-description-of-integration-window-fields)
 4. [Data exchange description](#4-data-exchange-description)
    - 4.1 [Operating modes](#41-operating-modes)
    - 4.2 [Data exchange sequence](#42-data-exchange-sequence)
@@ -36,22 +36,22 @@
      - 4.5.7 [Print return receipt](#457-print-return-receipt)
      - 4.5.8 [Cash drawer in/out](#458-cash-drawer-inout)
    - 4.6 [Get device date and time](#46-get-device-date-and-time)
-     - 4.6.1 [Receipt sample](#461-receipt-sample)
-     - 4.6.2 [HDM fiscal report](#462-hdm-fiscal-report)
+     - 4.6.1 [Print receipt sample](#461-print-receipt-sample)
+     - 4.6.2 [Print HDM report](#462-print-hdm-report)
      - 4.6.3 [HDM header and footer configuration](#463-hdm-header-and-footer-configuration)
      - 4.6.4 [HDM header logo configuration](#464-hdm-header-logo-configuration)
-   - 4.7 [HDM time synchronization](#47-hdm-time-synchronization)
+   - 4.7 [HDM synchronization](#47-hdm-synchronization)
    - 4.8 [Get list of payment systems installed on the HDM](#48-get-list-of-payment-systems-installed-on-the-hdm)
-   - 4.9 [Single eMark code request](#49-single-emark-code-request)
+   - 4.9 [Single eMark code check](#49-single-emark-code-check)
    - 4.10 [Response codes table](#410-response-codes-table)
 
 ---
 
 ## 1. General notes
 
-The integration of the Control Cash Register Machine (HDM) with External Software (AS) implies the automation of operations performed using the HDM. The integration is intended to reduce the time spent on entering sold goods into the HDM through the AS, and to also offer the option of receiving the fiscal data of the cheque registered in the AS into the HDM. The integration also offers the option of printing the HDM receipt either through the device itself or through another printer connected to the AS.
+The integration of the Control Cash Register Machine (HDM) with Commercial Software/Application (AS) makes it possible to optimize operations performed with the HDM. As a result of the integration, accounting for sold goods is performed through the AS, and the AS automatically sends the fiscal data to the HDM. The integration also offers the option of printing the HDM receipt either through the device itself or through another external printer connected to the AS.
 
-Data exchange between the AS and HDM is performed via the network, using the TCP protocol. By default, the HDM is configured to operate over its own internal network — via WiFi or Ethernet (using a USB-to-Ethernet adapter) — via cable.
+Data exchange between the AS and HDM is performed over a network using the TCP protocol. When operating in automatic mode, the HDM must be connected to a special internal corporate network via WiFi or Ethernet (using a USB-to-Ethernet adapter).
 
 ---
 
@@ -68,7 +68,7 @@ Data exchange between the AS and HDM is performed via the network, using the TCP
 
 ## 3. Activating integration mode
 
-The HDM device may operate as a standalone unit in standard mode, or in integration mode with an AS.
+The HDM device can operate either in standard mode or in integration mode with an AS.
 
 To activate integration mode, it is necessary to enter the HDM as either *Administrator* or *Super-Administrator* and press the **External software management** (*Արտ. ծր. Կառավարում*) button. The integration screen is shown in *Image 1*.
 
@@ -79,9 +79,10 @@ To activate integration mode, it is necessary to enter the HDM as either *Admini
 - *Ավտոմատ համակարգի IP հասցեն* — "Automatic system IP address"
 - *ՀԴՄ գաղտնաբառ* — "HDM password" (with **Generate** button)
 - *ՀԴՄ IP հասցե* — "HDM IP address"
+- *Պորտ* — "Port"
 - Buttons: *Չեղարկել* — "Cancel", *Պահպանել* — "Save"
 
-### 3.1 Description of integration password fields
+### 3.1 Description of integration window fields
 
 1. **Activate connection with external software** — when checked, the standard operating mode of the HDM device is changed to integration mode.
 2. **Print receipt on HDM printer** — after receiving data from the AS, the HDM prints the receipt on the HDM device. If this field is not selected, the AS sends fiscal data to the HDM during sale operations; the HDM generates the fiscal control number and returns it to the AS so the AS can print the HDM receipt on another printer. When printing on an external printer, the AS must print these values received from the HDM software on the receipt: HDM registration number (`crn`), receipt fiscal number, receipt sequence number (`rseq`), receipt issue date and time (date, hour, minute, second), and total amount.
@@ -94,7 +95,7 @@ To activate integration mode, it is necessary to enter the HDM as either *Admini
 
 ## 4. Data exchange description
 
-Armenian-character data items are encoded as UTF-8. The document is intended for editing in Armenian, Russian, and English. The use of other encodings may cause the device to malfunction.
+Armenian-character data items are encoded as UTF-8. The software is intended to work in Armenian, Russian, and English. The use of other encodings may cause the device to malfunction.
 
 ### 4.1 Operating modes
 
@@ -107,7 +108,7 @@ The integration operating modes are presented in the table below:
 
 ### 4.2 Data exchange sequence
 
-To make a correct request, it is necessary to perform the following steps:
+To perform any operation, it is necessary to complete the following steps:
 
 1. Establish a physical TCP connection with the HDM via the parameters specified during configuration (`IP`, `Port`).
 2. Send a 12-byte standard request header.
@@ -133,10 +134,10 @@ In integration mode, the data exchange operations possible with the HDM are as f
 - Get receipt data — returnable-receipt lookup per §4.5.6 (requires an active session).
 - Cash drawer in/out (requires an active session).
 - Get device date and time (requires an active session).
-- Receipt sample (requires an active session).
+- Print receipt sample (requires an active session).
 - HDM device synchronization (requires an active session).
 - Get list of payment systems installed on the HDM (requires an active session).
-- eMark code request (requires an active session).
+- eMark code check (requires an active session).
 
 ### 4.4 Request/response format
 
@@ -163,10 +164,10 @@ The operation codes for bytes 9 (Operation code) are:
 | 10 | Get receipt data — returnable-receipt lookup per §4.5.6 (requires an active session) |
 | 11 | Cash drawer in/out (requires an active session) |
 | 12 | Get device date and time (requires an active session) |
-| 13 | Receipt sample (requires an active session) |
+| 13 | Print receipt sample (requires an active session) |
 | 14 | HDM device synchronization (requires an active session) |
 | 15 | Get list of payment systems installed on the HDM (requires an active session) |
-| 16 | eMark code request (requires an active session) |
+| 16 | eMark code check (requires an active session) |
 
 #### 4.4.2 Response header byte layout
 
@@ -198,14 +199,14 @@ To encrypt requests, the **3DES** standard with **ECB mode** and **PKCS7 padding
 - Receipt header Logo configuration (requires an active session)
 - Cash drawer in/out (requires an active session)
 - Get device date and time (requires an active session)
-- Receipt sample (requires an active session)
+- Print receipt sample (requires an active session)
 - HDM device synchronization (requires an active session)
 - Get list of payment systems installed on the HDM (requires an active session)
-- eMark code request (requires an active session)
+- eMark code check (requires an active session)
 
 #### 4.4.4 Request and response body
 
-Each request and response is represented as a JSON-formatted object. Some requests and responses can be empty. For textual values it is recommended to use UTF-8 encoding. The software is intended for entering product data and punctuation symbols in Armenian, Russian, and English. The use of non-UTF-8 characters may cause the device to malfunction.
+Each request and response is represented as a JSON-formatted object. Some requests and responses can have no body. Textual values use UTF-8 encoding. The software is intended for entering product data and punctuation symbols in Armenian, Russian, and English. The use of characters in another encoding may cause the device to malfunction.
 
 #### 4.4.5 Request sequence number
 
@@ -250,19 +251,19 @@ This operation makes it possible to obtain the list of all operators and departm
 | `d` | Array of objects | List of departments. Each row is described in `list.d` |
 | `>id` | Integer | Department's unique ID |
 | `>name` | String | Department's name |
-| `>type` | Integer | Department's taxation kind* |
+| `>type` | Integer | Department's taxation type* |
 
-\* Taxation kinds:
+\* Taxation types:
 
-| ID | Taxation kind |
+| ID | Taxation type |
 |---:|---|
 | 1 | VAT-taxable |
 | 2 | Not VAT-taxable |
 | 3 | Turnover tax |
-| 4 | Production licensee* |
-| 5 | Patented* |
-| 6 | Family business* |
-| 7 | Micro-business |
+| 4 | Patent fee* |
+| 5 | Fixed fee* |
+| 6 | Family enterprise* |
+| 7 | Micro-enterprise |
 
 (*Currently not in use.)
 
@@ -309,11 +310,14 @@ This operation makes it possible to obtain the list of all operators and departm
 }
 ```
 
+> [!WARNING]
+> The PDF example shows `pin` as the JSON number `3233`, while the field table defines it as `String`. This translation quotes the value as a string to match the declared field type.
+
 **Response:**
 
 | Field | Type | Description |
 |---|---|---|
-| `key` | String | The current session's 24-byte response key, encoded in Base64 |
+| `key` | String | The current session's 24-byte key, encoded in Base64 |
 
 **Example:**
 
@@ -341,7 +345,7 @@ This operation makes it possible to obtain the list of all operators and departm
 
 ##### 4.5.4.1 Encryption: by session key
 
-When sending product data to the HDM, monetary fields must have at most **2 decimal places**, and quantity fields at most **3 decimal places**. This is because the smallest monetary unit is the luma (`0.01` dram), while quantities often use grams, milliliters, or similar fractional units: e.g. `101 grams of rice` is represented as `0.101 kilograms of rice`. Any calculation result from applying receipt discounts must again be rounded up to 2 decimal places: e.g. `0.005=0.01 ; 0.004=0`.
+When sending product data to the HDM, monetary fields must have at most **2 decimal places**, and quantity fields at most **3 decimal places**. This is because the smallest monetary unit is the luma (`0.01` dram), while quantities often use grams, milliliters, or similar fractional units: e.g. `101 grams of rice` is represented as `0.101 kilograms of rice`. Any calculation result from applying receipt discounts must again be rounded to 2 decimal places using the rule shown by the spec examples: `0.005=0.01 ; 0.004=0`.
 
 **Request:**
 
@@ -352,9 +356,9 @@ When sending product data to the HDM, monetary fields must have at most **2 deci
 | `paidAmountCard` | Double | Cashless paid amount |
 | `partialAmount` | Double | Partial payment amount |
 | `prePaymentAmount` | Double | Prepayment used amount |
-| `mode` | Integer | Receipt print mode: `1` — simple cheque, `2` — products mode, `3` — prepayment (other items not accepted) |
+| `mode` | Integer | Receipt print mode: `1` — simple receipt, `2` — products mode, `3` — prepayment (other values are not accepted) |
 | `partnerTin` | String | Buyer's TIN (Tax Identification Number), 8 digits or `null` |
-| `dep` | Integer | Department of a simple-mode cheque. Used only on a simple cheque print request |
+| `dep` | Integer | Department of a simple-mode receipt. Sent only when printing a simple receipt |
 | `useExtPOS` | Boolean | Use of another payment terminal. Applies to cashless payment; if the value is `false`, the HDM starts its internal cashless-payment application. |
 | `PaymentSystem` | Integer | Payment system code, used when `useExtPOS = false`. May be `null` if the HDM device has only one payment system, or if the payment system must be selected on the HDM device. Codes are listed in the [Payment systems list](#48-get-list-of-payment-systems-installed-on-the-hdm). |
 | `rrn` | String | Transaction unique identifier (12 chars) |
@@ -364,13 +368,13 @@ When sending product data to the HDM, monetary fields must have at most **2 deci
 | `>dep` | Integer | Department of the product |
 | `>qty` | Double | Quantity of the product. Allowed to have a precision of up to 3 decimal places after the period |
 | `>discount` | Double | Discount on the product. Allowed to have a precision of up to 2 decimal places. **If no discount applied to the product, the field should not be set.** |
-| `>discountType` | Integer | What kind of discount is set: %, price reduction, or total reduction on quantity: <br>• `%` discount in the case takes the value `1`, `(total_price * %)` <br>• Reduction on price (Դ - price): value `2`, `(initial_price – discount) * quantity` <br>• Reduction on total amount: value `4`, `(price * quantity) – discount` <br>If there is no corresponding discount, then it should not be set either. |
+| `>discountType` | Integer | What kind of discount is set: percentage discount, unit discount, or discount on the total quantity: <br>• Percentage discount takes the value `1`, `(total_price - %)` <br>• Unit discount (Դ - price): value `2`, `(initial_price - discount) * quantity` <br>• Discount on total quantity (Σ - total): value `4`, `(price * quantity) - discount` <br>If no corresponding discount is applied, this field should not be sent. |
 | `>additionalDiscount` | Double | Additional discount on the product. Allowed to have a precision of up to 2 decimal places. **If no discount applied to the product, the field should not be set.** |
-| `>additionalDiscountType` | Integer | What kind of discount is set, on the total of monetary-priced items, or on % of items: in the case of percentage discount it takes the value `8`, in the case of monetary discount it takes the value `16`. If no corresponding discount, the field should not be set either. |
+| `>additionalDiscountType` | Integer | What kind of additional discount is set on item rows: percentage or monetary. For a percentage discount, it takes the value `8`; for a monetary discount, it takes the value `16`. If no corresponding discount is applied, this field should not be sent. |
 | `>price` | Double | Unit price of the product (precision: 2 decimal places) |
 | `>productCode` | String | Product code (max 50 chars, must not be empty) |
 | `>productName` | String | Product name (max 50 chars, must not be empty) |
-| `>adgCode` | String | Product ATG code. The value should match the list which can be found at `taxservice.am`, by the path **ELECTRONIC SERVICES** → relevant **NEW SERIES HSKICH-DRAMARKGHAYIN MEKENA** documents containing the codes published in two Excel files Order N 1406-N and N 875-N, are also presented on ATG codes. |
+| `>adgCode` | String | Product ATG/ADG code. The value must be from the relevant list available at `taxservice.am`: log in, open **ELECTRONIC SERVICES** → **NEW GENERATION CONTROL CASH REGISTER MACHINES**; at the end of that section there are two Excel documents, N 1406-N and N 875-N, that contain the ATG/ADG codes. |
 | `>unit` | String | Unit-of-measure name (max 50 chars, must not be empty) |
 
 **Code Block 1 — example (Simple receipt):**
@@ -464,15 +468,15 @@ When sending product data to the HDM, monetary fields must have at most **2 deci
 | `prize` | Integer | `0` — no prize\*, `1` — prize\*\* |
 | `total` | Double (precision: 2 dp) | Total amount |
 | `change` | Double (precision: 2 dp) | Change |
-| `qr` | String | Required to be printed by the receipt's QR code text |
+| `qr` | String | Must be printed as a QR code |
 | `emarksCount` | String | Quantity of registered marks |
 | `verificationNumber` | String | Receipt verification number: max 13 chars (consisting of digits) |
 
-\* In this case, write *"Did not win"* on the receipt.
+\* In this case, write *"Receipt did not win"* on the receipt.
 
-\*\* In this case, write *"You won money"* on the receipt.
+\*\* In this case, write *"You have won"* on the receipt.
 
-\*\*\* The prize of receipts is no longer working.
+\*\*\* Receipt lottery prizes no longer apply.
 
 **Code Block 4 — example response (Simple receipt):**
 
@@ -482,8 +486,8 @@ When sending product data to the HDM, monetary fields must have at most **2 deci
   "crn": "31008940",
   "sn": "Q80414503833",
   "tin": "00000019",
-  "taxpayer": "LUSARD",
-  "address": "Yerevan, Smbat Kanyans 2 B31",
+  "taxpayer": "ԼՈՒՍԱՐԹ",
+  "address": "ԵՐԵՎԱՆ ՄԱՄԻԿՈՆՅԱՆՑ 2 ԲՆ31",
   "time": 1490190340000.0,
   "fiscal": "68287355",
   "lottery": "00000002",
@@ -504,8 +508,8 @@ When sending product data to the HDM, monetary fields must have at most **2 deci
   "crn": "31008940",
   "sn": "Q80414503833",
   "tin": "00000019",
-  "taxpayer": "LUSARD",
-  "address": "Yerevan, Smbat Kanyans 2 B31",
+  "taxpayer": "ԼՈՒՍԱՐԹ",
+  "address": "ԵՐԵՎԱՆ ՄԱՄԻԿՈՆՅԱՆՑ 2 ԲՆ31",
   "time": 1490017838000.0,
   "fiscal": "92543463",
   "lottery": "00000002",
@@ -526,8 +530,8 @@ When sending product data to the HDM, monetary fields must have at most **2 deci
   "crn": "31008940",
   "sn": "Q80414503833",
   "tin": "00000019",
-  "taxpayer": "LUSARD",
-  "address": "Yerevan, Smbat Kanyans 2 B31",
+  "taxpayer": "ԼՈՒՍԱՐԹ",
+  "address": "ԵՐԵՎԱՆ ՄԱՄԻԿՈՆՅԱՆՑ 2 ԲՆ31",
   "time": 1490190340000.0,
   "fiscal": "68287355",
   "lottery": "00000002",
@@ -584,7 +588,7 @@ This operation prints a copy of the last receipt, including the header and foote
 
 **Response:**
 
-> **Spec caveat.** §4.5.6's response is internally inconsistent: the field table below and the Code Block 7 example disagree (the example adds a `type` field, omits `rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). It is also **unverified against hardware** — an earlier integration test sent this lookup to op 6 and got vendor code 503 with an empty body, but op 6 is in fact the print-return code, so that result does not characterise this lookup (which uses op 10). The lookup also keys on a server-side `Receipt_ID` the firmware never exposes (op 4 omits the `qr` field entirely), so it may still be hard to satisfy in practice. The table below is reproduced faithfully from the original; treat field types as approximate.
+> **Spec caveat.** §4.5.6's response is internally inconsistent: the field table below and the Code Block 7 example disagree (the example adds a `type` field, omits `rseq`/`subType`/`refcrn`, and uses JSON numbers where the table says String). It is also **unverified against hardware** — an earlier integration test sent this lookup to op 6 and got vendor code 503 with an empty body, but op 6 is in fact the print-return code, so that result does not characterise this lookup (which uses op 10). The lookup appears to key on a server-side `Receipt_ID` from the op 4 `qr` field; on tested firmware that optional `qr` field was omitted, even though this PDF documents it. The field set below follows the original table, with `dtm` casing aligned to the JSON example; treat field types as approximate.
 
 | Field | Type | Description |
 |---|---|---|
@@ -612,7 +616,7 @@ This operation prints a copy of the last receipt, including the header and foote
 | `>mu` | String | Unit of measure |
 | `>rpid` | String | Item row ID (the handle for per-item partial returns in op 6) |
 | `>dsc` | String | Discount |
-| `>adsc` | String | Proportional secondary discount |
+| `>adsc` | String | Proportional discount |
 | `>dsct` | String | Discount type |
 | `>did` | String | Department number |
 | `>dt` | String | Department VAT |
@@ -674,6 +678,9 @@ This operation prints a copy of the last receipt, including the header and foote
 | `>rpid` | Long | Item's row sequence number |
 | `>quantity` | Double | Quantity of this row's items |
 
+> [!WARNING]
+> The PDF is inconsistent here: the field table declares `returnTicketId` as `Integer` and `>quantity` as `Double`, but Code Block 8 serializes both as JSON strings (`"205"` and `"1.0"`). The table and the example are reproduced as written.
+
 **Code Block 8 — example:**
 
 ```json
@@ -719,9 +726,9 @@ This operation prints a copy of the last receipt, including the header and foote
 | `emarksCount` | String | Quantity of registered marks |
 | `verificationNumber` | String | Receipt verification number: max 13 chars (consisting of digits) |
 
-\* In this case, write *"Did not win"* on the receipt. <br>
-\*\* In this case, write *"You won money"* on the receipt. <br>
-\*\*\* The prize of receipts is no longer working.
+\* In this case, write *"Receipt did not win"* on the receipt. <br>
+\*\* In this case, write *"You have won"* on the receipt. <br>
+\*\*\* Receipt lottery prizes no longer apply.
 
 #### 4.5.8 Cash drawer in/out
 
@@ -768,7 +775,7 @@ This operation prints a copy of the last receipt, including the header and foote
 |---|---|---|
 | `dt` | String | Date and time |
 
-#### 4.6.1 Receipt sample
+#### 4.6.1 Print receipt sample
 
 **Encryption:** by session key.
 
@@ -784,7 +791,7 @@ This operation prints a copy of the last receipt, including the header and foote
 { "seq": 2 }
 ```
 
-#### 4.6.2 HDM fiscal report
+#### 4.6.2 Print HDM report
 
 **Encryption:** by session key.
 
@@ -840,6 +847,9 @@ The report is printed via the HDM device; response information is not returned.
 
 **Encryption:** by session key.
 
+> [!WARNING]
+> The PDF appears to repeat `headers[0].*` for the footer rows. This translation normalizes those rows to `footers[0].*`, matching the JSON shape shown in the example.
+
 | Field | Type | Description |
 |---|---|---|
 | `seq` | Integer | Request sequence number |
@@ -865,7 +875,7 @@ The report is printed via the HDM device; response information is not returned.
       "align": 1,
       "bold": 1,
       "fsize": 2,
-      "text": "Bari galust"
+      "text": "Բարի գալուստ"
     }
   ],
   "footers": [
@@ -897,7 +907,7 @@ The report is printed via the HDM device; response information is not returned.
 }
 ```
 
-### 4.7 HDM time synchronization
+### 4.7 HDM synchronization
 
 **Encryption:** by session key.
 
@@ -961,17 +971,17 @@ The report is printed via the HDM device; response information is not returned.
   "PaymentSystems": [
     {
       "code": 1,
-      "name": "Card Payment"
+      "name": "Քարտային Վճարում"
     },
     {
       "code": 13,
-      "name": "IDRAM"
+      "name": "ԻԴՐԱՄ"
     }
   ]
 }
 ```
 
-### 4.9 Single eMark code request
+### 4.9 Single eMark code check
 
 **Encryption:** by session key.
 
@@ -993,7 +1003,7 @@ The report is printed via the HDM device; response information is not returned.
 
 ### 4.10 Response codes table
 
-| Code | Name | Description | Stops the server connection |
+| Code | Name | Description | Device closes connection |
 |---:|---|---|:---:|
 | **General** | | | |
 | 200 | Operation completed successfully | | |
@@ -1007,7 +1017,7 @@ The report is printed via the HDM device; response information is not returned.
 | 103 | Header format error | | X |
 | 104 | Request sequence number error | | X |
 | 105 | JSON format error | | X |
-| 141 | Last receipt archive is empty | | |
+| 141 | Last receipt record is missing | | |
 | 142 | Last receipt belongs to a different user | | |
 | 143 | Printer error — general | | |
 | 144 | Printer initialization error | | |
@@ -1023,7 +1033,7 @@ The report is printed via the HDM device; response information is not returned.
 | 153 | Receipt amount exceeds the limit | | |
 | 154 | Receipt amount must be a positive number | | |
 | 155 | HDM synchronization required | | X |
-| 156 | Synchronization not completed | | |
+| 156 | Synchronization failed | | |
 | 157 | Return receipt number error | | |
 | 158 | Receipt already returned | | |
 | 159 | Product price and quantity cannot be non-positive | | |
@@ -1051,8 +1061,8 @@ The report is printed via the HDM device; response information is not returned.
 | 181 | Return product quantity error | | |
 | 182 | Return receipt is of return-type itself | | |
 | 183 | Bad ATG code | | |
-| 184 | Inappropriate prepayment-return request | | |
-| 185 | Could not return partial-payment receipt: HDM software synchronization required | | |
+| 184 | Invalid prepayment-return request | | |
+| 185 | Could not return this receipt: HDM software synchronization required | | |
 | 186 | Bad amount in prepayment case | | |
 | 187 | Bad list in prepayment case | | |
 | 188 | Bad amounts | | |
@@ -1153,6 +1163,9 @@ The report is printed via the HDM device; response information is not returned.
 ```
 
 ### Simple case
+
+> [!WARNING]
+> The PDF labels this example as a simple case, but the JSON uses `"mode": 2`. The field table above defines simple receipts as `mode = 1`; the example below is preserved from the source.
 
 ```json
 {
