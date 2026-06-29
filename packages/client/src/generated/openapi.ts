@@ -980,7 +980,7 @@ export interface components {
         };
         /**
          * @description A single line item in a [`ReturnableReceiptResponse`] (`totals[]`). Numeric fields use the same
-         *     [`lenient`] string-or-number deserializers as the parent — the firmware sends them as strings.
+         *     `lenient` string-or-number deserializers as the parent — the firmware sends them as strings.
          */
         ReturnableReceiptItem: {
             /**
@@ -1081,7 +1081,7 @@ export interface components {
          *      "t":"16.67","tt":"20.00",...}]}
          *     ```
          *     Only `rseq` is a JSON number; `cid`/`saleType`/`subType`/`time`/`rpid`/all amounts are strings.
-         *     The integer/decimal fields use the [`lenient`] string-or-number deserializers so a real 200 body
+         *     The integer/decimal fields use the `lenient` string-or-number deserializers so a real 200 body
          *     decodes (it used to fail on `cid`). Callers use op 10 as a returnability **pre-check** before a
          *     refund: a 200 here means the receipt can be returned; server code 185/174/155/156 means it is not
          *     yet returnable (post-sale sync pending). The raw decrypted payload is logged at TRACE.
