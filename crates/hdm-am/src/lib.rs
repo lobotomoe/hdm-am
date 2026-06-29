@@ -43,8 +43,8 @@
 //!
 //! Three version axes are easy to confuse, so the crate keeps them separate:
 //!
-//! - **Wire framing version** — the byte in the request header ([`PROTOCOL_VERSION`]). Frozen
-//!   at `05` since spec v0.5 (2017); one framing covers the whole live protocol.
+//! - **Wire framing version** — the byte in the request header ([`PROTOCOL_VERSION`]). Tracks the
+//!   spec minor version; `07` for the live v0.7.x line.
 //! - **Spec (document) version** — which manual revision the operation/field set follows
 //!   ([`SPEC_VERSION`], currently `0.7.3`). This is what grows over time.
 //! - **Crate version** — ordinary semver; not coupled to the spec version (the mapping lives in the
@@ -110,7 +110,7 @@ pub use rust_decimal::Decimal;
 /// HDM specification (document) version this crate targets — the operation and field set follow
 /// this manual revision.
 ///
-/// Distinct from the wire framing version [`PROTOCOL_VERSION`] (`05`, frozen since spec v0.5)
+/// Distinct from the wire framing version [`PROTOCOL_VERSION`] (`07`, tracking the spec minor)
 /// and from the crate's own semver. The full version lineage and an upgrade runbook are in
 /// `docs/history/`.
 pub const SPEC_VERSION: &str = "0.7.3";

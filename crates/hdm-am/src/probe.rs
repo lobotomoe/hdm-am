@@ -74,11 +74,10 @@ pub fn identify<T: Read + Write>(transport: &mut T) -> Result<HdmIdentity, Error
     let header = ResponseHeader::read(transport)?;
     let protocol_version = header.protocol_version;
     // Identity is the protocol *major* version, not an exact match. A device reports its own
-    // protocol version in responses (a spec-v0.7.x terminal answers 0.7) while this crate frames
-    // requests at PROTOCOL_VERSION's level and the device accepts that older request version.
-    // Pinning the minor here yields a false "not an HDM" on a perfectly good newer device —
-    // observed on a Newland N950 that answers 0.7 to our 0.5 request. The major version identifies
-    // the protocol family; the minor is device-specific and is carried through for the caller.
+    // protocol version in responses, which may differ from the minor we frame requests at
+    // (PROTOCOL_VERSION). Pinning the minor here would yield a false "not an HDM" on a device
+    // running a different minor. The major version identifies the protocol family; the minor is
+    // device-specific and is carried through for the caller.
     let [exp_major, _exp_minor] = PROTOCOL_VERSION;
     if protocol_version.0 != exp_major {
         return Err(Error::NotHdm { protocol_version });

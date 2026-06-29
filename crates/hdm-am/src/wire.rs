@@ -8,14 +8,18 @@ pub const MAGIC: [u8; 6] = [0xD5, 0x80, 0xD4, 0xB4, 0xD5, 0x84];
 
 /// Wire framing version advertised in the request header (big-endian).
 ///
-/// This is the *framing* version, not the document version ([`crate::SPEC_VERSION`]): it went
-/// `03→04→05` across early manuals and has been frozen at `05` since spec v0.5 (2017), through
-/// v0.7.3. Spec v0.7.3 still documents `05`, so this is correct, not stale.
+/// This byte tracks the spec *minor* version: it went `03→04→05` across early manuals and is now
+/// `07` for the live v0.7.x line. The v0.7.3 integration manual still prints `05` in its
+/// request-header table, but that is a stale header in the document — the maintainer confirmed it
+/// should read `07`, and a live N950 (firmware 1.1.3) accepts `07`-framed requests and serves the
+/// full operation set — every op (1-16) plus the unauthenticated probe verified end-to-end against
+/// hardware. It also still accepts `05`, so the device is lenient here; we send `07` to match the
+/// targeted spec minor.
 ///
 /// A device reports its own protocol version in the *response* header, which may differ from what
 /// we send — documented behaviour since v0.3. [`crate::identify`] therefore matches on the major
 /// version only.
-pub const PROTOCOL_VERSION: [u8; 2] = [0x00, 0x05];
+pub const PROTOCOL_VERSION: [u8; 2] = [0x00, 0x07];
 
 /// Length of the response header preceding the encrypted payload.
 pub const RESPONSE_HEADER_LEN: usize = 2 + 3 + 2 + 2 + 2;
