@@ -33,9 +33,20 @@ struct Sequenced<R> {
 /// (anything implementing [`SequenceProvider`]). The split allows in-memory testing via
 /// `std::io::Cursor`-style mocks and pluggable persistence (`InMemorySeq`, `FileSeq`, custom).
 ///
-/// **Threading:** the client is not internally synchronised. Wrap in a `Mutex` if you need to
-/// share it across threads. The HDM itself is single-session anyway, so concurrent calls don't
-/// make sense at the protocol layer.
+/// **Threading & device serialisation:** a single `Client` cannot be misused from two threads —
+/// every operation takes `&mut self`, so the borrow checker already forbids overlapping calls on
+/// one instance. The risk this crate cannot see, and therefore cannot guard, is *two different
+/// `Client`s* (two TCP connections) reaching the **same physical HDM**: the device is single-session
+/// and a second login tears down the first session's key, corrupting whichever flow was mid-receipt.
+///
+/// Because the shared resource is the device — outside any one `Client`'s ownership — serialisation
+/// belongs to the layer that owns device access, not here. The consumer MUST funnel **every** path
+/// that touches a given device through one serialisation point: a `Mutex<Client>`, a single owning
+/// task/actor, or a one-slot connection pool. "Every path" explicitly includes background work —
+/// availability probes, health checks, scheduled syncs — which is the easy thing to forget: a
+/// monitor that opens its own connection while a sale is in flight reintroduces exactly the
+/// single-session collision. For multi-process consumers the lock must be cross-process (see the
+/// same caveat on [`crate::FileSeq`]); a process-local mutex is not enough.
 ///
 /// **Timeouts:** `Client` does not enforce timeouts on its transport. Configure
 /// `set_read_timeout`/`set_write_timeout` on a `TcpStream` before passing it to [`Self::new`].
@@ -266,9 +277,11 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
 
     /// Execute an operation that uses the session key (all ops except 1 and 2).
     ///
-    /// If the operation fails with a relogin-class error (stale key, server-side session timeout,
-    /// or a code that mandates re-login), the local session is dropped so [`Self::is_logged_in`]
-    /// reflects reality and the next call fails fast as [`Error::NotLoggedIn`].
+    /// If the operation fails in a way that ends the session — a relogin-class error (stale key,
+    /// server-side session timeout, or a code that mandates re-login) or a reconnect-class error
+    /// (transport failure, or a §4.10 code after which the device tears down the connection) — the
+    /// local session is dropped so [`Self::is_logged_in`] reflects reality rather than claiming a
+    /// session the protocol has already torn down.
     fn execute_with_session<R: Operation>(&mut self, request: R) -> Result<R::Response, Error> {
         const { assert!(!R::USES_PASSWORD_KEY, "expected session-key op") };
         let codec = self
@@ -280,9 +293,9 @@ impl<T: Read + Write, S: SequenceProvider> Client<T, S> {
         let body = Sequenced { seq, body: request };
         let result = self.round_trip_op::<R>(&body, &codec);
         if let Err(ref err) = result {
-            if err.requires_relogin() {
+            if err.requires_relogin() || err.requires_reconnect() {
                 self.session_codec = None;
-                log::debug!("hdm-am: session invalidated after a relogin-class error");
+                log::debug!("hdm-am: session invalidated after a session-ending error");
             }
         }
         result
@@ -586,6 +599,39 @@ mod tests {
         let json: serde_json::Value = serde_json::from_slice(&decrypted).expect("valid JSON");
         assert_eq!(json["seq"], 100, "client must inject the sequence number");
         assert_eq!(json["mode"], 1, "request body is flattened alongside seq");
+    }
+
+    /// A reconnect-class server error (here `104`, after which the device closes the connection)
+    /// must invalidate the local session, even though it is not a relogin-class code. Otherwise
+    /// `is_logged_in()` would keep claiming a session the device has already torn down.
+    #[test]
+    fn reconnect_class_error_invalidates_session() {
+        let password = "pw";
+        let password_codec = Codec::from_password(password);
+        let key_b64 = BASE64.encode([0u8; 24]);
+        let login_response = format!(r#"{{"key":"{key_b64}"}}"#);
+        let session_codec = Codec::from_key([0u8; 24]);
+
+        let mut incoming = make_response(200, &password_codec, login_response.as_bytes());
+        // Op-12 attempt answered with 104 (BadSequenceNumber): fatal-for-connection, not relogin.
+        incoming.extend_from_slice(&make_response(104, &session_codec, b"{}"));
+
+        let mut client = Client::new(Loopback::new(incoming), password, InMemorySeq::default());
+        client.login(1, "0000").expect("login");
+        assert!(client.is_logged_in());
+
+        let err = client.date_time().expect_err("expected a server error");
+        assert!(matches!(
+            err,
+            Error::Server {
+                kind: ServerErrorKind::BadSequenceNumber,
+                ..
+            }
+        ));
+        assert!(err.requires_reconnect());
+        assert!(!err.requires_relogin());
+        // The session must be gone: the device closed the connection, so the key is dead.
+        assert!(!client.is_logged_in());
     }
 
     /// Server-side errors include the raw payload drain — connection stays in sync for the next op.

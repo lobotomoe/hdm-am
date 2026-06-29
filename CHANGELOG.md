@@ -9,6 +9,22 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+Still targets HDM integration spec **v0.7.3**.
+
+### Fixed
+- **Session is now invalidated after reconnect-class errors, not only relogin-class ones.** After a
+  §4.10 "device closes connection" code (e.g. `104` bad sequence number, `103`, `155`) or a transport
+  failure, the device has torn down the session server-side. `Client` now clears its session key in
+  that case too, so `is_logged_in()` no longer reports a session the protocol has already ended.
+  Regression test added.
+
+### Documentation
+- **`Client` threading docs spell out device-level serialisation.** The HDM is single-session: the
+  consumer must funnel *every* path that touches a given device — including background availability
+  probes and scheduled syncs — through one serialisation point (`Mutex<Client>`, a single owning
+  task, or a one-slot pool), cross-process where applicable. A single `Client` is already protected
+  by `&mut self`; the unguardable risk is a second connection to the same device.
+
 ## [0.5.0] — 2026-06-23
 
 Still targets HDM integration spec **v0.7.3**.
