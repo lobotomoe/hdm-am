@@ -1347,7 +1347,7 @@
       "name": "MIT OR Apache-2.0"
     },
     "title": "HDM Bridge API",
-    "version": "0.5.0"
+    "version": "0.5.2"
   },
   "openapi": "3.1.0",
   "paths": {

@@ -9,6 +9,22 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+## [0.5.2] — 2026-06-29
+
+Still targets HDM integration spec **v0.7.3**.
+
+### Added
+- **Wire-capture hook (`WireObserver`).** `Client::with_observer` / `set_observer` install an
+  observer that receives every request/response exchange — the request plaintext, the exact framed
+  bytes on the wire, the response header, the response ciphertext, and the decrypted response
+  plaintext — for diagnostics and audit. `on_request` fires *before* the response is read, so a
+  request whose reply never comes (a wedged single-session device) is captured together with a
+  `Failed` outcome carrying the transport error; framed replies arrive as `Received` for any code,
+  including non-200. The bytes are handed over **unmasked** (the password, PIN, and session key are
+  visible): redaction, retention, and access control are the consumer's policy, since a masked
+  capture is useless for the failures this exists to diagnose. The crate's own `log` output stays
+  redacted regardless. No behaviour change when no observer is installed.
+
 ## [0.5.1] — 2026-06-29
 
 Still targets HDM integration spec **v0.7.3**.
