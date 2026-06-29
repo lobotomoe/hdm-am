@@ -9,6 +9,18 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+## [0.5.3] — 2026-06-29
+
+Still targets HDM integration spec **v0.7.3**.
+
+### Fixed
+- **Wire framing version is now `07`, not `05`.** The request header advertised framing version
+  `05`; the v0.7.3 integration manual prints `05` in its request-header table, but that header is
+  stale and should read `07` (confirmed by the integrator). The crate now sends `07` to track the
+  spec minor version. Verified end-to-end against a live Newland N950 (firmware 1.1.3): all 16
+  operations plus the unauthenticated probe succeed, and the device accepts both `05` and `07`.
+  No public API change.
+
 ## [0.5.2] — 2026-06-29
 
 Still targets HDM integration spec **v0.7.3**.
