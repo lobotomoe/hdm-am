@@ -12,7 +12,8 @@ use hdm_am::{
     CashInOutRequest, Client, DateTimeResponse, EmptyResponse, FiscalReportRequest,
     GetReturnableReceiptRequest, InMemorySeq, ListOpsAndDepsResponse, PaymentSystemsListResponse,
     PrintReceiptRequest, PrintReturnReceiptRequest, ReceiptResponse, ReturnReceiptResponse,
-    ReturnableReceiptResponse, SetupHeaderFooterRequest, SetupHeaderLogoRequest, SingleEmarkRequest,
+    ReturnableReceiptResponse, SetupHeaderFooterRequest, SetupHeaderLogoRequest,
+    SingleEmarkRequest,
 };
 
 use crate::config::{EndpointConn, PasswordConn, SessionConn};
