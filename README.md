@@ -32,7 +32,7 @@ All 16 operations are implemented and unit-tested. Hardware behaviour is recorde
 |---|---|---|---|
 | Newland N950 | Android 6 / Android 12 (`SKQ1.220119.001`) | `D_03_51_00_01010000` | `0.7` / `1.1.0` |
 
-The device reports protocol version `0.7` (matching spec v0.7.x) in its responses, yet accepts the `0.5`-framed requests this crate sends — so `hdm probe` keys identity on the protocol *major* version, not an exact match.
+The device reports protocol version `0.7` (matching spec v0.7.x) in its responses, yet accepts the `0.5`-framed requests this crate sends — the request framing version (`05`, fixed by the spec) and the device's reported response version legitimately differ.
 
 ### Per-operation status
 
@@ -107,7 +107,6 @@ protocol operations; run `hdm --help` or `hdm <command> --help` for the full arg
 ```sh
 export HDM_HOST=10.0.0.5 HDM_PORT=1025 HDM_PASSWORD=<hdm-password> HDM_CASHIER=3 HDM_PIN=1234
 
-hdm probe                                            # confirm the endpoint is an HDM (no login)
 hdm operators                                        # list operators & departments (no login)
 hdm receipt --mode simple --cash 10 --dep 1          # print a fiscal receipt (prompts first)
 hdm receipt --mode products --card 10 --items items.json --use-ext-pos --rrn 123456789012 --terminal-id 12345678 --emark <code>
@@ -127,7 +126,7 @@ Irreversible operations (receipt, return, cash, Z-report) prompt for confirmatio
 ## GUI app
 
 The native GUI lives in [`crates/hdm-am-app/`](crates/hdm-am-app/) and uses Slint without a webview. It has buttons for all 16
-protocol operations plus the unauthenticated `Probe`. HDM calls run on a worker thread so the UI
+protocol operations. HDM calls run on a worker thread so the UI
 event loop is not blocked by the protocol's long response timeout.
 
 ```sh
@@ -216,7 +215,7 @@ request type verbatim — `PrintReceiptRequest`, `FiscalReportRequest`, …):
 }
 ```
 
-Routes mirror the CLI: `/v1/probe`, `/v1/operators`, `/v1/login`, `/v1/receipt`, `/v1/receipt/last`,
+Routes mirror the CLI: `/v1/operators`, `/v1/login`, `/v1/receipt`, `/v1/receipt/last`,
 `/v1/receipt/lookup`, `/v1/return`, `/v1/report`, `/v1/cash`, `/v1/datetime`, `/v1/time-sync`,
 `/v1/payment-systems`, `/v1/emark`, `/v1/sample`, `/v1/header-footer`, `/v1/logo`, plus `/v1/health`
 (public liveness) and `/v1/info`. Errors render as a stable envelope carrying the device error code
