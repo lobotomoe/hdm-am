@@ -9,6 +9,24 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-06-29
+
+Still targets HDM integration spec **v0.7.3**.
+
+### Removed
+- **The credential-less probe / `identify` capability, in full.** It sent a bogus operation-1
+  frame and read back only the response header, leaving the connection half-read with no clean
+  logout — which wedges some single-session fiscal devices in the field (the "never reaches device
+  state" assumption did not hold on real hardware). Removed across every layer: `hdm_am::identify`,
+  `hdm_am::HdmIdentity`, and `Error::NotHdm` from the core crate; the `probe` CLI subcommand; the
+  `POST /v1/probe` bridge route and `Device::probe`; the desktop/mobile app's Probe screen; and the
+  `useProbe` React hook plus its generated TypeScript client bindings. **Breaking.**
+
+### Changed
+- **Wire framing version reverted to `05`.** 0.5.3 shipped `07`; the v0.7.3 spec documents `05` as
+  the request-header framing version, so we follow the spec. The device accepts both, so this is a
+  conformance choice, not a compatibility fix.
+
 ## [0.5.3] — 2026-06-29
 
 Still targets HDM integration spec **v0.7.3**.
