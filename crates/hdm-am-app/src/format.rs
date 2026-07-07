@@ -196,15 +196,6 @@ pub fn hdm_error(context: &str, err: &HdmError) -> String {
         lines.push(format!("Code: {code}"));
         lines.push(format!("Meaning: {}", server_error_meaning(*kind)));
         lines.push(format!("Suggested action: {}", server_error_hint(*kind)));
-    } else if let HdmError::NotHdm { protocol_version } = err {
-        let (major, minor) = protocol_version;
-        lines.push(format!(
-            "The endpoint answered with protocol bytes 0x{major:02x} 0x{minor:02x}."
-        ));
-        lines.push(
-            "Suggested action: check the host/port; another service may be listening there."
-                .to_owned(),
-        );
     } else {
         lines.push(format!("Details: {err}"));
     }
@@ -265,7 +256,6 @@ const fn error_title(err: &HdmError) -> &'static str {
         HdmError::Encode(_) => "Could not encode request",
         HdmError::NotLoggedIn => "Not logged in",
         HdmError::PayloadTooLarge { .. } => "Request is too large",
-        HdmError::NotHdm { .. } => "Endpoint is not an HDM",
         _ => "Unexpected HDM client error",
     }
 }

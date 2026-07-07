@@ -215,26 +215,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/v1/probe": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Probe an endpoint and identify it as an HDM.
-         * @description Probe an endpoint and identify it as an HDM. Requires connection: host (port/timeout optional).
-         */
-        post: operations["probe"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/v1/receipt": {
         parameters: {
             query?: never;
@@ -498,30 +478,6 @@ export interface components {
             crn: string;
             /** @description Number of the receipt to look up. */
             receiptId: string;
-        };
-        /** @description Protocol identity reported by an endpoint that responded to [`identify`]. */
-        HdmIdentity: {
-            /** @description HDM protocol version reported in the response header (major, minor). */
-            protocol_version: [
-                number,
-                number
-            ];
-            /**
-             * Format: uint16
-             * @description Response code the device returned to the unauthenticated probe.
-             *
-             *     Carried for diagnostics rather than as a success/failure signal — reaching this struct
-             *     already means the endpoint is an HDM. A `403` ([`crate::ServerErrorKind::UnauthorizedConnection`])
-             *     is the expected value during first contact and tells the operator the caller's IP must be
-             *     registered on the device's integration screen.
-             */
-            response_code: number;
-            /** @description HDM firmware/software version (major, minor, patch). */
-            software_version: [
-                number,
-                number,
-                number
-            ];
         };
         /** @description Liveness response for `GET /v1/health`. */
         HealthOk: {
@@ -1592,43 +1548,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaymentSystemsListResponse"];
-                };
-            };
-            /** @description Error envelope (4xx/5xx). */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorBody"];
-                };
-            };
-        };
-    };
-    probe: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": {
-                    connection?: components["schemas"]["PartialConn"];
-                    /** @description Ignored for this operation. */
-                    params?: unknown;
-                };
-            };
-        };
-        responses: {
-            /** @description Operation succeeded. */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HdmIdentity"];
                 };
             };
             /** @description Error envelope (4xx/5xx). */

@@ -76,10 +76,6 @@ pub struct Cli {
 /// One subcommand per HDM operation (plus a transport-only connectivity check).
 #[derive(Debug, Subcommand)]
 pub enum Command {
-    /// Check whether an endpoint speaks the HDM protocol, without logging in. Sends one
-    /// unauthenticated probe and reports the protocol/software version (or that it is not an HDM).
-    Probe,
-
     /// List operators and departments registered on the device. No login required.
     Operators,
 

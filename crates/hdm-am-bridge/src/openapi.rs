@@ -17,7 +17,7 @@ use serde_json::{Map, Value, json};
 
 use hdm_am::{
     CashInOutRequest, DateTimeResponse, EmptyResponse, FiscalReportRequest,
-    GetReturnableReceiptRequest, HdmIdentity, ListOpsAndDepsResponse, PaymentSystemsListResponse,
+    GetReturnableReceiptRequest, ListOpsAndDepsResponse, PaymentSystemsListResponse,
     PrintReceiptRequest, PrintReturnReceiptRequest, ReceiptResponse, ReturnReceiptResponse,
     ReturnableReceiptResponse, SetupHeaderFooterRequest, SetupHeaderLogoRequest,
     SingleEmarkRequest,
@@ -32,8 +32,6 @@ use crate::routes::{HealthOk, Info, StatusOk};
 /// or a per-request override).
 #[derive(Clone, Copy)]
 enum Conn {
-    /// Endpoint only (`host`; `port`/`timeout` optional).
-    Endpoint,
     /// Endpoint plus the access password.
     Password,
     /// Full operator session: endpoint, password, `cashier`, and `pin`.
@@ -43,7 +41,6 @@ enum Conn {
 impl Conn {
     const fn note(self) -> &'static str {
         match self {
-            Self::Endpoint => "Requires connection: host (port/timeout optional).",
             Self::Password => "Requires connection: host + password.",
             Self::Session => "Requires connection: host + password + cashier + pin.",
         }
@@ -72,14 +69,6 @@ struct OperationDef {
 /// Every operation the protected router exposes, in route order. Mirrors `routes::app`; the
 /// `documents_every_route` test asserts this list and the live router stay in lockstep.
 const OPERATIONS: &[OperationDef] = &[
-    OperationDef {
-        path: "/v1/probe",
-        op_id: "probe",
-        summary: "Probe an endpoint and identify it as an HDM.",
-        conn: Conn::Endpoint,
-        params: None,
-        response: SchemaGenerator::subschema_for::<HdmIdentity>,
-    },
     OperationDef {
         path: "/v1/operators",
         op_id: "operators",

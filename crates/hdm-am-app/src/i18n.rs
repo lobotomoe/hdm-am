@@ -1,6 +1,6 @@
 //! Language selection and a test that keeps the bundled translations complete and in sync.
 //!
-//! The UI uses symbolic translation keys (`@tr("op.probe.title")`), so — unlike gettext's
+//! The UI uses symbolic translation keys (`@tr("op.operators.title")`), so — unlike gettext's
 //! English-as-msgid default — there is no automatic fallback: a key missing from the active
 //! language renders as the raw key. The `bundled_translations_*` tests below fail the build if any
 //! language drifts, which is what makes the symbolic-key model safe.

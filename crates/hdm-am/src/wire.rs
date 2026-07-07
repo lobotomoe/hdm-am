@@ -8,18 +8,15 @@ pub const MAGIC: [u8; 6] = [0xD5, 0x80, 0xD4, 0xB4, 0xD5, 0x84];
 
 /// Wire framing version advertised in the request header (big-endian).
 ///
-/// This byte tracks the spec *minor* version: it went `03→04→05` across early manuals and is now
-/// `07` for the live v0.7.x line. The v0.7.3 integration manual still prints `05` in its
-/// request-header table, but that is a stale header in the document — the maintainer confirmed it
-/// should read `07`, and a live N950 (firmware 1.1.3) accepts `07`-framed requests and serves the
-/// full operation set — every op (1-16) plus the unauthenticated probe verified end-to-end against
-/// hardware. It also still accepts `05`, so the device is lenient here; we send `07` to match the
-/// targeted spec minor.
+/// This is the request *framing* version, not the document version ([`crate::SPEC_VERSION`]): it
+/// went `03→04→05` across early manuals and has been frozen at `05` since spec v0.5 (2017), through
+/// v0.7.3 — every manual from v0.5 onward documents the request-header version as `05`. We follow
+/// the spec and send `05`. (A live N950, firmware 1.1.3, was observed to also accept `07`, but that
+/// is device leniency; the spec is authoritative and `05` is what it documents.)
 ///
 /// A device reports its own protocol version in the *response* header, which may differ from what
-/// we send — documented behaviour since v0.3. [`crate::identify`] therefore matches on the major
-/// version only.
-pub const PROTOCOL_VERSION: [u8; 2] = [0x00, 0x07];
+/// we send — documented behaviour since v0.3 (a v0.7.x terminal answers `0.7` to our `05` request).
+pub const PROTOCOL_VERSION: [u8; 2] = [0x00, 0x05];
 
 /// Length of the response header preceding the encrypted payload.
 pub const RESPONSE_HEADER_LEN: usize = 2 + 3 + 2 + 2 + 2;

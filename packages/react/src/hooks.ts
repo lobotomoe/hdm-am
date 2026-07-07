@@ -29,13 +29,6 @@ export function useHdmInfo(options?: QueryOptions): QueryResult<Awaited<ReturnTy
 }
 type HdmInfo = ReturnType<typeof useHdmClient>['info'];
 
-/** Probe the configured device and read its identity. */
-export function useProbe(options?: QueryOptions): QueryResult<Awaited<ReturnType<Probe>>> {
-  const client = useHdmClient();
-  return useQuery((signal) => client.probe({ signal }), [client], options);
-}
-type Probe = ReturnType<typeof useHdmClient>['probe'];
-
 /** The device's operators and departments. */
 export function useOperators(options?: QueryOptions): QueryResult<Awaited<ReturnType<Operators>>> {
   const client = useHdmClient();

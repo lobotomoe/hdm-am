@@ -12,13 +12,13 @@ use tower::ServiceExt as _;
 
 use hdm_am::{
     CashInOutRequest, DateTimeResponse, EmptyResponse, Error, FiscalReportRequest,
-    GetReturnableReceiptRequest, HdmIdentity, ListOpsAndDepsResponse, PaymentSystemsListResponse,
+    GetReturnableReceiptRequest, ListOpsAndDepsResponse, PaymentSystemsListResponse,
     PrintReceiptRequest, PrintReturnReceiptRequest, ReceiptResponse, ReturnReceiptResponse,
     ReturnableReceiptResponse, ServerErrorKind, SetupHeaderFooterRequest, SetupHeaderLogoRequest,
     SingleEmarkRequest,
 };
 
-use crate::config::{BridgeConfig, EndpointConn, PartialConn, PasswordConn, SessionConn};
+use crate::config::{BridgeConfig, PartialConn, PasswordConn, SessionConn};
 use crate::device::Device;
 use crate::routes::{AppState, app};
 
@@ -62,9 +62,6 @@ impl FakeDevice {
 }
 
 impl Device for FakeDevice {
-    fn probe(&self, _conn: &EndpointConn) -> Result<HdmIdentity, Error> {
-        self.deny()
-    }
     fn operators(&self, _conn: &PasswordConn) -> Result<ListOpsAndDepsResponse, Error> {
         self.deny()
     }
@@ -362,8 +359,8 @@ mod openapi {
         }
         assert_eq!(
             crate::openapi::operation_paths().len(),
-            16,
-            "operation count drifted from the 16 protocol operations"
+            15,
+            "operation count drifted from the 15 protocol operations"
         );
     }
 

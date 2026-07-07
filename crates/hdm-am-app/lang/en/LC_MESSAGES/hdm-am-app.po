@@ -172,10 +172,6 @@ msgid "section.diagnostics"
 msgstr "DIAGNOSTICS"
 
 msgctxt "MainWindow"
-msgid "op.probe.title"
-msgstr "Probe"
-
-msgctxt "MainWindow"
 msgid "home.operators"
 msgstr "Operators & departments"
 
@@ -346,14 +342,6 @@ msgstr "Demo mode (no network, synthetic responses)"
 msgctxt "MainWindow"
 msgid "section.language"
 msgstr "LANGUAGE"
-
-msgctxt "MainWindow"
-msgid "op.probe.desc"
-msgstr "Check whether the endpoint speaks the HDM protocol, without logging in."
-
-msgctxt "MainWindow"
-msgid "op.probe.run"
-msgstr "Run probe"
 
 msgctxt "MainWindow"
 msgid "op.operators.title"

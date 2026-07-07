@@ -1,10 +1,9 @@
 //! Bridge configuration and the connection merge/resolve logic.
 //!
 //! A request may carry a partial `connection` override; it is merged field-by-field over the
-//! bridge's configured default, then resolved to exactly the fields an operation needs (endpoint
-//! only for probe, endpoint + password for the operator listing, the full session tuple for
-//! everything else). Missing required fields are reported together so the caller fixes them in one
-//! round-trip.
+//! bridge's configured default, then resolved to exactly the fields an operation needs (endpoint +
+//! password for the operator listing, the full session tuple for everything else). Missing required
+//! fields are reported together so the caller fixes them in one round-trip.
 
 use std::fmt;
 use std::net::SocketAddr;
@@ -50,7 +49,7 @@ impl fmt::Debug for PartialConn {
     }
 }
 
-/// A resolved endpoint: enough to open a socket and probe. No secrets.
+/// A resolved endpoint: host, port, and timeout — enough to open a socket. No secrets.
 #[derive(Clone, Debug)]
 pub struct EndpointConn {
     /// HDM host (IP or name).
@@ -61,8 +60,8 @@ pub struct EndpointConn {
     pub timeout: Duration,
 }
 
-/// A resolved endpoint plus the access password (the password-key operations: probe-with-auth and
-/// the operator/department listing).
+/// A resolved endpoint plus the access password (the password-key operation: the operator/
+/// department listing).
 #[derive(Clone)]
 pub struct PasswordConn {
     /// The resolved endpoint.
@@ -177,20 +176,6 @@ impl BridgeConfig {
         })
     }
 
-    /// Resolve just the endpoint (probe). Defaults fill port and timeout; only `host` is required.
-    ///
-    /// # Errors
-    /// [`ResolveError`] listing the missing fields (`host`).
-    pub fn resolve_endpoint(
-        &self,
-        over: Option<PartialConn>,
-    ) -> Result<EndpointConn, ResolveError> {
-        let merged = self.merged(over);
-        let mut missing = Vec::new();
-        let endpoint = Self::endpoint_from(&merged, &mut missing);
-        endpoint.ok_or(ResolveError { missing })
-    }
-
     /// Resolve endpoint + password (the operator/department listing, op 1).
     ///
     /// # Errors
@@ -212,7 +197,7 @@ impl BridgeConfig {
         }
     }
 
-    /// Resolve the full operator session (everything except probe and the listing).
+    /// Resolve the full operator session (everything except the listing).
     ///
     /// # Errors
     /// [`ResolveError`] listing every missing field (`host`, `password`, `cashier`, `pin`).
@@ -291,24 +276,14 @@ mod tests {
     }
 
     #[test]
-    fn endpoint_applies_defaults() {
-        let c = cfg(PartialConn {
-            host: Some("h".into()),
-            ..PartialConn::default()
-        });
-        let e = c.resolve_endpoint(None).expect("host present");
-        assert_eq!(e.port, DEFAULT_PORT);
-        assert_eq!(e.timeout, Duration::from_secs(DEFAULT_TIMEOUT_SECS));
-    }
-
-    #[test]
     fn timeout_is_clamped_to_spec_cap() {
         let c = cfg(PartialConn {
             host: Some("h".into()),
+            password: Some("pw".into()),
             timeout_secs: Some(9999),
             ..PartialConn::default()
         });
-        let e = c.resolve_endpoint(None).expect("host present");
-        assert_eq!(e.timeout, Duration::from_secs(MAX_TIMEOUT_SECS));
+        let p = c.resolve_password(None).expect("host and password present");
+        assert_eq!(p.endpoint.timeout, Duration::from_secs(MAX_TIMEOUT_SECS));
     }
 }

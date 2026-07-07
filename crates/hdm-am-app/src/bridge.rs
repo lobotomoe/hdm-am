@@ -2,11 +2,10 @@ use std::cell::RefCell;
 use std::net::{TcpStream, ToSocketAddrs};
 use std::rc::Rc;
 use std::thread;
-use std::time::{Instant, SystemTime, UNIX_EPOCH};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use hdm_am::{
-    Client, Error as HdmError, FiscalReportKind, InMemorySeq, ListOpsAndDepsResponse,
-    PaymentSystemsListResponse, identify,
+    Client, FiscalReportKind, InMemorySeq, ListOpsAndDepsResponse, PaymentSystemsListResponse,
 };
 use slint::{ComponentHandle, ModelRc, SharedString, VecModel, Weak};
 
@@ -20,7 +19,6 @@ type SharedStore = Rc<RefCell<Store>>;
 
 #[derive(Clone, Copy)]
 enum Action {
-    Probe,
     Operators,
     VerifyLogin,
     Receipt,
@@ -39,12 +37,8 @@ enum Action {
 }
 
 impl Action {
-    const fn needs_password(self) -> bool {
-        !matches!(self, Self::Probe)
-    }
-
     const fn needs_session(self) -> bool {
-        !matches!(self, Self::Probe | Self::Operators)
+        !matches!(self, Self::Operators)
     }
 
     fn requires_confirmation(self, inputs: &OperationInputs) -> bool {
@@ -59,8 +53,7 @@ impl Action {
             | Self::TimeSync
             | Self::Emark => true,
             Self::Report => inputs.report_kind.trim().eq_ignore_ascii_case("z"),
-            Self::Probe
-            | Self::Operators
+            Self::Operators
             | Self::VerifyLogin
             | Self::LookupReceipt
             | Self::Datetime
@@ -122,9 +115,6 @@ fn apply_store_to_window(window: &MainWindow, store: &Store) {
 }
 
 fn wire_callbacks(window: &MainWindow, store: &SharedStore) {
-    let weak = window.as_weak();
-    window.on_probe_requested(move || start_action(&weak, Action::Probe));
-
     let weak = window.as_weak();
     window.on_operators_requested(move || start_action(&weak, Action::Operators));
 
@@ -455,7 +445,7 @@ fn read_settings(window: &MainWindow, action: Action) -> Result<ConnectionSettin
         password: window.get_password().as_str(),
         cashier: window.get_cashier().as_str(),
         pin: window.get_pin().as_str(),
-        needs_password: action.needs_password(),
+        needs_password: true,
         needs_session: action.needs_session(),
     })
 }
@@ -493,9 +483,6 @@ fn read_inputs(window: &MainWindow) -> OperationInputs {
 fn demo_result(action: Action) -> String {
     let suffix = "\n\nDemo mode: no network request was sent and no fiscal data was registered.";
     let body = match action {
-        Action::Probe => {
-            "10.0.0.5:1025 is an HDM\nTCP connect: 4 ms\nProtocol: 0.7\nSoftware: 1.1.0\nProbe response code: 200"
-        }
         Action::Operators => {
             "Operators: 2\nDepartments: 2\n\nOperators\n  [1] Administrator\n      departments: [1] Sales / VAT-taxable; [2] Service / turnover tax\n  [3] Cashier\n      departments: [1] Sales / VAT-taxable\n\nDepartments\n  [1] Sales  taxation: VAT-taxable\n  [2] Service  taxation: turnover tax"
         }
@@ -537,7 +524,6 @@ fn run_action(
     inputs: &OperationInputs,
 ) -> Result<String, String> {
     match action {
-        Action::Probe => probe(settings),
         Action::Operators => operators(settings),
         Action::VerifyLogin => verify_login(settings),
         Action::Receipt => receipt(settings, inputs),
@@ -553,34 +539,6 @@ fn run_action(
         Action::TimeSync => time_sync(settings),
         Action::PaymentSystems => payment_systems(settings),
         Action::Emark => emark(settings, inputs),
-    }
-}
-
-fn probe(settings: &ConnectionSettings) -> Result<String, String> {
-    let started = Instant::now();
-    let mut stream = connect(settings)?;
-    let connect_ms = started.elapsed().as_millis();
-
-    match identify(&mut stream) {
-        Ok(id) => {
-            let protocol = format!("{}.{}", id.protocol_version.0, id.protocol_version.1);
-            let software = format!(
-                "{}.{}.{}",
-                id.software_version.0, id.software_version.1, id.software_version.2
-            );
-            Ok(format!(
-                "{}:{} is an HDM\nTCP connect: {connect_ms} ms\nProtocol: {protocol}\nSoftware: {software}\nProbe response code: {}",
-                settings.host, settings.port, id.response_code
-            ))
-        }
-        Err(HdmError::NotHdm { protocol_version }) => {
-            let (major, minor) = protocol_version;
-            Err(format!(
-                "{}:{} is reachable but is not an HDM.\nReported protocol bytes: 0x{major:02x} 0x{minor:02x}",
-                settings.host, settings.port
-            ))
-        }
-        Err(err) => Err(ui_format::hdm_error("probing endpoint", &err)),
     }
 }
 

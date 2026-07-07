@@ -9,7 +9,6 @@ import { fileURLToPath } from 'node:url';
 const generatedOpenapi = fileURLToPath(new URL('../src/generated/openapi.ts', import.meta.url));
 const generatedZod = fileURLToPath(new URL('../src/generated/zod.ts', import.meta.url));
 const orvalConfig = fileURLToPath(new URL('../orval.config.ts', import.meta.url));
-const patchZod = fileURLToPath(new URL('./patch-zod.mjs', import.meta.url));
 const spec = fileURLToPath(new URL('../../../docs/openapi.json', import.meta.url));
 
 const dir = mkdtempSync(join(tmpdir(), 'hdm-gen-'));
@@ -38,7 +37,6 @@ try {
     },
     stdio: 'inherit',
   });
-  execFileSync(process.execPath, [patchZod, freshZod], { stdio: 'inherit' });
 
   assertSame('src/generated/openapi.ts', generatedOpenapi, freshOpenapi);
   assertSame('src/generated/zod.ts', generatedZod, freshZod);

@@ -172,10 +172,6 @@ msgid "section.diagnostics"
 msgstr "ДИАГНОСТИКА"
 
 msgctxt "MainWindow"
-msgid "op.probe.title"
-msgstr "Проверка"
-
-msgctxt "MainWindow"
 msgid "home.operators"
 msgstr "Операторы и отделы"
 
@@ -346,14 +342,6 @@ msgstr "Демо-режим (без сети, синтетические отв�
 msgctxt "MainWindow"
 msgid "section.language"
 msgstr "ЯЗЫК"
-
-msgctxt "MainWindow"
-msgid "op.probe.desc"
-msgstr "Проверить, отвечает ли адрес по протоколу ККМ, без входа в систему."
-
-msgctxt "MainWindow"
-msgid "op.probe.run"
-msgstr "Запустить проверку"
 
 msgctxt "MainWindow"
 msgid "op.operators.title"

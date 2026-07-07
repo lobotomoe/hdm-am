@@ -63,7 +63,7 @@ function Register() {
 
 ## Hooks
 
-- **Queries** (auto-run, cancellable): `useHdmHealth`, `useHdmInfo`, `useProbe`, `useOperators`,
+- **Queries** (auto-run, cancellable): `useHdmHealth`, `useHdmInfo`, `useOperators`,
   `usePaymentSystems`, `useDateTime`.
 - **Mutations** (manual): `useLogin`, `usePrintReceipt`, `usePrintLastReceipt`, `useLookupReceipt`,
   `usePrintReturn`, `useReport`, `useCashInOut`, `useTimeSync`, `useReceiptSample`, `useEmark`,

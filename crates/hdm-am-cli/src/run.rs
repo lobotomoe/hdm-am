@@ -1,18 +1,16 @@
 //! Command dispatch and one handler per subcommand. Shared connection, session, and output
 //! plumbing lives in [`crate::conn`].
 
-use std::time::Instant;
-
 use anyhow::{Context, Result, bail};
 use base64::{Engine as _, engine::general_purpose::STANDARD as BASE64};
 use hdm_am::{
-    CashInOutRequest, Error as HdmError, FiscalReportKind, FiscalReportRequest, PrintMode,
-    PrintReceiptRequest, PrintReturnReceiptRequest, ReceiptItem, ReportFilter, ReturnItem,
-    ServerErrorKind, SetupHeaderFooterRequest, TextLine, identify,
+    CashInOutRequest, FiscalReportKind, FiscalReportRequest, PrintMode, PrintReceiptRequest,
+    PrintReturnReceiptRequest, ReceiptItem, ReportFilter, ReturnItem, SetupHeaderFooterRequest,
+    TextLine,
 };
 use rust_decimal::Decimal;
 
-use crate::conn::{client, confirm, connect, emit, require, with_session};
+use crate::conn::{client, confirm, emit, with_session};
 use crate::format;
 use crate::{
     CashArgs, CashDirection, Cli, Command, HeaderFooterArgs, LogoArgs, LookupReceiptArgs,
@@ -31,7 +29,6 @@ struct HeaderFooterFile {
 /// Route a parsed CLI invocation to its handler.
 pub fn dispatch(cli: &Cli) -> Result<()> {
     match &cli.command {
-        Command::Probe => probe(cli),
         Command::Operators => operators(cli),
         Command::Login => login(cli),
         Command::Datetime => datetime(cli),
@@ -52,106 +49,6 @@ pub fn dispatch(cli: &Cli) -> Result<()> {
 }
 
 // ---------------- Handlers ----------------
-
-fn probe(cli: &Cli) -> Result<()> {
-    let host = require(cli.host.as_deref(), "host", "HDM_HOST")?;
-    let started = Instant::now();
-    let mut stream = connect(cli)?;
-    let connect_ms = started.elapsed().as_millis();
-
-    // An unauthenticated identify proves the endpoint actually speaks HDM (not just that a port is
-    // open). NotHdm and a mute endpoint are legitimate findings, not failures of the probe itself,
-    // so they are reported via the result rather than bubbled up as errors.
-    match identify(&mut stream) {
-        Ok(id) => {
-            let protocol = format!("{}.{}", id.protocol_version.0, id.protocol_version.1);
-            let software = format!(
-                "{}.{}.{}",
-                id.software_version.0, id.software_version.1, id.software_version.2
-            );
-            let note = probe_code_note(id.response_code);
-            let status = serde_json::json!({
-                "host": host,
-                "port": cli.port,
-                "reachable": true,
-                "responded": true,
-                "is_hdm": true,
-                "connect_ms": connect_ms,
-                "protocol_version": protocol,
-                "software_version": software,
-                "response_code": id.response_code,
-            });
-            emit(cli, &status, |_| {
-                println!(
-                    "{host}:{} is an HDM (TCP connect in {connect_ms} ms)",
-                    cli.port
-                );
-                println!("  protocol version:     {protocol}");
-                println!("  HDM software version: {software}");
-                println!("  probe response code:  {} - {note}", id.response_code);
-            })
-        }
-        Err(HdmError::NotHdm { protocol_version }) => {
-            let (b0, b1) = protocol_version;
-            let detail =
-                format!("answered with 0x{b0:02x} 0x{b1:02x}, not the HDM protocol version");
-            let status = serde_json::json!({
-                "host": host,
-                "port": cli.port,
-                "reachable": true,
-                "responded": true,
-                "is_hdm": false,
-                "connect_ms": connect_ms,
-                "detail": detail,
-            });
-            emit(cli, &status, |_| {
-                println!(
-                    "{host}:{} is reachable but is NOT an HDM (TCP connect in {connect_ms} ms)",
-                    cli.port
-                );
-                println!("  {detail} - some other service is on this port.");
-            })
-        }
-        Err(HdmError::Transport(err)) => {
-            let detail = format!("{err}");
-            let status = serde_json::json!({
-                "host": host,
-                "port": cli.port,
-                "reachable": true,
-                "responded": false,
-                "is_hdm": false,
-                "connect_ms": connect_ms,
-                "detail": detail,
-            });
-            emit(cli, &status, |_| {
-                println!(
-                    "{host}:{} accepted the connection but did not answer the HDM probe (TCP connect in {connect_ms} ms)",
-                    cli.port
-                );
-                println!("  {detail}");
-                println!(
-                    "  the port is open but mute - likely a firewall, the wrong port, or not an HDM."
-                );
-            })
-        }
-        Err(other) => Err(other).context("probing endpoint"),
-    }
-}
-
-/// Human note about the response code an unauthenticated probe drew. Both common codes still
-/// confirm the endpoint is an HDM; `403` additionally tells the operator their IP needs
-/// whitelisting on the device's integration screen before authenticated calls will work.
-const fn probe_code_note(code: u16) -> &'static str {
-    match ServerErrorKind::from_code(code) {
-        ServerErrorKind::UnauthorizedConnection => {
-            "this caller's IP is not yet whitelisted on the device (expected on first contact)"
-        }
-        ServerErrorKind::CryptographicError => {
-            "the probe's throwaway payload failed to decrypt (expected for an unauthenticated probe)"
-        }
-        _ => "unusual for an unauthenticated probe, but the header confirms an HDM",
-    }
-}
 
 fn operators(cli: &Cli) -> Result<()> {
     let mut c = client(cli)?;
@@ -490,21 +387,11 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        build_fiscal_report_request, build_receipt_request, build_return_receipt_request,
-        probe_code_note,
-    };
+    use super::{build_fiscal_report_request, build_receipt_request, build_return_receipt_request};
     use crate::{ReceiptArgs, ReceiptMode, ReportArgs, ReportKind, ReturnArgs};
     use hdm_am::{PrintMode, ReportFilter};
     use rust_decimal::Decimal;
     use std::path::PathBuf;
-
-    #[test]
-    fn probe_code_note_maps_known_codes() {
-        assert!(probe_code_note(403).contains("whitelisted"));
-        assert!(probe_code_note(101).contains("decrypt"));
-        assert!(probe_code_note(999).contains("unusual"));
-    }
 
     #[test]
     fn receipt_request_supports_external_pos_and_emarks() {

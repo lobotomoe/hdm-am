@@ -345,57 +345,6 @@ export const PaymentSystemsResponse = zod.object({
 
 
 /**
- * Probe an endpoint and identify it as an HDM. Requires connection: host (port/timeout optional).
- * @summary Probe an endpoint and identify it as an HDM.
- */
-export const probeBodyConnectionCashierMin = 0;
-
-export const probeBodyConnectionPortMin = 0;
-export const probeBodyConnectionPortMax = 65535;
-
-export const probeBodyConnectionTimeoutSecsMin = 0;
-
-
-
-export const ProbeBody = zod.object({
-  "connection": zod.object({
-  "cashier": zod.number().min(probeBodyConnectionCashierMin).nullish().describe('Operator (cashier) numeric id for login.'),
-  "host": zod.string().nullish().describe('HDM host (IP or name).'),
-  "password": zod.string().nullish().describe('HDM access password (used to derive the password key).'),
-  "pin": zod.string().nullish().describe('Operator PIN for login.'),
-  "port": zod.number().min(probeBodyConnectionPortMin).max(probeBodyConnectionPortMax).nullish().describe('HDM TCP port; defaults to [`DEFAULT_PORT`].'),
-  "timeout_secs": zod.number().min(probeBodyConnectionTimeoutSecsMin).nullish().describe('Socket timeout in seconds; defaults to [`DEFAULT_TIMEOUT_SECS`], clamped to [`MAX_TIMEOUT_SECS`].')
-}).optional().describe('Connection parameters with every field optional, used both for the configured default and for a\nper-request override. Secrets are redacted in `Debug`.'),
-  "params": zod.unknown().optional().describe('Ignored for this operation.')
-})
-
-export const probeResponseResponseCodeMin = 0;
-export const probeResponseResponseCodeMax = 65535;
-
-export const probeResponseProtocolVersion0ItemMin = 0;
-export const probeResponseProtocolVersion0ItemMax = 255;
-export const probeResponseProtocolVersion1ItemMin = 0;
-export const probeResponseProtocolVersion1ItemMax = 255;
-export const probeResponseSoftwareVersion0ItemMin = 0;
-export const probeResponseSoftwareVersion0ItemMax = 255;
-export const probeResponseSoftwareVersion1ItemMin = 0;
-export const probeResponseSoftwareVersion1ItemMax = 255;
-export const probeResponseSoftwareVersion2ItemMin = 0;
-export const probeResponseSoftwareVersion2ItemMax = 255;
-
-
-
-export const ProbeResponse = zod.object({
-  "protocol_version": zod.tuple([zod.number().min(probeResponseProtocolVersion0ItemMin).max(probeResponseProtocolVersion0ItemMax),
-zod.number().min(probeResponseProtocolVersion1ItemMin).max(probeResponseProtocolVersion1ItemMax)]).describe('HDM protocol version reported in the response header (major, minor).'),
-  "response_code": zod.number().min(probeResponseResponseCodeMin).max(probeResponseResponseCodeMax).describe('Response code the device returned to the unauthenticated probe.\n\nCarried for diagnostics rather than as a success\/failure signal — reaching this struct\nalready means the endpoint is an HDM. A `403` ([`crate::ServerErrorKind::UnauthorizedConnection`])\nis the expected value during first contact and tells the operator the caller\'s IP must be\nregistered on the device\'s integration screen.'),
-  "software_version": zod.tuple([zod.number().min(probeResponseSoftwareVersion0ItemMin).max(probeResponseSoftwareVersion0ItemMax),
-zod.number().min(probeResponseSoftwareVersion1ItemMin).max(probeResponseSoftwareVersion1ItemMax),
-zod.number().min(probeResponseSoftwareVersion2ItemMin).max(probeResponseSoftwareVersion2ItemMax)]).describe('HDM firmware\/software version (major, minor, patch).')
-}).describe('Protocol identity reported by an endpoint that responded to [`identify`].')
-
-
-/**
  * Print a fiscal receipt. Requires connection: host + password + cashier + pin.
  * @summary Print a fiscal receipt.
  */

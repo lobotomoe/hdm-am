@@ -60,16 +60,6 @@ pub enum Error {
         /// The actual size that overflowed.
         len: usize,
     },
-
-    /// [`crate::identify`] reached a responsive endpoint, but its reply did not begin with the
-    /// HDM protocol version — some other TCP service is listening on that address. Distinct from
-    /// [`Self::Transport`] (nothing answered) so a discovery sweep can tell "wrong service" from
-    /// "unreachable".
-    #[error("endpoint is not an HDM (reported protocol version {protocol_version:?})")]
-    NotHdm {
-        /// The first two response bytes the endpoint sent, interpreted as a protocol version.
-        protocol_version: (u8, u8),
-    },
 }
 
 impl Error {

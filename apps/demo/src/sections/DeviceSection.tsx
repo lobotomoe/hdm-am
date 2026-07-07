@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react';
-import { Activity, Clock, Info, RefreshCw, Radar } from 'lucide-react';
-import { useDateTime, useHdmHealth, useHdmInfo, useProbe, useTimeSync } from '@hdm-am/react';
-import { JsonBlock, OkBadge, Outcome } from '../ui.js';
+import { Activity, Clock, Info, RefreshCw } from 'lucide-react';
+import { useDateTime, useHdmHealth, useHdmInfo, useTimeSync } from '@hdm-am/react';
+import { OkBadge, Outcome } from '../ui.js';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +12,6 @@ export function DeviceSection(): ReactNode {
   const info = useHdmInfo();
 
   // Device-touching calls are armed by a button so a full TCP round-trip never fires on mount.
-  const [probeArmed, setProbeArmed] = useState(false);
-  const probe = useProbe({ enabled: probeArmed });
   const [timeArmed, setTimeArmed] = useState(false);
   const dateTime = useDateTime({ enabled: timeArmed });
   const timeSync = useTimeSync();
@@ -72,18 +70,6 @@ export function DeviceSection(): ReactNode {
           <Button
             variant="outline"
             size="sm"
-            data-testid="btn-probe"
-            onClick={() => {
-              setProbeArmed(true);
-              probe.refetch();
-            }}
-          >
-            <Radar className="size-4" />
-            Probe
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
             data-testid="btn-datetime"
             onClick={() => {
               setTimeArmed(true);
@@ -107,14 +93,13 @@ export function DeviceSection(): ReactNode {
           {timeSync.data ? <OkBadge>synced</OkBadge> : null}
         </div>
         <Outcome
-          loading={probe.loading || dateTime.loading || timeSync.loading}
-          error={probe.error ?? dateTime.error ?? timeSync.error}
+          loading={dateTime.loading || timeSync.loading}
+          error={dateTime.error ?? timeSync.error}
         >
           {dateTime.data ? (
             <span className="text-sm text-muted-foreground">{dateTime.data.dt}</span>
           ) : null}
         </Outcome>
-        {probe.data ? <JsonBlock value={probe.data} /> : null}
       </CardContent>
     </Card>
   );

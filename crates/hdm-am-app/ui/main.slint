@@ -167,7 +167,6 @@ export component MainWindow inherits Window {
         : "ok";
 
     // ---- callbacks (consumed by the Rust bridge) ----
-    callback probe-requested();
     callback operators-requested();
     callback login-requested();
     callback receipt-requested();
@@ -284,12 +283,6 @@ export component MainWindow inherits Window {
                                 text: @tr("section.diagnostics");
                             }
                             ListCard {
-                                OpRow {
-                                    title: @tr("op.probe.title");
-                                    clicked => {
-                                        root.nav = "probe";
-                                    }
-                                }
                                 OpRow {
                                     title: @tr("home.operators");
                                     clicked => {
@@ -659,19 +652,6 @@ export component MainWindow inherits Window {
             }
 
             // ===================== OPERATIONS =====================
-            if root.nav == "probe": OpDetail {
-                title: @tr("op.probe.title");
-                description: @tr("op.probe.desc");
-                run-label: @tr("op.probe.run");
-                busy: root.busy;
-                status: root.status-text;
-                detail: root.detail-text;
-                tone: root.status-tone;
-                result: root.last-result;
-                back => { root.nav = ""; }
-                run => { root.probe-requested(); }
-            }
-
             if root.nav == "operators": OpDetail {
                 title: @tr("op.operators.title");
                 description: @tr("op.operators.desc");

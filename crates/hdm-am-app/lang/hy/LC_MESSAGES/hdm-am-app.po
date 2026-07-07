@@ -172,10 +172,6 @@ msgid "section.diagnostics"
 msgstr "ԱԽՏՈՐՈՇՈՒՄ"
 
 msgctxt "MainWindow"
-msgid "op.probe.title"
-msgstr "Ստուգում"
-
-msgctxt "MainWindow"
 msgid "home.operators"
 msgstr "Օպերատորներ և բաժիններ"
 
@@ -346,14 +342,6 @@ msgstr "Դեմո ռեժիմ (առանց ցանցի, սինթետիկ պատաս�
 msgctxt "MainWindow"
 msgid "section.language"
 msgstr "ԼԵԶՈՒ"
-
-msgctxt "MainWindow"
-msgid "op.probe.desc"
-msgstr "Ստուգել՝ արդյոք հասցեն խոսում է ՀԴՄ արձանագրությամբ՝ առանց մուտքի։"
-
-msgctxt "MainWindow"
-msgid "op.probe.run"
-msgstr "Գործարկել ստուգումը"
 
 msgctxt "MainWindow"
 msgid "op.operators.title"

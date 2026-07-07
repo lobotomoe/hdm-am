@@ -52,7 +52,7 @@
   "scripts": {
     "gen": "pnpm run gen:types && pnpm run gen:zod",
     "gen:types": "openapi-typescript ../../docs/openapi.json --default-non-nullable false -o src/generated/openapi.ts",
-    "gen:zod": "orval --config orval.config.ts && node scripts/patch-zod.mjs src/generated/zod.ts",
+    "gen:zod": "orval --config orval.config.ts",
     "gen:check": "node scripts/gen-check.mjs",
     "build": "tsup",
     "pack:check": "pnpm run build && node ../../scripts/pack-check.mjs",

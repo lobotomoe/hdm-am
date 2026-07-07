@@ -20,7 +20,7 @@ use tower_http::cors::CorsLayer;
 
 use hdm_am::{
     CashInOutRequest, DateTimeResponse, EmptyResponse, FiscalReportRequest,
-    GetReturnableReceiptRequest, HdmIdentity, ListOpsAndDepsResponse, PaymentSystemsListResponse,
+    GetReturnableReceiptRequest, ListOpsAndDepsResponse, PaymentSystemsListResponse,
     PrintReceiptRequest, PrintReturnReceiptRequest, ReceiptResponse, ReturnReceiptResponse,
     ReturnableReceiptResponse, SetupHeaderFooterRequest, SetupHeaderLogoRequest,
     SingleEmarkRequest,
@@ -169,7 +169,6 @@ pub fn app(state: AppState) -> Router {
     let cors = build_cors(&state.config);
     let protected = Router::new()
         .route("/v1/info", get(info))
-        .route("/v1/probe", post(probe))
         .route("/v1/operators", post(operators))
         .route("/v1/login", post(login))
         .route("/v1/receipt", post(receipt))
@@ -271,7 +270,6 @@ async fn info(State(state): State<AppState>) -> Json<Info> {
         spec_version: hdm_am::SPEC_VERSION,
         default_device_configured: state.config.default_conn.host.is_some(),
         operations: &[
-            "probe",
             "operators",
             "login",
             "receipt",
@@ -292,14 +290,6 @@ async fn info(State(state): State<AppState>) -> Json<Info> {
 }
 
 // ---------------- Operation handlers ----------------
-
-async fn probe(
-    State(state): State<AppState>,
-    body: Payload<IgnoredAny>,
-) -> Result<Json<HdmIdentity>, ApiError> {
-    let conn = state.config.resolve_endpoint(body.connection)?;
-    run_blocking(&state, move |dev| dev.probe(&conn)).await
-}
 
 async fn operators(
     State(state): State<AppState>,

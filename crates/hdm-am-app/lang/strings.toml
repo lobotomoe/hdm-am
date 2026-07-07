@@ -256,21 +256,6 @@ en = "Sync with tax authority"
 ru = "Синхронизация с налоговой"
 hy = "Համաժամեցում հարկային մարմնի հետ"
 
-["op.probe.title"]
-en = "Probe"
-ru = "Проверка"
-hy = "Ստուգում"
-
-["op.probe.desc"]
-en = "Check whether the endpoint speaks the HDM protocol, without logging in."
-ru = "Проверить, отвечает ли адрес по протоколу ККМ, без входа в систему."
-hy = "Ստուգել՝ արդյոք հասցեն խոսում է ՀԴՄ արձանագրությամբ՝ առանց մուտքի։"
-
-["op.probe.run"]
-en = "Run probe"
-ru = "Запустить проверку"
-hy = "Գործարկել ստուգումը"
-
 ["op.operators.title"]
 en = "Operators"
 ru = "Операторы"

@@ -229,70 +229,6 @@
         ],
         "type": "object"
       },
-      "HdmIdentity": {
-        "description": "Protocol identity reported by an endpoint that responded to [`identify`].",
-        "properties": {
-          "protocol_version": {
-            "description": "HDM protocol version reported in the response header (major, minor).",
-            "maxItems": 2,
-            "minItems": 2,
-            "prefixItems": [
-              {
-                "format": "uint8",
-                "maximum": 255,
-                "minimum": 0,
-                "type": "integer"
-              },
-              {
-                "format": "uint8",
-                "maximum": 255,
-                "minimum": 0,
-                "type": "integer"
-              }
-            ],
-            "type": "array"
-          },
-          "response_code": {
-            "description": "Response code the device returned to the unauthenticated probe.\n\nCarried for diagnostics rather than as a success/failure signal — reaching this struct\nalready means the endpoint is an HDM. A `403` ([`crate::ServerErrorKind::UnauthorizedConnection`])\nis the expected value during first contact and tells the operator the caller's IP must be\nregistered on the device's integration screen.",
-            "format": "uint16",
-            "maximum": 65535,
-            "minimum": 0,
-            "type": "integer"
-          },
-          "software_version": {
-            "description": "HDM firmware/software version (major, minor, patch).",
-            "maxItems": 3,
-            "minItems": 3,
-            "prefixItems": [
-              {
-                "format": "uint8",
-                "maximum": 255,
-                "minimum": 0,
-                "type": "integer"
-              },
-              {
-                "format": "uint8",
-                "maximum": 255,
-                "minimum": 0,
-                "type": "integer"
-              },
-              {
-                "format": "uint8",
-                "maximum": 255,
-                "minimum": 0,
-                "type": "integer"
-              }
-            ],
-            "type": "array"
-          }
-        },
-        "required": [
-          "protocol_version",
-          "software_version",
-          "response_code"
-        ],
-        "type": "object"
-      },
       "HealthOk": {
         "description": "Liveness response for `GET /v1/health`.",
         "properties": {
@@ -1839,59 +1775,6 @@
           }
         ],
         "summary": "List payment systems configured on the device."
-      }
-    },
-    "/v1/probe": {
-      "post": {
-        "description": "Probe an endpoint and identify it as an HDM. Requires connection: host (port/timeout optional).",
-        "operationId": "probe",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "additionalProperties": false,
-                "properties": {
-                  "connection": {
-                    "$ref": "#/components/schemas/PartialConn"
-                  },
-                  "params": {
-                    "description": "Ignored for this operation."
-                  }
-                },
-                "type": "object"
-              }
-            }
-          },
-          "required": false
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HdmIdentity"
-                }
-              }
-            },
-            "description": "Operation succeeded."
-          },
-          "default": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorBody"
-                }
-              }
-            },
-            "description": "Error envelope (4xx/5xx)."
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Probe an endpoint and identify it as an HDM."
       }
     },
     "/v1/receipt": {

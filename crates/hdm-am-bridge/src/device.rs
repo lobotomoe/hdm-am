@@ -10,10 +10,9 @@ use std::net::{TcpStream, ToSocketAddrs};
 
 use hdm_am::{
     CashInOutRequest, Client, DateTimeResponse, EmptyResponse, FiscalReportRequest,
-    GetReturnableReceiptRequest, HdmIdentity, InMemorySeq, ListOpsAndDepsResponse,
-    PaymentSystemsListResponse, PrintReceiptRequest, PrintReturnReceiptRequest, ReceiptResponse,
-    ReturnReceiptResponse, ReturnableReceiptResponse, SetupHeaderFooterRequest,
-    SetupHeaderLogoRequest, SingleEmarkRequest, identify,
+    GetReturnableReceiptRequest, InMemorySeq, ListOpsAndDepsResponse, PaymentSystemsListResponse,
+    PrintReceiptRequest, PrintReturnReceiptRequest, ReceiptResponse, ReturnReceiptResponse,
+    ReturnableReceiptResponse, SetupHeaderFooterRequest, SetupHeaderLogoRequest, SingleEmarkRequest,
 };
 
 use crate::config::{EndpointConn, PasswordConn, SessionConn};
@@ -21,7 +20,6 @@ use crate::config::{EndpointConn, PasswordConn, SessionConn};
 /// One method per bridge operation. `Send + Sync + 'static` so it can live in `Arc` shared state
 /// and be moved into a blocking worker.
 pub trait Device: Send + Sync + 'static {
-    fn probe(&self, conn: &EndpointConn) -> Result<HdmIdentity, hdm_am::Error>;
     fn operators(&self, conn: &PasswordConn) -> Result<ListOpsAndDepsResponse, hdm_am::Error>;
     fn verify_login(&self, conn: &SessionConn) -> Result<(), hdm_am::Error>;
     fn print_receipt(
@@ -127,11 +125,6 @@ impl TcpDevice {
 }
 
 impl Device for TcpDevice {
-    fn probe(&self, conn: &EndpointConn) -> Result<HdmIdentity, hdm_am::Error> {
-        let mut stream = Self::dial(conn)?;
-        identify(&mut stream)
-    }
-
     fn operators(&self, conn: &PasswordConn) -> Result<ListOpsAndDepsResponse, hdm_am::Error> {
         Self::with_password(conn, TcpHdmClient::list_operators_and_departments)
     }

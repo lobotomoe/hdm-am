@@ -69,7 +69,7 @@ describe('HdmBridgeClient request shaping', () => {
     const { fetch, calls } = ok({});
     const client = new HdmBridgeClient({ baseUrl: 'http://bridge.test', fetch });
 
-    await client.probe();
+    await client.operators();
 
     const sent = bodyOf(calls[0]!.init) as Record<string, unknown>;
     expect(sent).not.toHaveProperty('connection');
@@ -99,8 +99,8 @@ describe('HdmBridgeClient request shaping', () => {
     expect(() => new HdmBridgeClient({ baseUrl: '   ', fetch: ok({}).fetch })).toThrow(TypeError);
 
     const client = new HdmBridgeClient({ baseUrl: 'http://bridge.test', fetch: ok({}).fetch });
-    await expect(client.probe({ timeoutMs: Number.NaN })).rejects.toBeInstanceOf(RangeError);
-    await expect(client.probe({ timeoutMs: -1 })).rejects.toBeInstanceOf(RangeError);
+    await expect(client.operators({ timeoutMs: Number.NaN })).rejects.toBeInstanceOf(RangeError);
+    await expect(client.operators({ timeoutMs: -1 })).rejects.toBeInstanceOf(RangeError);
   });
 });
 
@@ -238,7 +238,7 @@ describe('HdmBridgeClient error handling', () => {
       timeoutMs: 10,
     });
 
-    const err = await client.probe().catch((e: unknown) => e);
+    const err = await client.operators().catch((e: unknown) => e);
     expect(err).toBeInstanceOf(HdmTransportError);
   });
 
@@ -254,7 +254,7 @@ describe('HdmBridgeClient error handling', () => {
       fetch: fetchImpl as unknown as typeof fetch,
     });
 
-    const err = await client.probe({ signal: controller.signal }).catch((e: unknown) => e);
+    const err = await client.operators({ signal: controller.signal }).catch((e: unknown) => e);
     expect(err).toBeInstanceOf(HdmTransportError);
   });
 });

@@ -39,7 +39,7 @@ Suggested short description:
 Suggested full description:
 
 > HDM is a native utility for developers, integrators, and support teams working with Armenian
-> fiscal cash registers. It can probe an HDM endpoint, verify operator credentials, list operators and
+> fiscal cash registers. It can verify operator credentials, list operators and
 > departments, print or return receipts, run reports, test cash operations, configure headers and
 > logos, sync device time, list payment systems, and submit eMarks. Demo mode lets reviewers and new
 > users inspect the workflow without connecting to fiscal hardware.
@@ -61,7 +61,7 @@ Still required in App Store Connect:
 - Complete App Privacy answers consistently with `PRIVACY.md`.
 - Complete export compliance. The app uses HDM protocol encryption and should not be described as
   having no cryptography.
-- Add screenshots showing Demo mode, Probe, Operators, Receipt, and error handling.
+- Add screenshots showing Demo mode, Operators, Receipt, and error handling.
 - Add reviewer notes from this document.
 - Use a monotonically increasing `CFBundleVersion` for every upload.
 
@@ -135,7 +135,7 @@ Known blockers:
 
 - Build and launch on each target OS.
 - Run Demo mode for every operation.
-- Run at least Probe, Operators, Verify login, Receipt, and Report against a real HDM where available.
+- Run at least Operators, Verify login, Receipt, and Report against a real HDM where available.
 - Verify no placeholder buttons or non-functional controls.
 - Verify all store screenshots match the actual UI.
 - Verify store listing says the app is for Armenian HDM fiscal devices and local network testing.

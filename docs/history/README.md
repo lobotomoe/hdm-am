@@ -48,9 +48,9 @@ fields grew.**
 - **Request and response protocol versions may differ — documented since v0.3 (2015).** That spec
   states outright that the request can carry one protocol version while the device replies in
   another (its example: request `0.3`, response `0.2`), and that the HDM "always returns data in its
-  own protocol version." This is why a real terminal answers `0.7` to our `05`-framed request, and
-  why `probe::identify` keys identity on the protocol *major* version rather than an exact match —
-  it follows documented, intended behaviour, not a workaround for a quirk.
+  own protocol version." This is why a real terminal answers `0.7` to our `05`-framed request: the
+  device reports its own protocol version in responses, which a spec-compliant client treats as
+  documented, intended behaviour rather than a mismatch to reject.
 - **The operation set grew ~8 → 16.** v0.3 defined roughly eight operations (operator list/login/
   logout, print receipt, reprint, return receipt, header/footer + logo config). Later revisions added
   cash in/out, date/time, receipt sample, fiscal reports (X/Z), tax-authority time-sync, payment-
@@ -80,9 +80,9 @@ rather than re-reading from scratch:
    crate↔spec mapping in the changelog.
 6. **Only if a new version is genuinely incompatible** (framing change, or request shapes that an
    older firmware in the field can't accept) introduce a per-version profile selected from the
-   device's reported version ([`identify`](../../src/probe.rs)) — not before. The current architecture
-   (framing isolated in `wire`, operations separate, `identify` exposing the device version) already
-   leaves that door open.
+   device's reported version (every response header carries the device's protocol and software
+   version) — not before. The current architecture (framing isolated in `wire`, operations separate)
+   already leaves that door open.
 
 ## Provenance (Wayback Machine snapshots)
 

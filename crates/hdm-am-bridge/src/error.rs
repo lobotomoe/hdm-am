@@ -64,7 +64,6 @@ fn device_status_kind_code(err: &hdm_am::Error) -> (StatusCode, &'static str, Op
         E::Encode(_) => (StatusCode::INTERNAL_SERVER_ERROR, "encode", None),
         E::NotLoggedIn => (StatusCode::CONFLICT, "not_logged_in", None),
         E::PayloadTooLarge { .. } => (StatusCode::PAYLOAD_TOO_LARGE, "payload_too_large", None),
-        E::NotHdm { .. } => (StatusCode::BAD_GATEWAY, "not_hdm", None),
         // `Error` is #[non_exhaustive]; treat anything new as an upstream/device fault.
         _ => (StatusCode::BAD_GATEWAY, "device", None),
     }

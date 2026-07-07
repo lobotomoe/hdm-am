@@ -23,7 +23,6 @@ export type SetupHeaderLogoRequest = Schemas['SetupHeaderLogoRequest'];
 export type TextLine = Schemas['TextLine'];
 
 // ---- Responses ----
-export type HdmIdentity = Schemas['HdmIdentity'];
 export type ListOpsAndDepsResponse = Schemas['ListOpsAndDepsResponse'];
 export type OperatorInfo = Schemas['OperatorInfo'];
 export type DepartmentInfo = Schemas['DepartmentInfo'];

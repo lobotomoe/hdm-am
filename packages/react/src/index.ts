@@ -5,7 +5,6 @@ export type { QueryResult, QueryOptions, MutationResult } from './use-async.js';
 export {
   useHdmHealth,
   useHdmInfo,
-  useProbe,
   useOperators,
   usePaymentSystems,
   useDateTime,

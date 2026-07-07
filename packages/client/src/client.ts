@@ -13,7 +13,6 @@ import type {
   ErrorBody,
   FiscalReportRequest,
   GetReturnableReceiptRequest,
-  HdmIdentity,
   HdmInfo,
   HealthStatus,
   ListOpsAndDepsResponse,
@@ -279,11 +278,6 @@ export class HdmBridgeClient {
   }
 
   // ---- Operations ----
-
-  /** Probe an endpoint and confirm it speaks the HDM protocol. */
-  probe(opts: RequestOptions = {}): Promise<HdmIdentity> {
-    return this.request('POST', '/v1/probe', this.envelope(undefined, opts), opts);
-  }
 
   /** List the device's operators and departments. */
   operators(opts: RequestOptions = {}): Promise<ListOpsAndDepsResponse> {

@@ -1,7 +1,7 @@
 # HDM bridge demo
 
 A small Vite + React + shadcn/ui app that connects an HDM fiscal cash register to the browser
-through the [bridge](../../crates/hdm-am-bridge/) and drives it: probe, login, list
+through the [bridge](../../crates/hdm-am-bridge/) and drives it: login, list
 operators/departments, print a receipt, cash in/out. Built on
 [`@hdm-am/react`](../../packages/react/). Private — not published.
 
