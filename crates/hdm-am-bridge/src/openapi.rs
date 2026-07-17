@@ -58,12 +58,20 @@ struct OperationDef {
     op_id: &'static str,
     /// One-line summary.
     summary: &'static str,
+    /// Fuller, user-facing description: what the operation does, key inputs, and common gotchas.
+    /// The connection-tier note is appended automatically, so it must not be repeated here.
+    description: &'static str,
     /// Connection tier required.
     conn: Conn,
     /// Params schema generator, or `None` for parameterless operations.
     params: Option<SchemaFn>,
     /// Success (`200`) response schema generator.
     response: SchemaFn,
+    /// Example request body (the full `{ params: ... }` envelope) as a JSON string. `Some` iff the
+    /// operation takes params; the `examples_match_params` test enforces that invariant.
+    req_example: Option<&'static str>,
+    /// Example `200` response body as a JSON string.
+    resp_example: Option<&'static str>,
 }
 
 /// Every operation the protected router exposes, in route order. Mirrors `routes::app`; the
@@ -72,122 +80,222 @@ const OPERATIONS: &[OperationDef] = &[
     OperationDef {
         path: "/v1/operators",
         op_id: "operators",
-        summary: "List the HDM's operators and departments.",
+        summary: "List the device's operators and departments.",
+        description: "Returns every operator (cashier) and department registered on the device, \
+            including which departments each operator may use. Call it first to discover the valid \
+            `cashier` ids and department numbers you will pass to other operations. Read-only.",
         conn: Conn::Password,
         params: None,
         response: SchemaGenerator::subschema_for::<ListOpsAndDepsResponse>,
+        req_example: None,
+        resp_example: Some(
+            r#"{"c":[{"id":3,"name":"Cashier 1","deps":[1,2]}],"d":[{"id":1,"name":"Main","type":1}]}"#,
+        ),
     },
     OperationDef {
         path: "/v1/login",
         op_id: "login",
-        summary: "Verify operator login credentials.",
+        summary: "Check operator login credentials.",
+        description: "Verifies that the supplied cashier + PIN can open an operator session, \
+            without printing anything or changing device state. Use it to validate credentials \
+            (e.g. at the start of a shift). Every other operation opens its own session, so this \
+            call is not a prerequisite for them.",
         conn: Conn::Session,
         params: None,
         response: SchemaGenerator::subschema_for::<StatusOk>,
+        req_example: None,
+        resp_example: Some(r#"{"ok":true}"#),
     },
     OperationDef {
         path: "/v1/receipt",
         op_id: "printReceipt",
-        summary: "Print a fiscal receipt.",
+        summary: "Print a fiscal sale receipt.",
+        description: "Prints and fiscalises a sale. Set `mode` to 1 (simple lump-sum, uses `dep`), \
+            2 (itemised — supply `items`), or 3 (prepayment). Split the total across `paidAmount` \
+            (cash), `paidAmountCard` (card), `partialAmount`, and `prePaymentAmount`. Keep the \
+            response's `rseq` — it is the sale's sequence number, and returns key on it, not on the \
+            printed `fiscal` number.",
         conn: Conn::Session,
         params: Some(SchemaGenerator::subschema_for::<PrintReceiptRequest>),
         response: SchemaGenerator::subschema_for::<ReceiptResponse>,
+        req_example: Some(
+            r#"{"params":{"mode":2,"paidAmount":40,"paidAmountCard":0,"partialAmount":0,"prePaymentAmount":0,"useExtPOS":false,"items":[{"dep":1,"adgCode":"56.10","productCode":"0001","productName":"Coffee","qty":1,"unit":"pcs","price":40}]}}"#,
+        ),
+        resp_example: Some(
+            r#"{"rseq":232,"crn":"51815332","sn":"NLS12345678","tin":"02601234","taxpayer":"Example Trade LLC","address":"12 Abovyan St, Yerevan","time":1710000000000,"fiscal":"20000123","total":40,"change":0,"lottery":"","prize":0,"verificationNumber":"A1B2C3D4"}"#,
+        ),
     },
     OperationDef {
         path: "/v1/receipt/last",
         op_id: "printLastReceipt",
-        summary: "Print a copy of the last receipt.",
+        summary: "Reprint a copy of the last receipt.",
+        description: "Reprints a copy of the operator's most recent receipt. The copy is marked as \
+            a duplicate and carries no new fiscal value.",
         conn: Conn::Session,
         params: None,
         response: SchemaGenerator::subschema_for::<EmptyResponse>,
+        req_example: None,
+        resp_example: Some("{}"),
     },
     OperationDef {
         path: "/v1/receipt/lookup",
         op_id: "lookupReceipt",
-        summary: "Look up a returnable receipt's contents (read-only).",
+        summary: "Look up a receipt before returning it (read-only).",
+        description: "Fetches an earlier sale's contents so you can confirm it is returnable before \
+            calling `printReturn`. `receiptId` is the sale's sequence number (`rseq` from the print \
+            response); `crn` is the registration number of the device that printed it. Success means \
+            the receipt can be returned; a device error (155/156/174/185) means it is not yet \
+            returnable — usually the post-sale sync with the tax authority is still pending, so run \
+            `timeSync` and retry.",
         conn: Conn::Session,
         params: Some(SchemaGenerator::subschema_for::<GetReturnableReceiptRequest>),
         response: SchemaGenerator::subschema_for::<ReturnableReceiptResponse>,
+        req_example: Some(r#"{"params":{"crn":"51815332","receiptId":"232"}}"#),
+        resp_example: Some(
+            r#"{"rseq":232,"cid":3,"saleType":0,"subType":2,"ta":40,"cash":0,"card":40,"ppa":0,"ppu":0,"pTin":"","eMarks":[],"totals":[{"gc":"0001","gn":"Coffee","qty":1,"p":40,"mu":"pcs","rpid":0,"t":33.33,"tt":40}]}"#,
+        ),
     },
     OperationDef {
         path: "/v1/return",
         op_id: "printReturn",
-        summary: "Print a return receipt.",
+        summary: "Print a return (refund) receipt.",
+        description: "Registers a refund against an earlier sale. `returnTicketId` is the original \
+            sale's sequence number (`rseq`), NOT the printed fiscal number — passing the fiscal \
+            number yields device error 174. Omit the `*ForReturn` amounts and `returnItemList` for a \
+            full return; set them for a partial one. If the device reports 174/185, the sale has not \
+            finished syncing with the tax authority (or the terminal is showing a modal): run \
+            `timeSync`, clear the terminal, and retry.",
         conn: Conn::Session,
         params: Some(SchemaGenerator::subschema_for::<PrintReturnReceiptRequest>),
         response: SchemaGenerator::subschema_for::<ReturnReceiptResponse>,
+        req_example: Some(r#"{"params":{"crn":"51815332","returnTicketId":232}}"#),
+        resp_example: Some(
+            r#"{"rseq":233,"crn":"51815332","sn":"NLS12345678","tin":"02601234","taxpayer":"Example Trade LLC","address":"12 Abovyan St, Yerevan","time":1710000500000,"rtime":1710000500000,"fiscal":"20000124","total":40,"change":0,"lottery":"","prize":0,"verificationNumber":"E5F6G7H8"}"#,
+        ),
     },
     OperationDef {
         path: "/v1/report",
         op_id: "report",
         summary: "Print an X or Z fiscal report.",
+        description: "Prints a fiscal report over a time range. `reportType` 1 is an X-report (an \
+            interim summary that leaves counters untouched); 2 is a Z-report (end-of-day close that \
+            zeros counters and finalises the fiscal day). Optionally restrict to a single \
+            department, cashier, or transaction type. `startDate`/`endDate` are epoch-style integers \
+            as in the spec.",
         conn: Conn::Session,
         params: Some(SchemaGenerator::subschema_for::<FiscalReportRequest>),
         response: SchemaGenerator::subschema_for::<EmptyResponse>,
+        req_example: Some(r#"{"params":{"reportType":2,"startDate":123231324,"endDate":123271324}}"#),
+        resp_example: Some("{}"),
     },
     OperationDef {
         path: "/v1/cash",
         op_id: "cashInOut",
-        summary: "Register a cash-drawer in or out.",
+        summary: "Register a cash-drawer deposit or withdrawal.",
+        description: "Records money moving in or out of the cash drawer outside of a sale (e.g. a \
+            starting float or a payout). Set `isCashIn` true for a deposit, false for a withdrawal; \
+            `amount` must be greater than zero.",
         conn: Conn::Session,
         params: Some(SchemaGenerator::subschema_for::<CashInOutRequest>),
         response: SchemaGenerator::subschema_for::<EmptyResponse>,
+        req_example: Some(
+            r#"{"params":{"isCashIn":true,"amount":5000,"cashierId":3,"description":"Opening float"}}"#,
+        ),
+        resp_example: Some("{}"),
     },
     OperationDef {
         path: "/v1/datetime",
         op_id: "dateTime",
-        summary: "Get the device date and time.",
+        summary: "Read the device date and time.",
+        description: "Returns the device's current date and time as an opaque string (the spec does \
+            not pin a format). Handy as a quick clock/liveness check against a live session.",
         conn: Conn::Session,
         params: None,
         response: SchemaGenerator::subschema_for::<DateTimeResponse>,
+        req_example: None,
+        resp_example: Some(r#"{"dt":"2026-07-17 20:14:03"}"#),
     },
     OperationDef {
         path: "/v1/time-sync",
         op_id: "timeSync",
-        summary: "Synchronize the device clock.",
+        summary: "Synchronize the device with the tax authority.",
+        description: "Runs the HDM's synchronisation with the tax authority (spec op 14 — clock plus \
+            pending fiscal state). Run it when the device reports a sync-required error (155/156) or \
+            rejects a return as not-yet-returnable (174/185): it uploads outstanding data so those \
+            operations can proceed. Harmless to call at any time.",
         conn: Conn::Session,
         params: None,
         response: SchemaGenerator::subschema_for::<EmptyResponse>,
+        req_example: None,
+        resp_example: Some("{}"),
     },
     OperationDef {
         path: "/v1/payment-systems",
         op_id: "paymentSystems",
-        summary: "List payment systems configured on the device.",
+        summary: "List the payment systems configured on the device.",
+        description: "Returns the payment-system code-to-name mapping configured on the device \
+            (1 = card, 10-18 = various Armenian wallets). Call it once at startup to learn which \
+            `PaymentSystem` codes are valid for `printReceipt`.",
         conn: Conn::Session,
         params: None,
         response: SchemaGenerator::subschema_for::<PaymentSystemsListResponse>,
+        req_example: None,
+        resp_example: Some(
+            r#"{"PaymentSystems":[{"code":1,"name":"Card"},{"code":11,"name":"Telcell"}]}"#,
+        ),
     },
     OperationDef {
         path: "/v1/emark",
         op_id: "emark",
-        summary: "Validate a single eMark code.",
+        summary: "Validate a single eMark traceability code.",
+        description: "Checks one eMark (product traceability) code with the device without printing \
+            anything. The code is 29-110 ASCII-printable characters. Use it to pre-validate a \
+            scanned mark before adding it to a receipt.",
         conn: Conn::Session,
         params: Some(SchemaGenerator::subschema_for::<SingleEmarkRequest>),
         response: SchemaGenerator::subschema_for::<EmptyResponse>,
+        req_example: Some(r#"{"params":{"eMark":"0104680000000000215abcDEfgHij12"}}"#),
+        resp_example: Some("{}"),
     },
     OperationDef {
         path: "/v1/sample",
         op_id: "receiptSample",
-        summary: "Print a sample receipt.",
+        summary: "Print a sample (test) receipt.",
+        description: "Prints a non-fiscal sample receipt for checking paper, layout, and print \
+            quality. It carries no fiscal value.",
         conn: Conn::Session,
         params: None,
         response: SchemaGenerator::subschema_for::<EmptyResponse>,
+        req_example: None,
+        resp_example: Some("{}"),
     },
     OperationDef {
         path: "/v1/header-footer",
         op_id: "headerFooter",
         summary: "Configure receipt header and footer lines.",
+        description: "Sets the free-text header and footer lines printed on every receipt (e.g. shop \
+            name, address, a thank-you). Lines print top-to-bottom in array order; send empty arrays \
+            to clear them.",
         conn: Conn::Session,
         params: Some(SchemaGenerator::subschema_for::<SetupHeaderFooterRequest>),
         response: SchemaGenerator::subschema_for::<EmptyResponse>,
+        req_example: Some(
+            r#"{"params":{"headers":["Example Trade LLC","12 Abovyan St, Yerevan"],"footers":["Thank you for your purchase!"]}}"#,
+        ),
+        resp_example: Some("{}"),
     },
     OperationDef {
         path: "/v1/logo",
         op_id: "headerLogo",
-        summary: "Configure the receipt header logo.",
+        summary: "Upload the receipt header logo.",
+        description: "Uploads the logo image printed at the top of receipts. `headerLogo` is the \
+            image bytes as Base64; the device expects a BMP with colour depth <=4 bits. (The Base64 \
+            is truncated in the example.)",
         conn: Conn::Session,
         params: Some(SchemaGenerator::subschema_for::<SetupHeaderLogoRequest>),
         response: SchemaGenerator::subschema_for::<EmptyResponse>,
+        req_example: Some(r#"{"params":{"headerLogo":"Qk1GAAAAAAAAADYAAAAoAAAA..."}}"#),
+        resp_example: Some("{}"),
     },
 ];
 
@@ -242,7 +350,12 @@ pub fn document(version: &str) -> Value {
     let health_ref = generator.subschema_for::<HealthOk>().to_value();
     paths.insert(
         "/v1/health".to_owned(),
-        meta_get("health", "Liveness probe (public, no auth).", &health_ref),
+        meta_get(
+            "health",
+            "Liveness probe (public, no auth).",
+            &health_ref,
+            Some(r#"{"status":"ok"}"#),
+        ),
     );
     paths.insert(
         "/v1/info".to_owned(),
@@ -250,6 +363,7 @@ pub fn document(version: &str) -> Value {
             "info",
             "Bridge metadata and the operation list (public, no auth).",
             &info_ref,
+            None,
         ),
     );
     paths.insert("/v1/openapi.json".to_owned(), openapi_self_item());
@@ -306,7 +420,16 @@ fn operation_item(
     }
     body_schema["properties"] = Value::Object(props);
     let body_required = op.params.is_some();
-    let description = format!("{} {}", op.summary, op.conn.note());
+    let description = format!("{}\n\n{}", op.description, op.conn.note());
+
+    let mut request_media = json!({ "schema": body_schema });
+    if let Some(example) = op.req_example {
+        request_media["example"] = parse_example(example);
+    }
+    let mut response_media = json!({ "schema": response_ref.clone() });
+    if let Some(example) = op.resp_example {
+        response_media["example"] = parse_example(example);
+    }
 
     json!({
         "post": {
@@ -316,12 +439,12 @@ fn operation_item(
             "security": [{ "bearerAuth": [] }],
             "requestBody": {
                 "required": body_required,
-                "content": { "application/json": { "schema": body_schema } },
+                "content": { "application/json": request_media },
             },
             "responses": {
                 "200": {
                     "description": "Operation succeeded.",
-                    "content": { "application/json": { "schema": response_ref.clone() } },
+                    "content": { "application/json": response_media },
                 },
                 "default": {
                     "description": "Error envelope (4xx/5xx).",
@@ -332,8 +455,19 @@ fn operation_item(
     })
 }
 
+/// Parse an authored example JSON string into a `Value`. The examples are compile-time constants in
+/// `OPERATIONS`; the `examples_are_valid_json` test proves every one parses, so this never fails at
+/// runtime.
+fn parse_example(raw: &str) -> Value {
+    serde_json::from_str(raw).expect("authored OpenAPI example must be valid JSON")
+}
+
 /// Build a public `GET` meta endpoint returning a single typed body.
-fn meta_get(op_id: &str, summary: &str, response_ref: &Value) -> Value {
+fn meta_get(op_id: &str, summary: &str, response_ref: &Value, example: Option<&str>) -> Value {
+    let mut response_media = json!({ "schema": response_ref.clone() });
+    if let Some(example) = example {
+        response_media["example"] = parse_example(example);
+    }
     json!({
         "get": {
             "operationId": op_id,
@@ -341,7 +475,7 @@ fn meta_get(op_id: &str, summary: &str, response_ref: &Value) -> Value {
             "responses": {
                 "200": {
                     "description": "Operation succeeded.",
-                    "content": { "application/json": { "schema": response_ref.clone() } },
+                    "content": { "application/json": response_media },
                 }
             }
         }
@@ -362,4 +496,42 @@ fn openapi_self_item() -> Value {
             }
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Guards `parse_example`'s `expect`: every authored example must be valid JSON, and each request
+    /// example must carry the `{ params: ... }` envelope the handlers accept.
+    #[test]
+    fn examples_are_valid_json() {
+        for op in OPERATIONS {
+            if let Some(raw) = op.req_example {
+                let value = parse_example(raw);
+                assert!(
+                    value.get("params").is_some(),
+                    "{} request example must wrap its input in `params`",
+                    op.op_id
+                );
+            }
+            if let Some(raw) = op.resp_example {
+                parse_example(raw);
+            }
+        }
+    }
+
+    /// A request example exists exactly when the operation takes params — otherwise the example and
+    /// the schema would disagree about whether a body is meaningful.
+    #[test]
+    fn request_examples_track_params() {
+        for op in OPERATIONS {
+            assert_eq!(
+                op.req_example.is_some(),
+                op.params.is_some(),
+                "{}: req_example must be Some iff the operation takes params",
+                op.op_id
+            );
+        }
+    }
 }

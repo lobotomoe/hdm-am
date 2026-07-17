@@ -14,8 +14,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Register a cash-drawer in or out.
-         * @description Register a cash-drawer in or out. Requires connection: host + password + cashier + pin.
+         * Register a cash-drawer deposit or withdrawal.
+         * @description Records money moving in or out of the cash drawer outside of a sale (e.g. a starting float or a payout). Set `isCashIn` true for a deposit, false for a withdrawal; `amount` must be greater than zero.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["cashInOut"];
         delete?: never;
@@ -34,8 +36,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Get the device date and time.
-         * @description Get the device date and time. Requires connection: host + password + cashier + pin.
+         * Read the device date and time.
+         * @description Returns the device's current date and time as an opaque string (the spec does not pin a format). Handy as a quick clock/liveness check against a live session.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["dateTime"];
         delete?: never;
@@ -54,8 +58,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Validate a single eMark code.
-         * @description Validate a single eMark code. Requires connection: host + password + cashier + pin.
+         * Validate a single eMark traceability code.
+         * @description Checks one eMark (product traceability) code with the device without printing anything. The code is 29-110 ASCII-printable characters. Use it to pre-validate a scanned mark before adding it to a receipt.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["emark"];
         delete?: never;
@@ -75,7 +81,9 @@ export interface paths {
         put?: never;
         /**
          * Configure receipt header and footer lines.
-         * @description Configure receipt header and footer lines. Requires connection: host + password + cashier + pin.
+         * @description Sets the free-text header and footer lines printed on every receipt (e.g. shop name, address, a thank-you). Lines print top-to-bottom in array order; send empty arrays to clear them.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["headerFooter"];
         delete?: never;
@@ -128,8 +136,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Verify operator login credentials.
-         * @description Verify operator login credentials. Requires connection: host + password + cashier + pin.
+         * Check operator login credentials.
+         * @description Verifies that the supplied cashier + PIN can open an operator session, without printing anything or changing device state. Use it to validate credentials (e.g. at the start of a shift). Every other operation opens its own session, so this call is not a prerequisite for them.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["login"];
         delete?: never;
@@ -148,8 +158,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Configure the receipt header logo.
-         * @description Configure the receipt header logo. Requires connection: host + password + cashier + pin.
+         * Upload the receipt header logo.
+         * @description Uploads the logo image printed at the top of receipts. `headerLogo` is the image bytes as Base64; the device expects a BMP with colour depth <=4 bits. (The Base64 is truncated in the example.)
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["headerLogo"];
         delete?: never;
@@ -185,8 +197,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * List the HDM's operators and departments.
-         * @description List the HDM's operators and departments. Requires connection: host + password.
+         * List the device's operators and departments.
+         * @description Returns every operator (cashier) and department registered on the device, including which departments each operator may use. Call it first to discover the valid `cashier` ids and department numbers you will pass to other operations. Read-only.
+         *
+         *     Requires connection: host + password.
          */
         post: operations["operators"];
         delete?: never;
@@ -205,8 +219,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * List payment systems configured on the device.
-         * @description List payment systems configured on the device. Requires connection: host + password + cashier + pin.
+         * List the payment systems configured on the device.
+         * @description Returns the payment-system code-to-name mapping configured on the device (1 = card, 10-18 = various Armenian wallets). Call it once at startup to learn which `PaymentSystem` codes are valid for `printReceipt`.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["paymentSystems"];
         delete?: never;
@@ -225,8 +241,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Print a fiscal receipt.
-         * @description Print a fiscal receipt. Requires connection: host + password + cashier + pin.
+         * Print a fiscal sale receipt.
+         * @description Prints and fiscalises a sale. Set `mode` to 1 (simple lump-sum, uses `dep`), 2 (itemised — supply `items`), or 3 (prepayment). Split the total across `paidAmount` (cash), `paidAmountCard` (card), `partialAmount`, and `prePaymentAmount`. Keep the response's `rseq` — it is the sale's sequence number, and returns key on it, not on the printed `fiscal` number.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["printReceipt"];
         delete?: never;
@@ -245,8 +263,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Print a copy of the last receipt.
-         * @description Print a copy of the last receipt. Requires connection: host + password + cashier + pin.
+         * Reprint a copy of the last receipt.
+         * @description Reprints a copy of the operator's most recent receipt. The copy is marked as a duplicate and carries no new fiscal value.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["printLastReceipt"];
         delete?: never;
@@ -265,8 +285,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Look up a returnable receipt's contents (read-only).
-         * @description Look up a returnable receipt's contents (read-only). Requires connection: host + password + cashier + pin.
+         * Look up a receipt before returning it (read-only).
+         * @description Fetches an earlier sale's contents so you can confirm it is returnable before calling `printReturn`. `receiptId` is the sale's sequence number (`rseq` from the print response); `crn` is the registration number of the device that printed it. Success means the receipt can be returned; a device error (155/156/174/185) means it is not yet returnable — usually the post-sale sync with the tax authority is still pending, so run `timeSync` and retry.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["lookupReceipt"];
         delete?: never;
@@ -286,7 +308,9 @@ export interface paths {
         put?: never;
         /**
          * Print an X or Z fiscal report.
-         * @description Print an X or Z fiscal report. Requires connection: host + password + cashier + pin.
+         * @description Prints a fiscal report over a time range. `reportType` 1 is an X-report (an interim summary that leaves counters untouched); 2 is a Z-report (end-of-day close that zeros counters and finalises the fiscal day). Optionally restrict to a single department, cashier, or transaction type. `startDate`/`endDate` are epoch-style integers as in the spec.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["report"];
         delete?: never;
@@ -305,8 +329,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Print a return receipt.
-         * @description Print a return receipt. Requires connection: host + password + cashier + pin.
+         * Print a return (refund) receipt.
+         * @description Registers a refund against an earlier sale. `returnTicketId` is the original sale's sequence number (`rseq`), NOT the printed fiscal number — passing the fiscal number yields device error 174. Omit the `*ForReturn` amounts and `returnItemList` for a full return; set them for a partial one. If the device reports 174/185, the sale has not finished syncing with the tax authority (or the terminal is showing a modal): run `timeSync`, clear the terminal, and retry.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["printReturn"];
         delete?: never;
@@ -325,8 +351,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Print a sample receipt.
-         * @description Print a sample receipt. Requires connection: host + password + cashier + pin.
+         * Print a sample (test) receipt.
+         * @description Prints a non-fiscal sample receipt for checking paper, layout, and print quality. It carries no fiscal value.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["receiptSample"];
         delete?: never;
@@ -345,8 +373,10 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Synchronize the device clock.
-         * @description Synchronize the device clock. Requires connection: host + password + cashier + pin.
+         * Synchronize the device with the tax authority.
+         * @description Runs the HDM's synchronisation with the tax authority (spec op 14 — clock plus pending fiscal state). Run it when the device reports a sync-required error (155/156) or rejects a return as not-yet-returnable (174/185): it uploads outstanding data so those operations can proceed. Harmless to call at any time.
+         *
+         *     Requires connection: host + password + cashier + pin.
          */
         post: operations["timeSync"];
         delete?: never;
@@ -1218,6 +1248,16 @@ export interface operations {
         };
         requestBody: {
             content: {
+                /**
+                 * @example {
+                 *       "params": {
+                 *         "amount": 5000,
+                 *         "cashierId": 3,
+                 *         "description": "Opening float",
+                 *         "isCashIn": true
+                 *       }
+                 *     }
+                 */
                 "application/json": {
                     connection?: components["schemas"]["PartialConn"];
                     params: components["schemas"]["CashInOutRequest"];
@@ -1231,6 +1271,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /** @example {} */
                     "application/json": components["schemas"]["EmptyResponse"];
                 };
             };
@@ -1268,6 +1309,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "dt": "2026-07-17 20:14:03"
+                     *     }
+                     */
                     "application/json": components["schemas"]["DateTimeResponse"];
                 };
             };
@@ -1291,6 +1337,13 @@ export interface operations {
         };
         requestBody: {
             content: {
+                /**
+                 * @example {
+                 *       "params": {
+                 *         "eMark": "0104680000000000215abcDEfgHij12"
+                 *       }
+                 *     }
+                 */
                 "application/json": {
                     connection?: components["schemas"]["PartialConn"];
                     params: components["schemas"]["SingleEmarkRequest"];
@@ -1304,6 +1357,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /** @example {} */
                     "application/json": components["schemas"]["EmptyResponse"];
                 };
             };
@@ -1327,6 +1381,19 @@ export interface operations {
         };
         requestBody: {
             content: {
+                /**
+                 * @example {
+                 *       "params": {
+                 *         "footers": [
+                 *           "Thank you for your purchase!"
+                 *         ],
+                 *         "headers": [
+                 *           "Example Trade LLC",
+                 *           "12 Abovyan St, Yerevan"
+                 *         ]
+                 *       }
+                 *     }
+                 */
                 "application/json": {
                     connection?: components["schemas"]["PartialConn"];
                     params: components["schemas"]["SetupHeaderFooterRequest"];
@@ -1340,6 +1407,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /** @example {} */
                     "application/json": components["schemas"]["EmptyResponse"];
                 };
             };
@@ -1369,6 +1437,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "status": "ok"
+                     *     }
+                     */
                     "application/json": components["schemas"]["HealthOk"];
                 };
             };
@@ -1417,6 +1490,11 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "ok": true
+                     *     }
+                     */
                     "application/json": components["schemas"]["StatusOk"];
                 };
             };
@@ -1440,6 +1518,13 @@ export interface operations {
         };
         requestBody: {
             content: {
+                /**
+                 * @example {
+                 *       "params": {
+                 *         "headerLogo": "Qk1GAAAAAAAAADYAAAAoAAAA..."
+                 *       }
+                 *     }
+                 */
                 "application/json": {
                     connection?: components["schemas"]["PartialConn"];
                     params: components["schemas"]["SetupHeaderLogoRequest"];
@@ -1453,6 +1538,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /** @example {} */
                     "application/json": components["schemas"]["EmptyResponse"];
                 };
             };
@@ -1510,6 +1596,27 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "c": [
+                     *         {
+                     *           "deps": [
+                     *             1,
+                     *             2
+                     *           ],
+                     *           "id": 3,
+                     *           "name": "Cashier 1"
+                     *         }
+                     *       ],
+                     *       "d": [
+                     *         {
+                     *           "id": 1,
+                     *           "name": "Main",
+                     *           "type": 1
+                     *         }
+                     *       ]
+                     *     }
+                     */
                     "application/json": components["schemas"]["ListOpsAndDepsResponse"];
                 };
             };
@@ -1547,6 +1654,20 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "PaymentSystems": [
+                     *         {
+                     *           "code": 1,
+                     *           "name": "Card"
+                     *         },
+                     *         {
+                     *           "code": 11,
+                     *           "name": "Telcell"
+                     *         }
+                     *       ]
+                     *     }
+                     */
                     "application/json": components["schemas"]["PaymentSystemsListResponse"];
                 };
             };
@@ -1570,6 +1691,29 @@ export interface operations {
         };
         requestBody: {
             content: {
+                /**
+                 * @example {
+                 *       "params": {
+                 *         "items": [
+                 *           {
+                 *             "adgCode": "56.10",
+                 *             "dep": 1,
+                 *             "price": 40,
+                 *             "productCode": "0001",
+                 *             "productName": "Coffee",
+                 *             "qty": 1,
+                 *             "unit": "pcs"
+                 *           }
+                 *         ],
+                 *         "mode": 2,
+                 *         "paidAmount": 40,
+                 *         "paidAmountCard": 0,
+                 *         "partialAmount": 0,
+                 *         "prePaymentAmount": 0,
+                 *         "useExtPOS": false
+                 *       }
+                 *     }
+                 */
                 "application/json": {
                     connection?: components["schemas"]["PartialConn"];
                     params: components["schemas"]["PrintReceiptRequest"];
@@ -1583,6 +1727,23 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "address": "12 Abovyan St, Yerevan",
+                     *       "change": 0,
+                     *       "crn": "51815332",
+                     *       "fiscal": "20000123",
+                     *       "lottery": "",
+                     *       "prize": 0,
+                     *       "rseq": 232,
+                     *       "sn": "NLS12345678",
+                     *       "taxpayer": "Example Trade LLC",
+                     *       "time": 1710000000000,
+                     *       "tin": "02601234",
+                     *       "total": 40,
+                     *       "verificationNumber": "A1B2C3D4"
+                     *     }
+                     */
                     "application/json": components["schemas"]["ReceiptResponse"];
                 };
             };
@@ -1620,6 +1781,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /** @example {} */
                     "application/json": components["schemas"]["EmptyResponse"];
                 };
             };
@@ -1643,6 +1805,14 @@ export interface operations {
         };
         requestBody: {
             content: {
+                /**
+                 * @example {
+                 *       "params": {
+                 *         "crn": "51815332",
+                 *         "receiptId": "232"
+                 *       }
+                 *     }
+                 */
                 "application/json": {
                     connection?: components["schemas"]["PartialConn"];
                     params: components["schemas"]["GetReturnableReceiptRequest"];
@@ -1656,6 +1826,33 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "card": 40,
+                     *       "cash": 0,
+                     *       "cid": 3,
+                     *       "eMarks": [],
+                     *       "pTin": "",
+                     *       "ppa": 0,
+                     *       "ppu": 0,
+                     *       "rseq": 232,
+                     *       "saleType": 0,
+                     *       "subType": 2,
+                     *       "ta": 40,
+                     *       "totals": [
+                     *         {
+                     *           "gc": "0001",
+                     *           "gn": "Coffee",
+                     *           "mu": "pcs",
+                     *           "p": 40,
+                     *           "qty": 1,
+                     *           "rpid": 0,
+                     *           "t": 33.33,
+                     *           "tt": 40
+                     *         }
+                     *       ]
+                     *     }
+                     */
                     "application/json": components["schemas"]["ReturnableReceiptResponse"];
                 };
             };
@@ -1679,6 +1876,15 @@ export interface operations {
         };
         requestBody: {
             content: {
+                /**
+                 * @example {
+                 *       "params": {
+                 *         "endDate": 123271324,
+                 *         "reportType": 2,
+                 *         "startDate": 123231324
+                 *       }
+                 *     }
+                 */
                 "application/json": {
                     connection?: components["schemas"]["PartialConn"];
                     params: components["schemas"]["FiscalReportRequest"];
@@ -1692,6 +1898,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /** @example {} */
                     "application/json": components["schemas"]["EmptyResponse"];
                 };
             };
@@ -1715,6 +1922,14 @@ export interface operations {
         };
         requestBody: {
             content: {
+                /**
+                 * @example {
+                 *       "params": {
+                 *         "crn": "51815332",
+                 *         "returnTicketId": 232
+                 *       }
+                 *     }
+                 */
                 "application/json": {
                     connection?: components["schemas"]["PartialConn"];
                     params: components["schemas"]["PrintReturnReceiptRequest"];
@@ -1728,6 +1943,24 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /**
+                     * @example {
+                     *       "address": "12 Abovyan St, Yerevan",
+                     *       "change": 0,
+                     *       "crn": "51815332",
+                     *       "fiscal": "20000124",
+                     *       "lottery": "",
+                     *       "prize": 0,
+                     *       "rseq": 233,
+                     *       "rtime": 1710000500000,
+                     *       "sn": "NLS12345678",
+                     *       "taxpayer": "Example Trade LLC",
+                     *       "time": 1710000500000,
+                     *       "tin": "02601234",
+                     *       "total": 40,
+                     *       "verificationNumber": "E5F6G7H8"
+                     *     }
+                     */
                     "application/json": components["schemas"]["ReturnReceiptResponse"];
                 };
             };
@@ -1765,6 +1998,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /** @example {} */
                     "application/json": components["schemas"]["EmptyResponse"];
                 };
             };
@@ -1802,6 +2036,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
+                    /** @example {} */
                     "application/json": components["schemas"]["EmptyResponse"];
                 };
             };

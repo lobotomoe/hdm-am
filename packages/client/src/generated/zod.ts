@@ -8,8 +8,10 @@
 import * as zod from 'zod';
 
 /**
- * Register a cash-drawer in or out. Requires connection: host + password + cashier + pin.
- * @summary Register a cash-drawer in or out.
+ * Records money moving in or out of the cash drawer outside of a sale (e.g. a starting float or a payout). Set `isCashIn` true for a deposit, false for a withdrawal; `amount` must be greater than zero.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Register a cash-drawer deposit or withdrawal.
  */
 export const cashInOutBodyConnectionCashierMin = 0;
 
@@ -45,8 +47,10 @@ export const CashInOutResponse = zod.looseObject({
 
 
 /**
- * Get the device date and time. Requires connection: host + password + cashier + pin.
- * @summary Get the device date and time.
+ * Returns the device's current date and time as an opaque string (the spec does not pin a format). Handy as a quick clock/liveness check against a live session.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Read the device date and time.
  */
 export const dateTimeBodyConnectionCashierMin = 0;
 
@@ -75,8 +79,10 @@ export const DateTimeResponse = zod.object({
 
 
 /**
- * Validate a single eMark code. Requires connection: host + password + cashier + pin.
- * @summary Validate a single eMark code.
+ * Checks one eMark (product traceability) code with the device without printing anything. The code is 29-110 ASCII-printable characters. Use it to pre-validate a scanned mark before adding it to a receipt.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Validate a single eMark traceability code.
  */
 export const emarkBodyConnectionCashierMin = 0;
 
@@ -107,7 +113,9 @@ export const EmarkResponse = zod.looseObject({
 
 
 /**
- * Configure receipt header and footer lines. Requires connection: host + password + cashier + pin.
+ * Sets the free-text header and footer lines printed on every receipt (e.g. shop name, address, a thank-you). Lines print top-to-bottom in array order; send empty arrays to clear them.
+ *
+ * Requires connection: host + password + cashier + pin.
  * @summary Configure receipt header and footer lines.
  */
 export const headerFooterBodyConnectionCashierMin = 0;
@@ -183,8 +191,10 @@ export const InfoResponse = zod.object({
 
 
 /**
- * Verify operator login credentials. Requires connection: host + password + cashier + pin.
- * @summary Verify operator login credentials.
+ * Verifies that the supplied cashier + PIN can open an operator session, without printing anything or changing device state. Use it to validate credentials (e.g. at the start of a shift). Every other operation opens its own session, so this call is not a prerequisite for them.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Check operator login credentials.
  */
 export const loginBodyConnectionCashierMin = 0;
 
@@ -213,8 +223,10 @@ export const LoginResponse = zod.object({
 
 
 /**
- * Configure the receipt header logo. Requires connection: host + password + cashier + pin.
- * @summary Configure the receipt header logo.
+ * Uploads the logo image printed at the top of receipts. `headerLogo` is the image bytes as Base64; the device expects a BMP with colour depth <=4 bits. (The Base64 is truncated in the example.)
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Upload the receipt header logo.
  */
 export const headerLogoBodyConnectionCashierMin = 0;
 
@@ -253,8 +265,10 @@ export const OpenapiDocumentResponse = zod.looseObject({
 
 
 /**
- * List the HDM's operators and departments. Requires connection: host + password.
- * @summary List the HDM's operators and departments.
+ * Returns every operator (cashier) and department registered on the device, including which departments each operator may use. Call it first to discover the valid `cashier` ids and department numbers you will pass to other operations. Read-only.
+ *
+ * Requires connection: host + password.
+ * @summary List the device's operators and departments.
  */
 export const operatorsBodyConnectionCashierMin = 0;
 
@@ -307,8 +321,10 @@ export const OperatorsResponse = zod.object({
 
 
 /**
- * List payment systems configured on the device. Requires connection: host + password + cashier + pin.
- * @summary List payment systems configured on the device.
+ * Returns the payment-system code-to-name mapping configured on the device (1 = card, 10-18 = various Armenian wallets). Call it once at startup to learn which `PaymentSystem` codes are valid for `printReceipt`.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary List the payment systems configured on the device.
  */
 export const paymentSystemsBodyConnectionCashierMin = 0;
 
@@ -345,8 +361,10 @@ export const PaymentSystemsResponse = zod.object({
 
 
 /**
- * Print a fiscal receipt. Requires connection: host + password + cashier + pin.
- * @summary Print a fiscal receipt.
+ * Prints and fiscalises a sale. Set `mode` to 1 (simple lump-sum, uses `dep`), 2 (itemised — supply `items`), or 3 (prepayment). Split the total across `paidAmount` (cash), `paidAmountCard` (card), `partialAmount`, and `prePaymentAmount`. Keep the response's `rseq` — it is the sale's sequence number, and returns key on it, not on the printed `fiscal` number.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Print a fiscal sale receipt.
  */
 export const printReceiptBodyConnectionCashierMin = 0;
 
@@ -447,8 +465,10 @@ export const PrintReceiptResponse = zod.object({
 
 
 /**
- * Print a copy of the last receipt. Requires connection: host + password + cashier + pin.
- * @summary Print a copy of the last receipt.
+ * Reprints a copy of the operator's most recent receipt. The copy is marked as a duplicate and carries no new fiscal value.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Reprint a copy of the last receipt.
  */
 export const printLastReceiptBodyConnectionCashierMin = 0;
 
@@ -477,8 +497,10 @@ export const PrintLastReceiptResponse = zod.looseObject({
 
 
 /**
- * Look up a returnable receipt's contents (read-only). Requires connection: host + password + cashier + pin.
- * @summary Look up a returnable receipt's contents (read-only).
+ * Fetches an earlier sale's contents so you can confirm it is returnable before calling `printReturn`. `receiptId` is the sale's sequence number (`rseq` from the print response); `crn` is the registration number of the device that printed it. Success means the receipt can be returned; a device error (155/156/174/185) means it is not yet returnable — usually the post-sale sync with the tax authority is still pending, so run `timeSync` and retry.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Look up a receipt before returning it (read-only).
  */
 export const lookupReceiptBodyConnectionCashierMin = 0;
 
@@ -573,7 +595,9 @@ export const LookupReceiptResponse = zod.object({
 
 
 /**
- * Print an X or Z fiscal report. Requires connection: host + password + cashier + pin.
+ * Prints a fiscal report over a time range. `reportType` 1 is an X-report (an interim summary that leaves counters untouched); 2 is a Z-report (end-of-day close that zeros counters and finalises the fiscal day). Optionally restrict to a single department, cashier, or transaction type. `startDate`/`endDate` are epoch-style integers as in the spec.
+ *
+ * Requires connection: host + password + cashier + pin.
  * @summary Print an X or Z fiscal report.
  */
 export const reportBodyConnectionCashierMin = 0;
@@ -622,8 +646,10 @@ export const ReportResponse = zod.looseObject({
 
 
 /**
- * Print a return receipt. Requires connection: host + password + cashier + pin.
- * @summary Print a return receipt.
+ * Registers a refund against an earlier sale. `returnTicketId` is the original sale's sequence number (`rseq`), NOT the printed fiscal number — passing the fiscal number yields device error 174. Omit the `*ForReturn` amounts and `returnItemList` for a full return; set them for a partial one. If the device reports 174/185, the sale has not finished syncing with the tax authority (or the terminal is showing a modal): run `timeSync`, clear the terminal, and retry.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Print a return (refund) receipt.
  */
 export const printReturnBodyConnectionCashierMin = 0;
 
@@ -698,8 +724,10 @@ export const PrintReturnResponse = zod.object({
 
 
 /**
- * Print a sample receipt. Requires connection: host + password + cashier + pin.
- * @summary Print a sample receipt.
+ * Prints a non-fiscal sample receipt for checking paper, layout, and print quality. It carries no fiscal value.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Print a sample (test) receipt.
  */
 export const receiptSampleBodyConnectionCashierMin = 0;
 
@@ -728,8 +756,10 @@ export const ReceiptSampleResponse = zod.looseObject({
 
 
 /**
- * Synchronize the device clock. Requires connection: host + password + cashier + pin.
- * @summary Synchronize the device clock.
+ * Runs the HDM's synchronisation with the tax authority (spec op 14 — clock plus pending fiscal state). Run it when the device reports a sync-required error (155/156) or rejects a return as not-yet-returnable (174/185): it uploads outstanding data so those operations can proceed. Harmless to call at any time.
+ *
+ * Requires connection: host + password + cashier + pin.
+ * @summary Synchronize the device with the tax authority.
  */
 export const timeSyncBodyConnectionCashierMin = 0;
 

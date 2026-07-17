@@ -1289,11 +1289,19 @@
   "paths": {
     "/v1/cash": {
       "post": {
-        "description": "Register a cash-drawer in or out. Requires connection: host + password + cashier + pin.",
+        "description": "Records money moving in or out of the cash drawer outside of a sale (e.g. a starting float or a payout). Set `isCashIn` true for a deposit, false for a withdrawal; `amount` must be greater than zero.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "cashInOut",
         "requestBody": {
           "content": {
             "application/json": {
+              "example": {
+                "params": {
+                  "amount": 5000,
+                  "cashierId": 3,
+                  "description": "Opening float",
+                  "isCashIn": true
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1317,6 +1325,7 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {},
                 "schema": {
                   "$ref": "#/components/schemas/EmptyResponse"
                 }
@@ -1340,12 +1349,12 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Register a cash-drawer in or out."
+        "summary": "Register a cash-drawer deposit or withdrawal."
       }
     },
     "/v1/datetime": {
       "post": {
-        "description": "Get the device date and time. Requires connection: host + password + cashier + pin.",
+        "description": "Returns the device's current date and time as an opaque string (the spec does not pin a format). Handy as a quick clock/liveness check against a live session.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "dateTime",
         "requestBody": {
           "content": {
@@ -1370,6 +1379,9 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {
+                  "dt": "2026-07-17 20:14:03"
+                },
                 "schema": {
                   "$ref": "#/components/schemas/DateTimeResponse"
                 }
@@ -1393,16 +1405,21 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Get the device date and time."
+        "summary": "Read the device date and time."
       }
     },
     "/v1/emark": {
       "post": {
-        "description": "Validate a single eMark code. Requires connection: host + password + cashier + pin.",
+        "description": "Checks one eMark (product traceability) code with the device without printing anything. The code is 29-110 ASCII-printable characters. Use it to pre-validate a scanned mark before adding it to a receipt.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "emark",
         "requestBody": {
           "content": {
             "application/json": {
+              "example": {
+                "params": {
+                  "eMark": "0104680000000000215abcDEfgHij12"
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1426,6 +1443,7 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {},
                 "schema": {
                   "$ref": "#/components/schemas/EmptyResponse"
                 }
@@ -1449,16 +1467,27 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Validate a single eMark code."
+        "summary": "Validate a single eMark traceability code."
       }
     },
     "/v1/header-footer": {
       "post": {
-        "description": "Configure receipt header and footer lines. Requires connection: host + password + cashier + pin.",
+        "description": "Sets the free-text header and footer lines printed on every receipt (e.g. shop name, address, a thank-you). Lines print top-to-bottom in array order; send empty arrays to clear them.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "headerFooter",
         "requestBody": {
           "content": {
             "application/json": {
+              "example": {
+                "params": {
+                  "footers": [
+                    "Thank you for your purchase!"
+                  ],
+                  "headers": [
+                    "Example Trade LLC",
+                    "12 Abovyan St, Yerevan"
+                  ]
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1482,6 +1511,7 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {},
                 "schema": {
                   "$ref": "#/components/schemas/EmptyResponse"
                 }
@@ -1515,6 +1545,9 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {
+                  "status": "ok"
+                },
                 "schema": {
                   "$ref": "#/components/schemas/HealthOk"
                 }
@@ -1546,7 +1579,7 @@
     },
     "/v1/login": {
       "post": {
-        "description": "Verify operator login credentials. Requires connection: host + password + cashier + pin.",
+        "description": "Verifies that the supplied cashier + PIN can open an operator session, without printing anything or changing device state. Use it to validate credentials (e.g. at the start of a shift). Every other operation opens its own session, so this call is not a prerequisite for them.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "login",
         "requestBody": {
           "content": {
@@ -1571,6 +1604,9 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {
+                  "ok": true
+                },
                 "schema": {
                   "$ref": "#/components/schemas/StatusOk"
                 }
@@ -1594,16 +1630,21 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Verify operator login credentials."
+        "summary": "Check operator login credentials."
       }
     },
     "/v1/logo": {
       "post": {
-        "description": "Configure the receipt header logo. Requires connection: host + password + cashier + pin.",
+        "description": "Uploads the logo image printed at the top of receipts. `headerLogo` is the image bytes as Base64; the device expects a BMP with colour depth <=4 bits. (The Base64 is truncated in the example.)\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "headerLogo",
         "requestBody": {
           "content": {
             "application/json": {
+              "example": {
+                "params": {
+                  "headerLogo": "Qk1GAAAAAAAAADYAAAAoAAAA..."
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1627,6 +1668,7 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {},
                 "schema": {
                   "$ref": "#/components/schemas/EmptyResponse"
                 }
@@ -1650,7 +1692,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Configure the receipt header logo."
+        "summary": "Upload the receipt header logo."
       }
     },
     "/v1/openapi.json": {
@@ -1673,7 +1715,7 @@
     },
     "/v1/operators": {
       "post": {
-        "description": "List the HDM's operators and departments. Requires connection: host + password.",
+        "description": "Returns every operator (cashier) and department registered on the device, including which departments each operator may use. Call it first to discover the valid `cashier` ids and department numbers you will pass to other operations. Read-only.\n\nRequires connection: host + password.",
         "operationId": "operators",
         "requestBody": {
           "content": {
@@ -1698,6 +1740,25 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {
+                  "c": [
+                    {
+                      "deps": [
+                        1,
+                        2
+                      ],
+                      "id": 3,
+                      "name": "Cashier 1"
+                    }
+                  ],
+                  "d": [
+                    {
+                      "id": 1,
+                      "name": "Main",
+                      "type": 1
+                    }
+                  ]
+                },
                 "schema": {
                   "$ref": "#/components/schemas/ListOpsAndDepsResponse"
                 }
@@ -1721,12 +1782,12 @@
             "bearerAuth": []
           }
         ],
-        "summary": "List the HDM's operators and departments."
+        "summary": "List the device's operators and departments."
       }
     },
     "/v1/payment-systems": {
       "post": {
-        "description": "List payment systems configured on the device. Requires connection: host + password + cashier + pin.",
+        "description": "Returns the payment-system code-to-name mapping configured on the device (1 = card, 10-18 = various Armenian wallets). Call it once at startup to learn which `PaymentSystem` codes are valid for `printReceipt`.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "paymentSystems",
         "requestBody": {
           "content": {
@@ -1751,6 +1812,18 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {
+                  "PaymentSystems": [
+                    {
+                      "code": 1,
+                      "name": "Card"
+                    },
+                    {
+                      "code": 11,
+                      "name": "Telcell"
+                    }
+                  ]
+                },
                 "schema": {
                   "$ref": "#/components/schemas/PaymentSystemsListResponse"
                 }
@@ -1774,16 +1847,37 @@
             "bearerAuth": []
           }
         ],
-        "summary": "List payment systems configured on the device."
+        "summary": "List the payment systems configured on the device."
       }
     },
     "/v1/receipt": {
       "post": {
-        "description": "Print a fiscal receipt. Requires connection: host + password + cashier + pin.",
+        "description": "Prints and fiscalises a sale. Set `mode` to 1 (simple lump-sum, uses `dep`), 2 (itemised — supply `items`), or 3 (prepayment). Split the total across `paidAmount` (cash), `paidAmountCard` (card), `partialAmount`, and `prePaymentAmount`. Keep the response's `rseq` — it is the sale's sequence number, and returns key on it, not on the printed `fiscal` number.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "printReceipt",
         "requestBody": {
           "content": {
             "application/json": {
+              "example": {
+                "params": {
+                  "items": [
+                    {
+                      "adgCode": "56.10",
+                      "dep": 1,
+                      "price": 40,
+                      "productCode": "0001",
+                      "productName": "Coffee",
+                      "qty": 1,
+                      "unit": "pcs"
+                    }
+                  ],
+                  "mode": 2,
+                  "paidAmount": 40,
+                  "paidAmountCard": 0,
+                  "partialAmount": 0,
+                  "prePaymentAmount": 0,
+                  "useExtPOS": false
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1807,6 +1901,21 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {
+                  "address": "12 Abovyan St, Yerevan",
+                  "change": 0,
+                  "crn": "51815332",
+                  "fiscal": "20000123",
+                  "lottery": "",
+                  "prize": 0,
+                  "rseq": 232,
+                  "sn": "NLS12345678",
+                  "taxpayer": "Example Trade LLC",
+                  "time": 1710000000000,
+                  "tin": "02601234",
+                  "total": 40,
+                  "verificationNumber": "A1B2C3D4"
+                },
                 "schema": {
                   "$ref": "#/components/schemas/ReceiptResponse"
                 }
@@ -1830,12 +1939,12 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Print a fiscal receipt."
+        "summary": "Print a fiscal sale receipt."
       }
     },
     "/v1/receipt/last": {
       "post": {
-        "description": "Print a copy of the last receipt. Requires connection: host + password + cashier + pin.",
+        "description": "Reprints a copy of the operator's most recent receipt. The copy is marked as a duplicate and carries no new fiscal value.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "printLastReceipt",
         "requestBody": {
           "content": {
@@ -1860,6 +1969,7 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {},
                 "schema": {
                   "$ref": "#/components/schemas/EmptyResponse"
                 }
@@ -1883,16 +1993,22 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Print a copy of the last receipt."
+        "summary": "Reprint a copy of the last receipt."
       }
     },
     "/v1/receipt/lookup": {
       "post": {
-        "description": "Look up a returnable receipt's contents (read-only). Requires connection: host + password + cashier + pin.",
+        "description": "Fetches an earlier sale's contents so you can confirm it is returnable before calling `printReturn`. `receiptId` is the sale's sequence number (`rseq` from the print response); `crn` is the registration number of the device that printed it. Success means the receipt can be returned; a device error (155/156/174/185) means it is not yet returnable — usually the post-sale sync with the tax authority is still pending, so run `timeSync` and retry.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "lookupReceipt",
         "requestBody": {
           "content": {
             "application/json": {
+              "example": {
+                "params": {
+                  "crn": "51815332",
+                  "receiptId": "232"
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1916,6 +2032,31 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {
+                  "card": 40,
+                  "cash": 0,
+                  "cid": 3,
+                  "eMarks": [],
+                  "pTin": "",
+                  "ppa": 0,
+                  "ppu": 0,
+                  "rseq": 232,
+                  "saleType": 0,
+                  "subType": 2,
+                  "ta": 40,
+                  "totals": [
+                    {
+                      "gc": "0001",
+                      "gn": "Coffee",
+                      "mu": "pcs",
+                      "p": 40,
+                      "qty": 1,
+                      "rpid": 0,
+                      "t": 33.33,
+                      "tt": 40
+                    }
+                  ]
+                },
                 "schema": {
                   "$ref": "#/components/schemas/ReturnableReceiptResponse"
                 }
@@ -1939,16 +2080,23 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Look up a returnable receipt's contents (read-only)."
+        "summary": "Look up a receipt before returning it (read-only)."
       }
     },
     "/v1/report": {
       "post": {
-        "description": "Print an X or Z fiscal report. Requires connection: host + password + cashier + pin.",
+        "description": "Prints a fiscal report over a time range. `reportType` 1 is an X-report (an interim summary that leaves counters untouched); 2 is a Z-report (end-of-day close that zeros counters and finalises the fiscal day). Optionally restrict to a single department, cashier, or transaction type. `startDate`/`endDate` are epoch-style integers as in the spec.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "report",
         "requestBody": {
           "content": {
             "application/json": {
+              "example": {
+                "params": {
+                  "endDate": 123271324,
+                  "reportType": 2,
+                  "startDate": 123231324
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1972,6 +2120,7 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {},
                 "schema": {
                   "$ref": "#/components/schemas/EmptyResponse"
                 }
@@ -2000,11 +2149,17 @@
     },
     "/v1/return": {
       "post": {
-        "description": "Print a return receipt. Requires connection: host + password + cashier + pin.",
+        "description": "Registers a refund against an earlier sale. `returnTicketId` is the original sale's sequence number (`rseq`), NOT the printed fiscal number — passing the fiscal number yields device error 174. Omit the `*ForReturn` amounts and `returnItemList` for a full return; set them for a partial one. If the device reports 174/185, the sale has not finished syncing with the tax authority (or the terminal is showing a modal): run `timeSync`, clear the terminal, and retry.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "printReturn",
         "requestBody": {
           "content": {
             "application/json": {
+              "example": {
+                "params": {
+                  "crn": "51815332",
+                  "returnTicketId": 232
+                }
+              },
               "schema": {
                 "additionalProperties": false,
                 "properties": {
@@ -2028,6 +2183,22 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {
+                  "address": "12 Abovyan St, Yerevan",
+                  "change": 0,
+                  "crn": "51815332",
+                  "fiscal": "20000124",
+                  "lottery": "",
+                  "prize": 0,
+                  "rseq": 233,
+                  "rtime": 1710000500000,
+                  "sn": "NLS12345678",
+                  "taxpayer": "Example Trade LLC",
+                  "time": 1710000500000,
+                  "tin": "02601234",
+                  "total": 40,
+                  "verificationNumber": "E5F6G7H8"
+                },
                 "schema": {
                   "$ref": "#/components/schemas/ReturnReceiptResponse"
                 }
@@ -2051,12 +2222,12 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Print a return receipt."
+        "summary": "Print a return (refund) receipt."
       }
     },
     "/v1/sample": {
       "post": {
-        "description": "Print a sample receipt. Requires connection: host + password + cashier + pin.",
+        "description": "Prints a non-fiscal sample receipt for checking paper, layout, and print quality. It carries no fiscal value.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "receiptSample",
         "requestBody": {
           "content": {
@@ -2081,6 +2252,7 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {},
                 "schema": {
                   "$ref": "#/components/schemas/EmptyResponse"
                 }
@@ -2104,12 +2276,12 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Print a sample receipt."
+        "summary": "Print a sample (test) receipt."
       }
     },
     "/v1/time-sync": {
       "post": {
-        "description": "Synchronize the device clock. Requires connection: host + password + cashier + pin.",
+        "description": "Runs the HDM's synchronisation with the tax authority (spec op 14 — clock plus pending fiscal state). Run it when the device reports a sync-required error (155/156) or rejects a return as not-yet-returnable (174/185): it uploads outstanding data so those operations can proceed. Harmless to call at any time.\n\nRequires connection: host + password + cashier + pin.",
         "operationId": "timeSync",
         "requestBody": {
           "content": {
@@ -2134,6 +2306,7 @@
           "200": {
             "content": {
               "application/json": {
+                "example": {},
                 "schema": {
                   "$ref": "#/components/schemas/EmptyResponse"
                 }
@@ -2157,7 +2330,7 @@
             "bearerAuth": []
           }
         ],
-        "summary": "Synchronize the device clock."
+        "summary": "Synchronize the device with the tax authority."
       }
     }
   },
