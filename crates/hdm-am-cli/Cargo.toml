@@ -32,6 +32,11 @@ serde_json = { workspace = true }
 base64 = { workspace = true }
 rust_decimal = { workspace = true }
 
+# Self-update (`hdm update`): axoupdater reads the install receipt written by the cargo-dist
+# installer and replaces the binary in place. `blocking` exposes the synchronous API this non-async
+# CLI needs; `github_releases` (default) matches how releases are published.
+axoupdater = { version = "0.10", features = ["blocking"] }
+
 # Background bridge supervision (`hdm bridge start/stop/status`) sends signals and probes process
 # liveness. Unix-only; on other platforms `hdm bridge run` (foreground) is offered instead.
 [target.'cfg(unix)'.dependencies]

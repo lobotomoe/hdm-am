@@ -87,16 +87,17 @@ hdm --version          # or: hdm-bridge --version
 
 Then update by the same method you installed with:
 
-- **Self-updater (simplest).** Installs from the release scripts bundle a standalone updater that
-  fetches the latest release and replaces the binary in place — just run it, on any OS:
+- **Self-update (simplest).** The tools update themselves in place — on any OS:
 
   ```sh
-  hdm-am-cli-update        # updates the hdm CLI
-  hdm-am-bridge-update     # updates the hdm-bridge
+  hdm update          # update the CLI
+  hdm-bridge update   # update the bridge
   ```
 
-  (The command is named after the package, not the `hdm` binary. It reads the install receipt written
-  at install time, so it only works for installs done via the installer scripts above.)
+  This fetches the latest release and replaces the binary. It reads the install receipt written by
+  the installer scripts, so it only works for installs done that way (not a `cargo install` build or
+  a hand-copied binary — those report a clear error). A standalone `hdm-am-cli-update` /
+  `hdm-am-bridge-update` command is also installed as a fallback.
 
 - **Installer script (CLI / bridge).** Re-run the exact same install command — it downloads the
   latest release and replaces the existing binary in place. For example, on macOS / Linux:

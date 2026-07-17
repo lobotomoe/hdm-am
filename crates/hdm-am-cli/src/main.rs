@@ -14,6 +14,7 @@ mod bridge;
 mod conn;
 mod format;
 mod run;
+mod update;
 
 use clap::{Parser, Subcommand};
 use rust_decimal::Decimal;
@@ -129,6 +130,10 @@ pub enum Command {
     /// Manage the local HTTP bridge that exposes this device to a browser: start/stop/status as a
     /// background process, or `run` in the foreground.
     Bridge(BridgeArgs),
+
+    /// Update `hdm` in place to the latest release. Only works for installs done via the release
+    /// installer script (it reads the install receipt that script writes).
+    Update,
 }
 
 /// Arguments for the `bridge` command.

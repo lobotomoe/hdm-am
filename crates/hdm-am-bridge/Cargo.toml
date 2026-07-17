@@ -31,6 +31,10 @@ log = { workspace = true }
 env_logger = { workspace = true }
 schemars = { workspace = true, optional = true }
 
+# Self-update (`hdm-bridge update`): axoupdater reads the cargo-dist install receipt and replaces
+# the binary in place. `blocking` gives the synchronous API, invoked before the server runtime starts.
+axoupdater = { version = "0.10", features = ["blocking"] }
+
 [features]
 # Generate the OpenAPI 3.1 document for the bridge's HTTP surface. Off by default — keeps
 # `schemars` out of the runtime dependency graph. Pulls the library's own `schema` feature so the

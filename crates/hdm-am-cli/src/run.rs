@@ -45,6 +45,7 @@ pub fn dispatch(cli: &Cli) -> Result<()> {
         Command::HeaderFooter(args) => header_footer(cli, args),
         Command::Logo(args) => logo(cli, args),
         Command::Bridge(args) => crate::bridge::dispatch(cli, args),
+        Command::Update => crate::update::run(),
     }
 }
 
