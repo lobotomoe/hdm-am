@@ -24,8 +24,10 @@ curl --proto '=https' --tlsv1.2 -LsSf https://github.com/lobotomoe/hdm-am/releas
 **Windows (PowerShell):**
 
 ```powershell
-powershell -ExecutionPolicy Bypass -c "irm https://github.com/lobotomoe/hdm-am/releases/latest/download/hdm-am-cli-installer.ps1 | iex"
+powershell -ExecutionPolicy Bypass -c "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; irm https://github.com/lobotomoe/hdm-am/releases/latest/download/hdm-am-cli-installer.ps1 | iex"
 ```
+
+The `Tls12` prefix forces TLS 1.2 so the download also works on older, unpatched Windows; `-ExecutionPolicy Bypass` avoids the "running scripts is disabled" error. If anything goes wrong, see [Windows troubleshooting](#windows-troubleshooting).
 
 **From source** (any OS with [Rust](https://rustup.rs) ≥ 1.85):
 
@@ -48,7 +50,7 @@ curl --proto '=https' --tlsv1.2 -LsSf https://github.com/lobotomoe/hdm-am/releas
 **Windows (PowerShell):**
 
 ```powershell
-powershell -ExecutionPolicy Bypass -c "irm https://github.com/lobotomoe/hdm-am/releases/latest/download/hdm-am-bridge-installer.ps1 | iex"
+powershell -ExecutionPolicy Bypass -c "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; irm https://github.com/lobotomoe/hdm-am/releases/latest/download/hdm-am-bridge-installer.ps1 | iex"
 ```
 
 **From source:**
@@ -107,6 +109,58 @@ Then update by the same method you installed with:
   `cargo add hdm-am@<version>` to move to a newer minor (e.g. `0.7`).
 
 - **GUI from source.** `git pull` in your clone, then `cargo run -p hdm-am-app` again.
+
+### Windows troubleshooting
+
+The Windows binaries statically link the C runtime, so there is **no Visual C++ Redistributable to
+install** — they run on a clean Windows 10/11. If the installer or the tool misbehaves, this covers
+the common cases (most also apply to the `hdm-bridge` installer — just swap `HDM_AM_CLI` for
+`HDM_AM_BRIDGE` in the environment-variable names).
+
+- **`'hdm' is not recognized` right after installing.** The installer adds itself to `PATH`, but an
+  already-open terminal keeps its old environment. **Open a new terminal window** and try again. If
+  it is still missing, the binary lives in `%USERPROFILE%\.cargo\bin` — confirm that folder is on
+  your user `PATH` (Start → "Edit environment variables for your account"), or run it by full path.
+
+- **`Could not create SSL/TLS secure channel`.** The machine is defaulting to an outdated TLS
+  version. Use the install command **exactly as shown above** — it forces TLS 1.2. The permanent
+  machine-wide fix (for IT) is to run Windows Update, or enable strong crypto:
+
+  ```powershell
+  Set-ItemProperty 'HKLM:\SOFTWARE\Microsoft\.NETFramework\v4.0.30319' SchUseStrongCrypto 1 -Type DWord
+  Set-ItemProperty 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\.NETFramework\v4.0.30319' SchUseStrongCrypto 1 -Type DWord
+  ```
+
+- **`running scripts is disabled on this system`.** The `-ExecutionPolicy Bypass` prefix was dropped
+  — copy the full command. If a corporate Group Policy enforces the policy machine-wide, ask IT (a
+  per-process bypass cannot override a locked-down `MachinePolicy`).
+
+- **"Windows protected your PC" / antivirus warning.** The recommended PowerShell install avoids
+  SmartScreen. If you instead downloaded a binary by hand and Windows blocks it, choose **More info →
+  Run anyway**; if Microsoft Defender quarantines it, restore the file and add an exclusion. The
+  binaries are unsigned for now, so a fresh release can trip a reputation warning.
+
+- **Behind a corporate proxy or firewall.** The installer reads the `HTTPS_PROXY` (or `ALL_PROXY`)
+  environment variable — set it before running:
+
+  ```powershell
+  $env:HTTPS_PROXY = "http://proxy.host:8080"   # add user:pass@ if the proxy needs auth
+  ```
+
+  IT must also allow-list `github.com`, `api.github.com`, and `objects.githubusercontent.com` (the
+  release CDN), not just `github.com`.
+
+- **Your Windows username has a space** (e.g. `C:\Users\John Smith`). A known cargo-dist bug can break
+  the default install. Work around it by installing to a space-free folder, then add its `bin` to
+  `PATH`:
+
+  ```powershell
+  $env:HDM_AM_CLI_INSTALL_DIR = "C:\hdm"
+  powershell -ExecutionPolicy Bypass -c "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; irm https://github.com/lobotomoe/hdm-am/releases/latest/download/hdm-am-cli-installer.ps1 | iex"
+  ```
+
+- **Very old Windows.** The installer needs **PowerShell 5+** (built into Windows 10/11). Windows 7/8
+  are unsupported; install from source there, or upgrade PowerShell.
 
 ## Quick start
 
