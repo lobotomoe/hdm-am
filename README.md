@@ -75,6 +75,39 @@ cargo run -p hdm-am-app
 
 Android/iOS toolchain setup and build commands live in [`crates/hdm-am-app/README.md`](crates/hdm-am-app/README.md).
 
+### Updating
+
+Check what you have installed first:
+
+```sh
+hdm --version          # or: hdm-bridge --version
+```
+
+Then update by the same method you installed with:
+
+- **Installer script (CLI / bridge).** Re-run the exact same install command — it downloads the
+  latest release and replaces the existing binary in place. For example, on macOS / Linux:
+
+  ```sh
+  curl --proto '=https' --tlsv1.2 -LsSf https://github.com/lobotomoe/hdm-am/releases/latest/download/hdm-am-cli-installer.sh | sh
+  ```
+
+  (Windows: re-run the PowerShell one-liner. For the bridge, use the `hdm-am-bridge-installer` script.)
+  To pin a specific version instead of the latest, swap `latest` in the URL for a release tag, e.g.
+  `.../releases/download/v0.6.0/hdm-am-cli-installer.sh`.
+
+- **From source (`cargo install --git`).** Re-run the install command with `--force` to rebuild from
+  the latest commit:
+
+  ```sh
+  cargo install --git https://github.com/lobotomoe/hdm-am hdm-am-cli --force
+  ```
+
+- **Rust library (`hdm-am`).** Run `cargo update -p hdm-am` for a compatible (`0.6.x`) bump, or
+  `cargo add hdm-am@<version>` to move to a newer minor (e.g. `0.7`).
+
+- **GUI from source.** `git pull` in your clone, then `cargo run -p hdm-am-app` again.
+
 ## Quick start
 
 Point the tool at your device with flags or `HDM_*` environment variables:
