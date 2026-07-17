@@ -3,7 +3,7 @@
  * Do not edit manually.
  * HDM Bridge API
  * Local HTTP bridge for the Armenian fiscal cash register (HDM) protocol. Every operation is a `POST /v1/<op>` carrying a uniform JSON envelope `{ connection?, params? }`: `connection` overrides the bridge's configured default device field-by-field, and `params` carries the operation input. On failure every route returns the same error envelope (see `ErrorBody`): `kind` is a stable machine tag and `code` carries the device/spec response code when the device rejected the request. All routes except `/v1/health`, `/v1/info`, and `/v1/openapi.json` require `Authorization: Bearer <token>`.
- * OpenAPI spec version: 0.6.0
+ * OpenAPI spec version: 0.7.0
  */
 import * as zod from 'zod';
 

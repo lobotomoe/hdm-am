@@ -90,7 +90,7 @@ hdm --version          # or: hdm-bridge --version
 
 Then update by the same method you installed with:
 
-- **Self-update (simplest).** The tools update themselves in place — on any OS:
+- **Self-update (simplest, from 0.7.0 on).** The tools update themselves in place — on any OS:
 
   ```sh
   hdm update          # update the CLI
@@ -101,6 +101,10 @@ Then update by the same method you installed with:
   the installer scripts, so it only works for installs done that way (not a `cargo install` build or
   a hand-copied binary — those report a clear error). A standalone `hdm-am-cli-update` /
   `hdm-am-bridge-update` command is also installed as a fallback.
+
+  **Coming from 0.6.x or earlier?** `hdm update` did not exist yet — `hdm --version` will show
+  `0.6.x` and the command is unrecognized. Update once by re-running the installer script (below) to
+  reach 0.7.0; `hdm update` works from then on.
 
 - **Installer script (CLI / bridge).** Re-run the exact same install command — it downloads the
   latest release and replaces the existing binary in place. For example, on macOS / Linux:

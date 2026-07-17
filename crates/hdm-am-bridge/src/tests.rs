@@ -376,7 +376,8 @@ mod openapi {
         let (status, served) = send(h.router, req).await;
         assert_eq!(status, StatusCode::OK);
 
-        let generated = crate::openapi::document(env!("CARGO_PKG_VERSION"));
+        let generated =
+            crate::openapi::document(env!("CARGO_PKG_VERSION")).expect("build document");
         assert_eq!(
             served, generated,
             "served /v1/openapi.json drifted from document()"
@@ -387,7 +388,7 @@ mod openapi {
     /// request body, a `200`, and the error envelope.
     #[test]
     fn document_is_structurally_valid() {
-        let doc = crate::openapi::document(env!("CARGO_PKG_VERSION"));
+        let doc = crate::openapi::document(env!("CARGO_PKG_VERSION")).expect("build document");
 
         assert_eq!(doc["openapi"], "3.1.0");
 

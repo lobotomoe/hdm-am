@@ -133,7 +133,9 @@ fn run_update() -> anyhow::Result<()> {
     )?;
     match updater.run_sync().context("installing the update")? {
         Some(_) => {
-            println!("hdm-bridge updated to the latest release. Run `hdm-bridge --version` to confirm.");
+            println!(
+                "hdm-bridge updated to the latest release. Run `hdm-bridge --version` to confirm."
+            );
         }
         None => println!("hdm-bridge is already up to date."),
     }

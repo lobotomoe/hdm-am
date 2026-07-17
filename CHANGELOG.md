@@ -9,6 +9,33 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-07-17
+
+Still targets HDM integration spec **v0.7.3**. The core `hdm-am` library API is unchanged from 0.6.0;
+this release adds tooling around the CLI, bridge, distribution, and docs.
+
+### Added
+- **Self-update.** `hdm update` and `hdm-bridge update` update the binary in place, and the release
+  installers now bundle a standalone updater (`hdm-am-cli-update` / `hdm-am-bridge-update`) as a
+  fallback. Both read the cargo-dist install receipt, so they work only for installs done via the
+  release installer scripts; other installs (a `cargo install` build, a hand-copied binary) get a
+  clear error instead of guessing.
+- **OpenAPI examples and descriptions.** Every bridge operation in `docs/openapi.json` (and the live
+  `/docs` explorer) now carries a task-oriented description and a worked request/response example.
+
+### Changed
+- **`hdm-bridge` CLI** gained an optional `update` subcommand. The existing `hdm-bridge [flags]`
+  interface is unchanged (server flags are flattened onto the top level).
+- **README** restructured to lead with installation and a quick start (per-OS instructions and a
+  version-aware "Updating" section), with all protocol/reference material moved below.
+- **Windows install hardened.** The PowerShell one-liners force TLS 1.2 so downloads work on older,
+  unpatched machines; a Windows troubleshooting section was added; and static MSVC-CRT linking is
+  pinned so the binaries never depend on the Visual C++ Redistributable.
+
+### Build
+- Building the CLI or bridge **from source** now requires `cmake` and a C compiler (a transitive
+  dependency of the self-updater compiles native code). The prebuilt binaries are unaffected.
+
 ## [0.6.0] — 2026-06-29
 
 Still targets HDM integration spec **v0.7.3**.

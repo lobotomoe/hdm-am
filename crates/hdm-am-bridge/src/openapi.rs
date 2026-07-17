@@ -185,7 +185,9 @@ const OPERATIONS: &[OperationDef] = &[
         conn: Conn::Session,
         params: Some(SchemaGenerator::subschema_for::<FiscalReportRequest>),
         response: SchemaGenerator::subschema_for::<EmptyResponse>,
-        req_example: Some(r#"{"params":{"reportType":2,"startDate":123231324,"endDate":123271324}}"#),
+        req_example: Some(
+            r#"{"params":{"reportType":2,"startDate":123231324,"endDate":123271324}}"#,
+        ),
         resp_example: Some("{}"),
     },
     OperationDef {
@@ -316,8 +318,11 @@ All routes except `/v1/health`, `/v1/info`, and `/v1/openapi.json` require \
 `Authorization: Bearer <token>`.";
 
 /// Build the `OpenAPI` 3.1 document describing the bridge's HTTP surface for the given bridge version.
-#[must_use]
-pub fn document(version: &str) -> Value {
+///
+/// # Errors
+/// Returns an error only if an authored example in `OPERATIONS` is not valid JSON — a developer
+/// mistake caught by the `examples_are_valid_json` test, never a runtime condition.
+pub fn document(version: &str) -> serde_json::Result<Value> {
     let settings = SchemaSettings::draft2020_12().with(|s| {
         s.definitions_path = "/components/schemas".into();
         // Component schemas don't carry their own `$schema`; the document declares the dialect once.
@@ -341,7 +346,7 @@ pub fn document(version: &str) -> Value {
                 params_ref.as_ref(),
                 &response_ref,
                 &error_ref,
-            ),
+            )?,
         );
     }
 
@@ -355,7 +360,7 @@ pub fn document(version: &str) -> Value {
             "Liveness probe (public, no auth).",
             &health_ref,
             Some(r#"{"status":"ok"}"#),
-        ),
+        )?,
     );
     paths.insert(
         "/v1/info".to_owned(),
@@ -364,13 +369,13 @@ pub fn document(version: &str) -> Value {
             "Bridge metadata and the operation list (public, no auth).",
             &info_ref,
             None,
-        ),
+        )?,
     );
     paths.insert("/v1/openapi.json".to_owned(), openapi_self_item());
 
     let schemas = Value::Object(generator.take_definitions(true));
 
-    json!({
+    Ok(json!({
         "openapi": "3.1.0",
         "info": {
             "title": "HDM Bridge API",
@@ -392,7 +397,7 @@ pub fn document(version: &str) -> Value {
             },
             "schemas": schemas,
         },
-    })
+    }))
 }
 
 /// Build the `{ "post": { ... } }` path item for one protected operation.
@@ -402,7 +407,7 @@ fn operation_item(
     params_ref: Option<&Value>,
     response_ref: &Value,
     error_ref: &Value,
-) -> Value {
+) -> serde_json::Result<Value> {
     // Request body: `{ connection?: PartialConn, params?: <typed> }`, no extra keys (mirrors the
     // handler's `deny_unknown_fields` envelope).
     let mut props = Map::new();
@@ -424,14 +429,14 @@ fn operation_item(
 
     let mut request_media = json!({ "schema": body_schema });
     if let Some(example) = op.req_example {
-        request_media["example"] = parse_example(example);
+        request_media["example"] = parse_example(example)?;
     }
     let mut response_media = json!({ "schema": response_ref.clone() });
     if let Some(example) = op.resp_example {
-        response_media["example"] = parse_example(example);
+        response_media["example"] = parse_example(example)?;
     }
 
-    json!({
+    Ok(json!({
         "post": {
             "operationId": op.op_id,
             "summary": op.summary,
@@ -452,23 +457,28 @@ fn operation_item(
                 },
             },
         }
-    })
+    }))
 }
 
 /// Parse an authored example JSON string into a `Value`. The examples are compile-time constants in
-/// `OPERATIONS`; the `examples_are_valid_json` test proves every one parses, so this never fails at
-/// runtime.
-fn parse_example(raw: &str) -> Value {
-    serde_json::from_str(raw).expect("authored OpenAPI example must be valid JSON")
+/// `OPERATIONS` (and `examples_are_valid_json` proves every one parses), so an error here is a
+/// developer typo; it surfaces as a `Result` the generator fails on rather than a runtime panic.
+fn parse_example(raw: &str) -> serde_json::Result<Value> {
+    serde_json::from_str(raw)
 }
 
 /// Build a public `GET` meta endpoint returning a single typed body.
-fn meta_get(op_id: &str, summary: &str, response_ref: &Value, example: Option<&str>) -> Value {
+fn meta_get(
+    op_id: &str,
+    summary: &str,
+    response_ref: &Value,
+    example: Option<&str>,
+) -> serde_json::Result<Value> {
     let mut response_media = json!({ "schema": response_ref.clone() });
     if let Some(example) = example {
-        response_media["example"] = parse_example(example);
+        response_media["example"] = parse_example(example)?;
     }
-    json!({
+    Ok(json!({
         "get": {
             "operationId": op_id,
             "summary": summary,
@@ -479,7 +489,7 @@ fn meta_get(op_id: &str, summary: &str, response_ref: &Value, example: Option<&s
                 }
             }
         }
-    })
+    }))
 }
 
 /// The `GET /v1/openapi.json` path item — the document describes its own discovery endpoint.
@@ -502,13 +512,13 @@ fn openapi_self_item() -> Value {
 mod tests {
     use super::*;
 
-    /// Guards `parse_example`'s `expect`: every authored example must be valid JSON, and each request
+    /// Every authored example must be valid JSON (so `document()` never errors), and each request
     /// example must carry the `{ params: ... }` envelope the handlers accept.
     #[test]
     fn examples_are_valid_json() {
         for op in OPERATIONS {
             if let Some(raw) = op.req_example {
-                let value = parse_example(raw);
+                let value = parse_example(raw).expect("req_example must be valid JSON");
                 assert!(
                     value.get("params").is_some(),
                     "{} request example must wrap its input in `params`",
@@ -516,7 +526,7 @@ mod tests {
                 );
             }
             if let Some(raw) = op.resp_example {
-                parse_example(raw);
+                parse_example(raw).expect("resp_example must be valid JSON");
             }
         }
     }
