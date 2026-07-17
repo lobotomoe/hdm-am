@@ -35,6 +35,9 @@ The `Tls12` prefix forces TLS 1.2 so the download also works on older, unpatched
 cargo install --git https://github.com/lobotomoe/hdm-am hdm-am-cli
 ```
 
+> Building from source also needs **`cmake`** and a C compiler — a transitive dependency of the
+> self-update feature compiles native code. The prebuilt binaries above have no such requirement.
+
 Verify with `hdm --help`.
 
 ### HTTP bridge (`hdm-bridge`)
@@ -53,7 +56,7 @@ curl --proto '=https' --tlsv1.2 -LsSf https://github.com/lobotomoe/hdm-am/releas
 powershell -ExecutionPolicy Bypass -c "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12; irm https://github.com/lobotomoe/hdm-am/releases/latest/download/hdm-am-bridge-installer.ps1 | iex"
 ```
 
-**From source:**
+**From source** (same `cmake` + C-compiler requirement as the CLI above):
 
 ```sh
 cargo install --git https://github.com/lobotomoe/hdm-am hdm-am-bridge
