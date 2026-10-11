@@ -13,7 +13,7 @@ readme = "README.md"
 
 [package.metadata.docs.rs]
 # Build docs with the schema feature so the JsonSchema impls and the dump-schema example surface.
-features = ["schema"]
+features = ["schema", "simulator"]
 
 [dependencies]
 serde = { workspace = true }
@@ -32,6 +32,9 @@ thiserror = "2"
 # Derive JSON Schema for every wire request/response type. Off by default — keeps `schemars`
 # out of the default dependency graph. Generate the schema files with `examples/dump-schema.rs`.
 schema = ["dep:schemars"]
+# A simulated device (`hdm_am::simulator`): a TCP server speaking the device side of the
+# protocol, for developing and testing an integration with no cash register at hand.
+simulator = []
 
 [dev-dependencies]
 hex = "0.4"
@@ -39,7 +42,7 @@ serde_json = { workspace = true, features = ["preserve_order"] }
 
 [[example]]
 name = "dump-schema"
-required-features = ["schema"]
+required-features = ["schema", "simulator"]
 
 [lints]
 workspace = true

@@ -233,6 +233,20 @@ sale usually hasn't finished syncing with the tax authority yet (or the terminal
 Run `hdm time-sync`, make sure the terminal screen is idle, then retry the return. Note that
 `--ticket` is the original sale's **sequence number** (`rseq`), not the printed fiscal number.
 
+### Without a device: `hdm simulate`
+
+```sh
+hdm simulate --listen 127.0.0.1:1025     # password "simulator", operator 1, PIN 1234, department 1
+HDM_HOST=127.0.0.1 HDM_PASSWORD=simulator HDM_CASHIER=1 HDM_PIN=1234 hdm operators
+```
+
+A simulated device for developing and testing an integration. It registers receipts, looks them
+up and returns them, and refuses what a register would refuse, with the register's response
+codes. Type `refuse 145` (out of paper) or `lose` (registered, answer dropped) and Enter to make
+its next operation go wrong. It is not a tax device: amounts are plain arithmetic, nothing is sent
+to the tax authority, and what a real register does with an edge case is settled on a real one.
+The same simulator is `hdm_am::simulator` in the library, behind the `simulator` feature.
+
 ## Rust library
 
 ```rust

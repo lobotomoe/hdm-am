@@ -9,6 +9,16 @@ is recorded below and exposed in code as `hdm_am::SPEC_VERSION`.
 
 ## [Unreleased]
 
+### Added
+- **A simulated device.** `hdm simulate` runs one on a local port, and the library exposes it as
+  `hdm_am::simulator` behind the `simulator` feature. It speaks the device side of the protocol
+  (framing, both encryption phases, per-session sequence numbers), keeps the receipts it registers
+  so they can be looked up and returned, and answers the device's own response codes for a wrong
+  PIN, an unknown department, a missing ADG code, an underpaid receipt or a second return. Typing
+  `refuse <code>` or `lose` makes it refuse its next operation, or carry it out and drop the
+  answer. It is for developing an integration with no cash register at hand: amounts are plain
+  arithmetic and nothing is sent to the tax authority.
+
 ## [0.7.0] — 2026-07-17
 
 Still targets HDM integration spec **v0.7.3**. The core `hdm-am` library API is unchanged from 0.6.0;
