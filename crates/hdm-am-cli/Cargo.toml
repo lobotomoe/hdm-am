@@ -22,7 +22,7 @@ name = "hdm"
 path = "src/main.rs"
 
 [dependencies]
-hdm-am = { workspace = true }
+hdm-am = { workspace = true, features = ["simulator"] }
 clap = { workspace = true }
 anyhow = { workspace = true }
 log = { workspace = true }

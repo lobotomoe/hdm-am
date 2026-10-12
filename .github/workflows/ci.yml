@@ -137,6 +137,10 @@ jobs:
         with:
           targets: aarch64-linux-android
       - uses: android-actions/setup-android@v3
+        with:
+          # Its default also asks for `tools`, a package the SDK no longer has.
+          # What the build needs is installed by name below.
+          packages: ''
       - name: Install Android SDK/NDK
         run: |
           sdkmanager \

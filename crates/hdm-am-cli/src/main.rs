@@ -14,6 +14,7 @@ mod bridge;
 mod conn;
 mod format;
 mod run;
+mod simulate;
 mod update;
 
 use clap::{Parser, Subcommand};
@@ -131,9 +132,22 @@ pub enum Command {
     /// background process, or `run` in the foreground.
     Bridge(BridgeArgs),
 
+    /// Run a simulated device on this machine, for developing an integration with no cash
+    /// register at hand. It takes `--password`, `--cashier` and `--pin` as the device's own.
+    /// Type `refuse <code>` or `lose` and Enter to make it get its next operation wrong.
+    Simulate(SimulateArgs),
+
     /// Update `hdm` in place to the latest release. Only works for installs done via the release
     /// installer script (it reads the install receipt that script writes).
     Update,
+}
+
+/// Arguments for the `simulate` command.
+#[derive(Debug, clap::Args)]
+pub struct SimulateArgs {
+    /// Address to listen on. Loopback unless another machine has to reach it.
+    #[arg(long, default_value = "127.0.0.1:1025")]
+    pub listen: std::net::SocketAddr,
 }
 
 /// Arguments for the `bridge` command.

@@ -379,7 +379,8 @@ mod tests {
     fn returnable_receipt_parses_empty_object() {
         let r: ReturnableReceiptResponse = serde_json::from_str("{}").unwrap();
         assert!(r.rseq.is_none() && r.cid.is_none() && r.ta.is_none());
-        assert!(r.e_marks.is_empty() && r.totals.is_empty());
+        assert_eq!(r.e_marks, Vec::<String>::new());
+        assert!(r.totals.is_empty());
     }
 
     // --- Request deserialization (the input side the HTTP bridge relies on). ---
@@ -425,7 +426,7 @@ mod tests {
         assert_eq!(req.paid_amount, Decimal::from(1000));
         assert_eq!(req.dep, Some(1));
         assert!(req.partner_tin.is_none());
-        assert!(req.e_marks.is_empty());
+        assert_eq!(req.e_marks, Vec::<String>::new());
         assert!(req.items.is_empty());
     }
 

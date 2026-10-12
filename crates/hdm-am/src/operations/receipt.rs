@@ -757,7 +757,7 @@ mod returnable_receipt_tests {
         assert_eq!(parsed.sub_type, Some(1));
         assert_eq!(parsed.ta, Some(dec("10.00")));
         assert!(parsed.totals.is_empty());
-        assert!(parsed.e_marks.is_empty());
+        assert_eq!(parsed.e_marks, Vec::<String>::new());
     }
 
     #[test]

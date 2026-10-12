@@ -217,6 +217,6 @@ mod tests {
         let store: Store = serde_json::from_str(r#"{"language":"hy"}"#).unwrap_or_default();
         assert_eq!(store.language, "hy");
         assert!(!store.advanced);
-        assert!(store.favorites.is_empty());
+        assert_eq!(store.favorites, Vec::new());
     }
 }

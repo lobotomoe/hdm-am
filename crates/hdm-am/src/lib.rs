@@ -72,6 +72,8 @@ pub mod format;
 pub mod observer;
 pub mod operations;
 pub mod seq;
+#[cfg(feature = "simulator")]
+pub mod simulator;
 
 // Framing and crypto are implementation details: the genuinely-public items (OperationCode,
 // PROTOCOL_VERSION) are re-exported below; everything else stays internal.
